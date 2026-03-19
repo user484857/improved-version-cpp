@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Delivering" Id="{a383dba3-f484-4678-ad7d-c4ad77dc3a85}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Delivering
+VAR
+	iStep : UINT;		// step variable, guides through process
+	iTimer : UINT;		// incremental timer
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// check if p_Delivering is requested
+IF LocalVariables.iMS_Step = 1 THEN
+	CASE iStep OF
+		
+		// move transfer unit to oven
+		0:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_TransferUnit_atoven) THEN
+					LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+					LocalVariables.eMove_TransferUnit := TransferUnit.toward_Oven;
+				s_Move();
+			ELSE 
+					LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+					LocalVariables.eMove_TransferUnit := TransferUnit.switchoff;
+				s_Move();
+				iStep := 1;
+			END_IF
+			
+		// lower cylinder (takes ~1000 iterations) and secure WP with vacuum gripper
+		1:	iTimer := iTimer+1;
+			IF iTimer < 1000 THEN
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+				s_SupplyCompressedAir();
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_TransferUnit;
+					LocalVariables.eMove_Cylinder := Cylinder.extend;
+				s_Move();
+			ELSE
+					LocalVariables.eSecure_Device := Devices_Secure.VacuumGripper_MS;
+					LocalVariables.eSecure_SuctionCup := VacuumGripper.on;
+				s_Secure();
+				iTimer := 0; 
+				iStep := 2;
+			END_IF
+			
+		// lift workpiece (takes ~200 iterations)
+		2:	iTimer := iTimer+1;
+			IF iTimer < 200 THEN
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_TransferUnit;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();
+			ELSE 
+				iTimer := 0;
+				iStep := 3;
+			END_IF
+			
+		// move transfer unit to turntable
+		3:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_TransferUnit_atturntable) THEN
+					LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+					LocalVariables.eMove_TransferUnit := TransferUnit.toward_Turntable;
+				s_Move();
+			ELSE 
+					LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+					LocalVariables.eMove_TransferUnit := TransferUnit.switchoff;
+				s_Move();
+				iStep := 4;
+			END_IF
+		
+		// lower cylinder (takes ~500 ierations) and stop securing WP (takes additional ~200 iterations) 
+		4:	iTimer := iTimer+1;
+			IF iTimer < 500 THEN
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_TransferUnit;
+					LocalVariables.eMove_Cylinder := Cylinder.extend;
+				s_Move();
+			ELSIF iTimer < 700 THEN
+					LocalVariables.eSecure_Device := Devices_Secure.VacuumGripper_MS;
+					LocalVariables.eSecure_SuctionCup := VacuumGripper.off;
+				s_Secure();
+			ELSE
+				iTimer := 0;
+				iStep := 5;
+			END_IF
+		
+		// raise cylinder (takes ~500 iterations), stop supply of compressed air and request p_Sawing via step variable of MS
+		5:	iTimer := iTimer+1;
+			IF iTimer < 500 THEN
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_TransferUnit;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();	
+			ELSE
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+				s_SupplyCompressedAir();
+				iTimer := 0;
+				LocalVariables.iMS_Step := 2;
+				iStep := 0;
+			END_IF
+			
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_Delivering">
+      <LineId Id="609" Count="86" />
+      <LineId Id="35" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

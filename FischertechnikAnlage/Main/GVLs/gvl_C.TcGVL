@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="gvl_C" Id="{84f7b313-ae92-4729-b4d2-c1a732c572fe}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// digital inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_C_vertical AT %I* : BOOL;		// crane is at max. height
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_C_horizontal AT %I* : BOOL;	// crane is min. extended 
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_C_rotate AT %I* : BOOL;		// crane is at stop position in clockwise direction 
+	
+	// digital outputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_upward AT %Q* : BOOL;				// rise crane 
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_downward AT %Q* : BOOL;			// lower crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_backward AT %Q* : BOOL;			// retract crane in horizontal direction
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_forward AT %Q* : BOOL;				// extend crane in horizontal direction
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_clockwise AT %Q* : BOOL;			// rotate crane clockwise
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_C_counterclockwise AT %Q* : BOOL;	// rotate crane counterclockwise
+	{attribute 'OPC.UA.DA' := '1'}
+	bCompressor_C AT %Q*: BOOL;					// activate compressor (needed for vaccuum gripper)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_C AT %Q* : BOOL;						// activate valve (needed for vacuum gripper)
+	
+	// encoder inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_vertical1 AT %I* : BOOL;		// registers pulse if crane moves in vertical direction 
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_vertical2 AT %I* : BOOL;		// (not used) registers second pulse if crane moves in vertical direction 
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_horizontal1 AT %I* : BOOL;	// registers pulse if crane moves in horizontal direction 
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_horizontal2 AT %I* : BOOL;	// (not used) registers second pulse if crane moves in horizontal direction 
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_rotate1 AT %I* : BOOL;		// registers pulse if crane rotates 
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_C_rotate2 AT %I* : BOOL;		// (not used) registers second pulse if crane rotates
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

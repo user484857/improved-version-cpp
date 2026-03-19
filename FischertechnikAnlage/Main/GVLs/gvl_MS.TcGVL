@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <GVL Name="gvl_MS" Id="{6be43be7-ec0f-4ea3-ad9e-366a4884a04f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// digital inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_Turntable_attransferunit AT %I*: BOOL;	// turntable is orientated towards transfer unit
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_Turntable_atconveyorbelt AT %I*: BOOL;	// turntable is orientated towards conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_MS_conveyorbelt AT %I*: BOOL;					// light barrier that detects WP on conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_Turntable_atsaw AT %I*: BOOL;			// turntable is orientated towards saw
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_TransferUnit_atturntable AT %I*: BOOL;	// transfer unit is located next to turntable
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_OvenSlider_inside AT %I*: BOOL;			// oven slider is inside oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_OvenSlider_outside AT %I*: BOOL;		// oven slider is outside oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_MS_TransferUnit_atoven AT %I*: BOOL;		// transfer unit is located next to oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_MS_oven AT %I*: BOOL;							// light barrier that detects WP on oven slider
+
+	// digital outputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_Turntable_clockwise AT %Q*: BOOL;				// rotate turntable clockwise
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_Turntable_counterclockwise AT %Q*: BOOL;		// rotate turntable counterclockwise
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_ConveyorBelt_forward AT %Q*: BOOL;			// move conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_Saw AT %Q*: BOOL;								// activate saw
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_OvenSlider_movein AT %Q*: BOOL;				// move oven slider into oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_OvenSlider_moveout AT %Q*: BOOL;				// move oven slider out of oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_TransferUnit_tooven AT %Q*: BOOL;				// move ransfer unit towards oven
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_MS_TransferUnit_toturntable AT %Q*: BOOL;		// move transfer unit towards turntable
+	{attribute 'OPC.UA.DA' := '1'}
+	bLamp_MS AT %Q*: BOOL;									// activate lamp that simulates burning of WP
+	{attribute 'OPC.UA.DA' := '1'}
+	bCompressor_MS AT %Q*: BOOL;							// activate compressor (needed for vaccuum gripper, transfer unit, oven door and ejector)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_MS_Vacuum AT %Q*: BOOL;							// activate valve (needed for vaccuum gripper)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_MS_TransferUnit AT %Q*: BOOL;					// activate valve (needed for height of vacuum gripper)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_MS_OvenDoor AT %Q*: BOOL;						// activate valve (needed for opening/closing oven door)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_MS_Ejector AT %Q*: BOOL;							// activate valve (needed for ejector)
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

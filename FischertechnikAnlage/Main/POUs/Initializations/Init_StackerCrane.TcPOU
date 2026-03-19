@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Init_StackerCrane" Id="{78d04965-2151-47d6-86cb-0e9277c24bde}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_StackerCrane
+VAR
+	iStep : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE iStep OF 
+	0:	//Ausleger in Ausgangsposition
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_Cantilever_back) THEN
+				LocalVariables.eMove_Device := Devices_Move.Cantilever_HBW;
+				LocalVariables.eMove_Cantilever  := Cantilever.backward;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.Cantilever_HBW;
+				LocalVariables.eMove_Cantilever  := Cantilever.switchoff;
+			s_Move();
+			iStep := 1;
+		END_IF
+	1: //Bediengeraet in vertikale Ausgangsposition
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_vertical) THEN
+				LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.upward;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_vertical;
+			s_Move();
+		END_IF
+		//Bediengeraet in horizontale Ausgangsposition
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_horizontal) THEN
+				LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.toward_ConveyorBelt;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_horizontal;
+			s_Move();
+		END_IF
+		IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_horizontal) AND s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_vertical) THEN
+			LocalVariables.bStackerCrane_InitPos := TRUE;
+			iStep := 0;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="Init_StackerCrane">
+      <LineId Id="390" Count="35" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_Move" Id="{66db8975-3574-47c0-89f0-a90f054c7533}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM s_Move
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE LocalVariables.eMove_Device OF //pruefe welches Gerät angesprochen wird
+	0: 	IF LocalVariables.eMove_Cylinder = Cylinder.extend THEN //bVentil_weiss_SST
+			gvl_SL.bValve_SL_white := TRUE;
+		ELSE
+			gvl_SL.bValve_SL_white := FALSE;
+		END_IF
+	1: 	IF LocalVariables.eMove_Cylinder = Cylinder.extend THEN //bVentil_rot_SST
+			gvl_SL.bValve_SL_red := TRUE;
+		ELSE
+			gvl_SL.bValve_SL_red := FALSE;
+		END_IF
+	2: 	IF LocalVariables.eMove_Cylinder = Cylinder.extend THEN //bVentil_blau_SST
+			gvl_SL.bValve_SL_blue := TRUE;
+		ELSE
+			gvl_SL.bValve_SL_blue := FALSE;
+		END_IF
+	3: //Foerderband_SST
+		CASE LocalVariables.eMove_ConveyorBelt OF //Abfrage der einzelnen Geräteparameter
+			0: 	gvl_SL.bMotor_SL_ConveyorBelt := TRUE;  //vorwaerts
+			1: //rueckwaerts
+			2:	gvl_SL.bMotor_SL_ConveyorBelt := FALSE;//abschalten
+		END_CASE		
+	4: //Ofenschieber_BS
+		CASE LocalVariables.eMove_OvenSlider OF
+			0: gvl_MS.bMotor_MS_OvenSlider_movein := TRUE;
+			1: gvl_MS.bMotor_MS_OvenSlider_moveout := TRUE;
+			2: gvl_MS.bMotor_MS_OvenSlider_movein := FALSE;
+			   gvl_MS.bMotor_MS_OvenSlider_moveout := FALSE;				
+		END_CASE
+	5: //Sauger_BS
+		CASE LocalVariables.eMove_TransferUnit OF 
+			0: gvl_MS.bMotor_MS_TransferUnit_toturntable := TRUE;
+			1: gvl_MS.bMotor_MS_TransferUnit_tooven := TRUE;
+			2: gvl_MS.bMotor_MS_TransferUnit_toturntable := FALSE;
+			   gvl_MS.bMotor_MS_TransferUnit_tooven := FALSE;
+		END_CASE
+	6: //Zylinder am Sauger
+		IF LocalVariables.eMove_Cylinder = Cylinder.extend THEN 
+			gvl_MS.bValve_MS_TransferUnit := TRUE;
+		ELSE
+			gvl_MS.bValve_MS_TransferUnit := FALSE;
+		END_IF
+	7: //Drehkranz_BS
+		CASE LocalVariables.eMove_Turntable OF
+			0: gvl_MS.bMotor_MS_Turntable_clockwise := TRUE;
+			1: gvl_MS.bMotor_MS_Turntable_counterclockwise := TRUE;
+			2: gvl_MS.bMotor_MS_Turntable_clockwise := FALSE;
+			   gvl_MS.bMotor_MS_Turntable_counterclockwise := FALSE;
+		END_CASE
+	8: //Zylinder am Drehkranz
+		IF LocalVariables.eMove_Cylinder = Cylinder.extend THEN 
+			gvl_MS.bValve_MS_Ejector := TRUE;
+		ELSE
+			gvl_MS.bValve_MS_Ejector := FALSE;
+		END_IF
+	9: //Foerderband_BS
+		CASE LocalVariables.eMove_ConveyorBelt OF //Abfrage der einzelnen Geräteparameter
+			0: gvl_MS.bMotor_MS_ConveyorBelt_forward := TRUE;  //vorwaerts
+			1: //rueckwaerts
+			2: gvl_MS.bMotor_MS_ConveyorBelt_forward := FALSE;//abschalten
+		END_CASE
+	10: IF LocalVariables.eMove_OvenDoor = OvenDoor.open THEN
+			gvl_MS.bValve_MS_OvenDoor := TRUE;
+		ELSE
+			gvl_MS.bValve_MS_OvenDoor := FALSE;
+		END_IF
+	//HRL:
+	11: CASE LocalVariables.eMove_ConveyorBelt OF 
+			0: gvl_HBW.bMotor_HBW_ConveyorBelt_forward := TRUE;  //vorwaerts
+			1: gvl_HBW.bMotor_HBW_ConveyorBelt_backward := TRUE;//rueckwaerts
+			2: gvl_HBW.bMotor_HBW_ConveyorBelt_forward := FALSE; //abschalten
+			   gvl_HBW.bMotor_HBW_ConveyorBelt_backward := FALSE;
+		END_CASE
+	12: CASE LocalVariables.eMove_StackerCrane OF 
+			0: 	gvl_HBW.bMotor_HBW_StackerCrane_torack := TRUE;  
+			1: 	gvl_HBW.bMotor_HBW_StackerCrane_toconveyorbelt := TRUE;
+			2: gvl_HBW.bMotor_HBW_StackerCrane_upward := TRUE;
+			3: gvl_HBW.bMotor_HBW_StackerCrane_downward := TRUE;
+			4: gvl_HBW.bMotor_HBW_StackerCrane_torack := FALSE; 
+			   gvl_HBW.bMotor_HBW_StackerCrane_toconveyorbelt := FALSE;
+			5: gvl_HBW.bMotor_HBW_StackerCrane_upward := FALSE;
+			   gvl_HBW.bMotor_HBW_StackerCrane_downward := FALSE;
+		END_CASE
+	13: CASE LocalVariables.eMove_Cantilever OF 
+			0: gvl_HBW.bMotor_HBW_Cantilever_forward := TRUE;  //vorwaerts
+			1: gvl_HBW.bMotor_HBW_Cantilever_backward := TRUE;//rueckwaerts
+			2: gvl_HBW.bMotor_HBW_Cantilever_forward := FALSE; //abschalten
+			   gvl_HBW.bMotor_HBW_Cantilever_backward := FALSE;
+		END_CASE 
+	//VSG
+	14:	CASE LocalVariables.eMove_Crane OF 
+			0: 	gvl_C.bMotor_C_upward := TRUE;  //hoch
+			1: 	gvl_C.bMotor_C_downward := TRUE;//runter
+			2: 	gvl_C.bMotor_C_forward := TRUE; //vor
+			3: 	gvl_C.bMotor_C_backward := TRUE; //zurueck
+			4: 	gvl_C.bMotor_C_clockwise := TRUE;//im Uhr
+			5: 	gvl_C.bMotor_C_counterclockwise := TRUE;//gegem Uhr
+			6: 	gvl_C.bMotor_C_upward := FALSE;  //hoch
+				gvl_C.bMotor_C_downward := FALSE;//runter
+			7:	gvl_C.bMotor_C_forward := FALSE; //vor
+				gvl_C.bMotor_C_backward := FALSE; //zurueck
+			8:	gvl_C.bMotor_C_clockwise := FALSE;//im Uhr
+				gvl_C.bMotor_C_counterclockwise := FALSE;//gegem Uhr//abschalten
+		END_CASE 
+	//ST
+	15: CASE LocalVariables.eMove_ConveyorBelt OF 
+			0: gvl_PM.bMotor_PM_ConveyorBelt_forward := TRUE;  //vorwaerts
+			1: gvl_PM.bMotor_PM_ConveyorBelt_backward := TRUE;//rueckwaerts
+			2: gvl_PM.bMotor_PM_ConveyorBelt_forward := FALSE; //abschalten
+			   gvl_PM.bMotor_PM_ConveyorBelt_backward := FALSE;
+		END_CASE
+	16:	CASE LocalVariables.eMove_PunchingMachine OF
+			0: gvl_PM.bMotor_PM_Tool_upward := TRUE;
+			1: gvl_PM.bMotor_PM_Tool_downward := TRUE;
+			2: gvl_PM.bMotor_PM_Tool_upward := FALSE;
+	   		   gvl_PM.bMotor_PM_Tool_downward := FALSE;
+		END_CASE
+END_CASE
+]]></ST>
+    </Implementation>
+    <LineIds Name="s_Move">
+      <LineId Id="8" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="41" Count="3" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="2" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="69" Count="3" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="78" Count="2" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="3" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="3" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="110" Count="4" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="116" Count="2" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="123" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="126" Count="4" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="186" Count="12" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="205" Count="4" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="211" Count="4" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

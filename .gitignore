@@ -1,0 +1,19 @@
+# TwinCAT
+_Boot/
+_CompileInfo/
+_Libraries/
+*.compiled-library
+*.tclrs
+*.tcrec
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.ncb
+*.sdf
+*.opensdf
+*.db
+
+# macOS
+.DS_Store

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="OvenSlider" Id="{05984064-3f7b-410f-ad88-771c51fbfa5a}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE OvenSlider :
+(
+	retract := 0,
+	extend,
+	switchoff
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

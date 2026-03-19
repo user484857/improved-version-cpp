@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Cantilever" Id="{2501dcd4-f3f0-405e-b29c-1cc16496c2b0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Cantilever :
+(
+	forward := 0,
+	backward,
+	switchoff
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

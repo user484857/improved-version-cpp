@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Devices_SupplyCompressedAir" Id="{738f8f24-6e49-4b54-9086-3b4245c815a4}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Devices_SupplyCompressedAir :
+(
+	Compressor_SL := 0,
+	Compressor_MS,
+	Compressor_C 
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

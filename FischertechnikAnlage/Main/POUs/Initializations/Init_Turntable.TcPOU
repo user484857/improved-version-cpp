@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Init_Turntable" Id="{b539d233-dd46-4f91-a88c-701a782816b6}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_Turntable
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT gvl_MS.bReferenceSwitch_MS_Turntable_attransferunit THEN
+	gvl_MS.bMotor_MS_Turntable_counterclockwise := TRUE;
+ELSE
+	gvl_MS.bMotor_MS_Turntable_counterclockwise := FALSE;
+	LocalVariables.bTurntable_InitPos := True;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="Init_Turntable">
+      <LineId Id="6" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

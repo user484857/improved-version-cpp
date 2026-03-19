@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="gvl_HBW" Id="{0b400e3f-2aca-4e61-a698-7a3a5851037c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// digital inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_HBW_horizontal AT %I* : BOOL;			// stacker crane is at stop position next to conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_HBW_inside AT %I* : BOOL;					// light barrier at conveyor belt next to stacker crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_HBW_outside AT %I* : BOOL;				// light barrier at conveyor belt next to crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_HBW_vertical AT %I* : BOOL;			// stacker crane is at highest position
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_HBW_Cantilever_front AT %I* : BOOL;	// cantilever is extended
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_HBW_Cantilever_back AT %I* : BOOL;		// cantilever is retracted
+	{attribute 'OPC.UA.DA' := '1'}
+	bTrailSensor_HBW_bottom AT %I* : BOOL; 					// (not used)
+	{attribute 'OPC.UA.DA' := '1'}	
+	bTrailSensor_HBW_top AT %I* : BOOL;						// (not used)
+	
+	// digital outputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_ConveyorBelt_forward AT %Q* : BOOL;			// move conveyor belt towards crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_ConveyorBelt_backward AT %Q* : BOOL;			// move conveyor belt towards stacker crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_StackerCrane_torack AT %Q* : BOOL;			// move stacker crane in horizontal direction towards rack
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_StackerCrane_toconveyorbelt AT %Q* : BOOL;	// move stacker crane in horizontal direction towards conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_StackerCrane_downward AT %Q* : BOOL;			// lower stacker crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_StackerCrane_upward AT %Q* : BOOL;			// rise stacker crane
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_Cantilever_forward AT %Q* : BOOL;			// extend cantilever in horizontal direction 
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_HBW_Cantilever_backward AT %Q* : BOOL;			// retract cantilever in horizontal direction
+	
+	// encoder inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_HBW_horizontal1 AT %I* : BOOL;		// registers pulse if stacker crane moves in horizontal direction
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_HBW_horizontal2 AT %I* : BOOL;		// (not used) registers second pulse if crane moves in horizontal direction
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_HBW_vertical1 AT %I* : BOOL;		// registers pulse if stacker crane moves in vertical direction
+	{attribute 'OPC.UA.DA' := '1'}
+	bEncoderImpulse_HBW_vertical2 AT %I* : BOOL;		// (not used) registers second pulse if stacker crane moves in vertical direction
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

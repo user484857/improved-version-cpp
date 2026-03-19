@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_SupplyCompressedAir" Id="{9d65a2b6-1a6d-4d4f-bccd-1953476924b7}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM s_SupplyCompressedAir
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE LocalVariables.eSupplyCompressedAir_Device OF
+	0: 	IF LocalVariables.eSupplyCompressedAir_Compressor = Compressor.on THEN	//SST		anschalten
+			gvl_SL.bCompressor_SL := TRUE;
+		ELSE
+			gvl_SL.bCompressor_SL := FALSE;						//	abschalten
+		END_IF
+	1: 	IF LocalVariables.eSupplyCompressedAir_Compressor = Compressor.on THEN	//BS		anschalten
+			gvl_MS.bCompressor_MS := TRUE;
+		ELSE
+			gvl_MS.bCompressor_MS := FALSE;						//	abschalten
+		END_IF//BS
+	2: 	IF LocalVariables.eSupplyCompressedAir_Compressor = Compressor.on THEN	//VSG		anschalten
+			gvl_C.bCompressor_C := TRUE;
+		ELSE
+			gvl_C.bCompressor_C := FALSE;						//	abschalten
+		END_IF//VSG
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="s_SupplyCompressedAir">
+      <LineId Id="5" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="3" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="18" Count="3" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

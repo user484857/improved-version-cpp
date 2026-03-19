@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Lamp" Id="{ce5d7d0f-e2bb-426b-b8b9-755b7227f77b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Lamp :
+(
+	on := 0,
+	off
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

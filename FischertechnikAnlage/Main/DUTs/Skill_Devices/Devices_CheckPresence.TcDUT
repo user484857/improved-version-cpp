@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <DUT Name="Devices_CheckPresence" Id="{d92bd081-a92d-4e2c-bc05-d08cdebb9d81}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Devices_CheckPresence :
+(
+	// SL (sorting line)
+	LightBarrier_SL_beforecolor := 0,
+	LightBarrier_SL_aftercolor := 1,
+	LightBarrier_SL_white := 2,
+	LightBarrier_SL_red := 3,
+	LightBarrier_SL_blue := 4,
+	PulseCounter_SL := 5,
+	
+	// MS (machining station)
+	ReferenceSwitch_MS_Turntable_attransferunit := 6,
+	ReferenceSwitch_MS_Turntable_atconveyorbelt := 7,
+	LightBarrier_MS_conveyorbelt := 8,
+	ReferenceSwitch_MS_Turntable_atsaw := 9,
+	ReferenceSwitch_MS_TransferUnit_atturntable := 10,
+	ReferenceSwitch_MS_OvenSlider_inside := 11,
+	ReferenceSwitch_MS_OvenSlider_outside := 12,
+	ReferenceSwitch_MS_TransferUnit_atoven := 13,
+	LightBarrier_MS_oven := 14,
+	
+	// HBW (high bay warehouse)
+	ReferenceSwitch_HBW_horizontal := 15,
+	ReferenceSwitch_HBW_vertical := 16,
+	ReferenceSwitch_HBW_Cantilever_back := 17,
+	ReferenceSwitch_HBW_Cantilever_front := 18,
+	LightBarrier_HBW_atcantilever := 19,
+	LightBarrier_HBW_atcrane := 20,
+	
+	// C (crane)
+	ReferenceSwitch_C_horizontal := 21,
+	ReferenceSwitch_C_vertical := 22,
+	ReferenceSwitch_C_rotate := 23,
+	
+	// PM (punching machine)
+	LightBarrier_PM_entry := 24,
+	LightBarrier_PM_tool := 25,
+	ReferenceSwitch_PM_top := 26,
+	ReferenceSwitch_PM_bottom := 27
+) ;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

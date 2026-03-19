@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Punching" Id="{0120b23c-b5da-4b6e-9406-3a7c0255f5f5}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Punching
+VAR
+	iStep : UINT;
+	iTimer : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE iStep OF
+	
+	// wait until crane has left the station (takes ~700 iterations)
+	0: 	IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_PM_entry) THEN
+			iTimer := iTimer + 1;
+		END_IF
+		IF iTimer = 700 THEN
+			iTimer := 0;
+			iStep := 1;
+		END_IF
+		
+	// move WP to punching tool
+	1:	IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_PM_tool) THEN
+				LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_PM;
+				LocalVariables.eMove_ConveyorBelt := ConveyorBelt.switchoff;
+			s_Move();
+			iStep := 2;
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_PM;
+				LocalVariables.eMove_ConveyorBelt := ConveyorBelt.forward;
+			s_Move();
+		END_IF
+		
+	// move punching tool downward and wait ~200 iterations
+	2:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_PM_bottom) THEN
+				LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+				LocalVariables.eMove_PunchingMachine := PunchingMachine.downward;
+			s_Move();
+		ELSE
+			iTimer := iTimer + 1;
+			IF iTimer = 200 THEN
+					LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+					LocalVariables.eMove_PunchingMachine := PunchingMachine.switchoff;
+				s_Move();
+				iStep := 3;
+				iTimer := 0;
+			END_IF
+		END_IF
+		
+	// wait ~150 iterations
+	3:	iTimer := iTimer + 1;
+		IF iTimer = 150 THEN
+			iTimer := 0;
+			iStep := 4;
+		END_IF
+		
+	// move punching tool upward
+	4:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_PM_top) THEN
+				LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+				LocalVariables.eMove_PunchingMachine := PunchingMachine.upward;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+				LocalVariables.eMove_PunchingMachine := PunchingMachine.switchoff;
+			s_Move();
+			iStep := 5;
+		END_IF
+		
+	// move WP back to other end of conveyor belt (optimal position: ~100 iterations of further movement after WP reaches light barrier)
+	5:	IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_PM_entry) THEN
+			iTimer := iTimer + 1;
+			IF iTimer = 100 THEN
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_PM;
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.switchoff;
+				s_Move();
+				iStep := 6;
+				iTimer := 0;
+			END_IF
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_PM;
+				LocalVariables.eMove_ConveyorBelt := ConveyorBelt.backward;
+			s_Move();
+		END_IF
+		
+	// reset process if WP has left the station
+	6:	IF s_CheckPresence(Devices_CheckPresence.LightBarrier_PM_entry) THEN
+			iStep := 0;
+		END_IF
+		
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="p_Punching">
+      <LineId Id="287" Count="78" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

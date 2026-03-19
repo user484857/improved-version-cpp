@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Devices_Move" Id="{55f34608-7e79-47cc-9902-c9251133dff7}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Devices_Move :
+(
+	// SL (sorting line)
+	Cylinder_SL_white := 0,
+	Cylinder_SL_red := 1,
+	Cylinder_SL_blue := 2,
+	ConveyorBelt_SL := 3,
+	
+	// MS (machining station)
+	OvenSlider_MS := 4,
+	TransferUnit_MS := 5,
+	Cylinder_MS_TransferUnit := 6,
+	Turntable_MS := 7,
+	Cylinder_MS_Turntable := 8,
+	ConveyorBelt_MS := 9,
+	OvenDoor_MS := 10,
+	
+	// HBW (high bay warehouse)
+	ConveyorBelt_HBW := 11,
+	StackerCrane_HBW := 12,
+	Cantilever_HBW := 13,
+	
+	// C (crane)
+	Crane_C := 14,
+	
+	// PM (punching machine)
+	ConveyorBelt_PM := 15,
+	Tool_PM := 16
+) ;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

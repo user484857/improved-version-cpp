@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Turntable" Id="{6020a02d-be50-4094-9b44-6f47b259a55e}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Turntable :
+(
+	clockwise := 0,
+	counterclockwise,
+	switchoff
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

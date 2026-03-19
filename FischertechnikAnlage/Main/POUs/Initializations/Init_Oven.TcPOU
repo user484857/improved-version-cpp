@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="Init_Oven" Id="{606fe19f-a0df-4a6f-9f39-b71ef21a2623}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_Oven
+VAR
+	iStep : UINT;
+	iTimer : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE iStep OF 
+	
+	// 	if oven slider is inside oven: open oven door (takes ~250 iterations) and extend oven slider afterwards
+	0:	iTimer := iTimer+1;
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_outside) THEN	
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+			s_SupplyCompressedAir();
+				LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+				LocalVariables.eMove_OvenDoor := OvenDoor.open;
+			s_Move();
+		END_IF
+		IF iTimer >= 250 THEN
+			iTimer := 0;
+				LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+				LocalVariables.eMove_OvenSlider := OvenSlider.extend;
+			s_Move();
+			iStep := 1;
+		END_IF
+		
+	// close oven door if slider is outside
+	1:	IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_outside) THEN
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+			s_SupplyCompressedAir();
+				LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+				LocalVariables.eMove_OvenDoor := OvenDoor.close;
+			s_Move();
+				LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+				LocalVariables.eMove_OvenSlider := OvenSlider.switchoff;
+			s_Move();
+			LocalVariables.bOven_InitPos := TRUE;
+			iStep := 0;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="Init_Oven">
+      <LineId Id="128" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="129" Count="15" />
+      <LineId Id="168" Count="1" />
+      <LineId Id="145" Count="12" />
+      <LineId Id="41" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

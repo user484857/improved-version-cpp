@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="PickingLocation" Id="{70b20f2c-5f90-45a0-9dfc-03f61e3df209}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE PickingLocation :
+(
+	HBW := 0,
+	SL := 1
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

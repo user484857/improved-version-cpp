@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="PlacingLocation" Id="{0eef20ba-9248-4a9b-97a9-46b12175c7b0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE PlacingLocation :
+(
+	MS := 0,
+	HBW := 1
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

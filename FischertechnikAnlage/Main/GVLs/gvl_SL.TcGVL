@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="gvl_SL" Id="{c3509b81-f808-45d9-9814-9eb48b0d6bfd}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// digital inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bPulseCounter_SL AT%I* : BOOL;				// registers pulse if conveyor belt next to storage locations is moving
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_SL_beforecolor AT%I* : BOOL;	// light barrier that detects WP on conveyor belt right before color sensor
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_SL_aftercolor AT%I* : BOOL;	// light barrier that detects WP on conveyor belt right behind color sensor
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_SL_white AT%I* : BOOL;		// light barrier that detects WP in first storage location (white)
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_SL_red AT%I* : BOOL;			// light barrier that detects WP in second storage location (red)
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_SL_blue AT%I* : BOOL;			// light barrier that detects WP in third storage location (blue)
+	{attribute 'OPC.UA.DA' := '1'}
+	iColorSensor_SL AT%I* : INT;				// value of color sensor (white: 250...300 / red: 130...190 / blue: 40...60) 
+	
+	// digital outputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_SL_ConveyorBelt AT%Q* : BOOL;		// activate conyeyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bCompressor_SL AT%Q* : BOOL;				// activate compressor (needed for the three pneumatic cylinders)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_SL_white AT%Q* : BOOL;				// activate valve (needed for cylinder at first/white storage location)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_SL_red AT%Q* : BOOL;					// activate valve (needed for cylinder at second/red storage location)
+	{attribute 'OPC.UA.DA' := '1'}
+	bValve_SL_blue AT%Q* : BOOL;				// activate valve (needed for cylinder at third/blue storage location)
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

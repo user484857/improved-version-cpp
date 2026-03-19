@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="PRG_INIT" Id="{585a1177-d209-48d5-bd31-35cafa2edc1d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PRG_INIT
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT LocalVariables.bPunchingMachine_InitPos THEN
+	Init_PunchingMachine();
+END_IF
+IF NOT LocalVariables.bStackerCrane_InitPos THEN
+	Init_StackerCrane();
+END_IF
+IF NOT LocalVariables.bCrane_InitPos THEN
+	Init_Crane();
+END_IF
+IF NOT LocalVariables.bTransferUnit_InitPos THEN
+	Init_TransferUnit();
+END_IF
+IF NOT LocalVariables.bTurntable_InitPos THEN
+	Init_Turntable();
+END_IF
+IF NOT LocalVariables.bOven_InitPos THEN
+	Init_Oven();
+END_IF
+
+IF LocalVariables.bPunchingMachine_InitPos AND LocalVariables.bCrane_InitPos AND LocalVariables.bStackerCrane_InitPos AND LocalVariables.bOven_InitPos AND LocalVariables.bTransferUnit_InitPos AND LocalVariables.bTurntable_InitPos THEN
+	LocalVariables.bAllDevices_InitPos := TRUE;
+	LocalVariables.bHBW_RetrievingWPCRequested := TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="PRG_INIT">
+      <LineId Id="233" Count="21" />
+      <LineId Id="73" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

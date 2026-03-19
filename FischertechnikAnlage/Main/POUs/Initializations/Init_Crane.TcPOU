@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Init_Crane" Id="{ca4df53e-6782-4dfd-a66c-3d43838eae92}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_Crane
+VAR
+	iStep : UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE iStep OF
+	0:	//vertikal ausrichten
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_C_vertical) THEN
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.upward;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.switchoff_vertical;
+			s_Move();
+			iStep := 1;
+		END_IF
+	1:	//horizontal ausrichten
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_C_horizontal) THEN
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.backward;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.switchoff_horizontal;
+			s_Move();
+			iStep := 2;	
+		END_IF
+	
+	2:	//Drehung ausrichten
+		IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_C_rotate) THEN
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.clockwise;
+			s_Move();
+		ELSE
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.switchoff_rotate;
+			s_Move();
+			LocalVariables.bCrane_InitPos := TRUE;
+			iStep := 0;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="Init_Crane">
+      <LineId Id="148" Count="35" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

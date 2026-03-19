@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Crane" Id="{aac22f91-9d45-4395-bf70-2f64d3e88a50}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Crane :
+(
+	upward := 0,
+	downward,
+	forward,
+	backward,
+	clockwise,
+	counterclockwise,
+	switchoff_vertical,
+	switchoff_horizontal,
+	switchoff_rotate
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

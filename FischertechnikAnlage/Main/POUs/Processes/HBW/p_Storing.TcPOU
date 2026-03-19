@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Storing" Id="{7d97f19d-0a88-40f1-bbc9-d62b550cc007}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Storing
+VAR
+	iStep : UINT;						// step variable, guides through process
+	iTimer : UINT;						// incremental timer
+	bPulseRegistered_horizontal : BOOL;	// memorizes registered pulse in order to update horizontal coordinate of stacker crane
+	bPulseRegistered_vertical : BOOL;	// memorizes registered pulse in order to update vertical coordinate of stacker crane
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// check if process should run right now
+IF LocalVariables.bHBW_StoringWPCRequested THEN
+	CASE iStep OF
+		
+		// move conveyor belt with WPC towards stacker crane 
+		0:	IF s_CheckPresence(Devices_CheckPresence.LightBarrier_HBW_atcantilever) THEN
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_HBW;
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.backward;
+				s_Move();
+			ELSE 
+				iTimer := iTimer + 1;
+				IF iTimer >= 200 THEN
+						LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_HBW;
+						LocalVariables.eMove_ConveyorBelt := ConveyorBelt.switchoff;
+					s_Move();
+					iTimer := 0;
+					iStep := 1;
+				END_IF
+			END_IF
+			
+		// lift WPC
+		1:	IF gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := TRUE;
+			END_IF
+			IF bPulseRegistered_vertical AND NOT gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := FALSE;
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := LocalVariables.iHBW_TravelledDistanceV_StackerCrane + 1; 
+			END_IF
+				LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.upward;
+			s_Move();
+			IF LocalVariables.iHBW_TravelledDistanceV_StackerCrane = 100 THEN
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := 0;
+				iStep := 2;	
+				LocalVariables.bStackerCrane_InitPos := FALSE;
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_vertical;
+				s_Move();
+			END_IF
+			
+		// move to initial position
+		2:	Init_StackerCrane();
+			IF LocalVariables.bStackerCrane_InitPos THEN
+				iStep := 3;
+			END_IF
+			
+		// move towards corresponding storage location in horizontal and vertical direction simultaneously
+		3:	// update travelled distance in horizontal direction
+			IF gvl_HBW.bEncoderImpulse_HBW_horizontal1 THEN
+				bPulseRegistered_horizontal := TRUE;		
+			END_IF
+			IF bPulseRegistered_horizontal AND NOT gvl_HBW.bEncoderImpulse_HBW_horizontal1 THEN
+				bPulseRegistered_horizontal := FALSE;
+				LocalVariables.iHBW_TravelledDistanceH_StackerCrane := LocalVariables.iHBW_TravelledDistanceH_StackerCrane + 1; 
+			END_IF
+			// move towards storage location in horizontal direction
+			IF LocalVariables.iHBW_TravelledDistanceH_StackerCrane >= LocalVariables.iHBW_CoordH_StorageLocation[LocalVariables.iHBW_IndexH] THEN
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_horizontal;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane  := StackerCrane.toward_HBW;
+				s_Move();
+			END_IF
+			// update travelled distance in vertical direction
+			IF gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := TRUE;		
+			END_IF
+			IF bPulseRegistered_vertical AND NOT gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := FALSE;
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := LocalVariables.iHBW_TravelledDistanceV_StackerCrane + 1; 
+			END_IF
+			// move towards storage location in vertical direction
+			IF LocalVariables.iHBW_TravelledDistanceV_StackerCrane >= (LocalVariables.iHBW_CoordV_StorageLocation[LocalVariables.iHBW_IndexV] - 30) THEN
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_vertical;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane := StackerCrane.downward;
+				s_Move();
+			END_IF
+			// reset variables and proceed with next state as soon as both movements are fulfilled
+			IF (LocalVariables.iHBW_TravelledDistanceH_StackerCrane >= LocalVariables.iHBW_CoordH_StorageLocation[LocalVariables.iHBW_IndexH]) AND (LocalVariables.iHBW_TravelledDistanceV_StackerCrane >= (LocalVariables.iHBW_CoordV_StorageLocation[LocalVariables.iHBW_IndexV] - 30)) THEN
+				LocalVariables.iHBW_TravelledDistanceH_StackerCrane := 0;		
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := 0;			
+				iStep := 4;
+			END_IF
+		
+		// move cantilever toward rack
+		4:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_HBW_Cantilever_front) THEN
+					LocalVariables.eMove_Device := Devices_Move.Cantilever_HBW;
+					LocalVariables.eMove_Cantilever  := Cantilever.forward;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Cantilever_HBW;
+					LocalVariables.eMove_Cantilever := Cantilever.switchoff;
+				s_Move();
+				iStep := 5;
+			END_IF
+		
+		// place workpiece into rack
+		5:		LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+				LocalVariables.eMove_StackerCrane  := StackerCrane.downward;
+			s_Move();
+			IF gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := TRUE;		
+			END_IF
+			IF bPulseRegistered_vertical AND NOT gvl_HBW.bEncoderImpulse_HBW_vertical1 THEN
+				bPulseRegistered_vertical := FALSE;
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := LocalVariables.iHBW_TravelledDistanceV_StackerCrane + 1; 
+			END_IF
+			IF LocalVariables.iHBW_TravelledDistanceV_StackerCrane = 50 THEN
+				LocalVariables.iHBW_TravelledDistanceV_StackerCrane := 0;
+					LocalVariables.eMove_Device := Devices_Move.StackerCrane_HBW;
+					LocalVariables.eMove_StackerCrane  := StackerCrane.switchoff_vertical;
+				s_Move();
+				iStep := 6;	
+			END_IF
+		
+		// decide from which storage location the next workpiece carrier should be taken
+		6:	LocalVariables.iHBW_CoordH_PreviousStorageLocation := LocalVariables.iHBW_CoordH_StorageLocation[LocalVariables.iHBW_IndexH];
+			LocalVariables.iHBW_CoordV_PreviousStorageLocation := LocalVariables.iHBW_CoordV_StorageLocation[LocalVariables.iHBW_IndexV];
+			IF LocalVariables.iHBW_IndexH = 2 THEN
+				LocalVariables.iHBW_IndexH := 0;
+				LocalVariables.iHBW_IndexV := LocalVariables.iHBW_IndexV + 1;
+			ELSE
+				LocalVariables.iHBW_IndexH := LocalVariables.iHBW_IndexH + 1;
+			END_IF
+			IF (LocalVariables.iHBW_IndexH = 0) AND (LocalVariables.iHBW_IndexV = 3) THEN
+				LocalVariables.iHBW_IndexV := 0;
+				LocalVariables.bStackerCrane_InitPos := FALSE;
+				LocalVariables.iHBW_CoordH_PreviousStorageLocation := 0;
+				LocalVariables.iHBW_CoordV_PreviousStorageLocation := 0;
+				iStep := 7;
+			ELSE
+				LocalVariables.bHBW_RetrievingWPCRequested := TRUE;	
+				LocalVariables.bHBW_StoringWPCRequested := FALSE;
+				iStep := 0;
+			END_IF	
+		
+		// move stacker crane to initial position and reset variables
+		7:	IF NOT LocalVariables.bStackerCrane_InitPos THEN
+				Init_StackerCrane();
+			ELSE
+				IF LocalVariables.bHBW_NoWPRemaining THEN
+					LocalVariables.bEndSimulation := FALSE; // terminates program
+				END_IF
+				LocalVariables.bHBW_NoWPRemaining := TRUE;
+				LocalVariables.bHBW_WPCNotEmpty := TRUE;  // otherwise crane delivers no more WP
+				LocalVariables.bHBW_RetrievingWPCRequested := TRUE;	
+				LocalVariables.bHBW_StoringWPCRequested := FALSE;
+				iStep := 0;
+			END_IF
+			
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_Storing">
+      <LineId Id="1074" Count="156" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

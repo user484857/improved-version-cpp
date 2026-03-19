@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="ConveyorBelt" Id="{f0574860-a4d4-4865-9c55-ef2955afccaf}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE ConveyorBelt :
+(
+	forward := 0,
+	backward := 1,
+	switchoff := 2	//Geraet abschalten, gilt dann für alle Förderbänder im entsprechenden Zyklus, in dem abschalten auf True gesetzt wird
+) ;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

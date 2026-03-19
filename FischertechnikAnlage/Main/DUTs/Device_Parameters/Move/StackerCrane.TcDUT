@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="StackerCrane" Id="{1a0c189b-ee87-4961-ae30-a7a896b11e9b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE StackerCrane :
+(
+	toward_HBW := 0,
+	toward_ConveyorBelt,
+	upward,
+	downward,
+	switchoff_horizontal,
+	switchoff_vertical
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

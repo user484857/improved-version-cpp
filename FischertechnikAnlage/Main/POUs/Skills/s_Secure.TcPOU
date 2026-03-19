@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_Secure" Id="{de83d58c-c54a-4609-83ca-001ac93b52ba}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM s_Secure
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE LocalVariables.eSecure_Device OF
+	0: 	IF LocalVariables.eSecure_SuctionCup = VacuumGripper.on THEN
+			gvl_MS.bValve_MS_Vacuum := TRUE;
+		ELSE
+			gvl_MS.bValve_MS_Vacuum := FALSE;
+		END_IF
+	1:	IF LocalVariables.eSecure_SuctionCup = VacuumGripper.on THEN
+			gvl_C.bValve_C := TRUE;
+		ELSE
+			gvl_C.bValve_C := FALSE;
+		END_IF
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="s_Secure">
+      <LineId Id="5" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="18" Count="3" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

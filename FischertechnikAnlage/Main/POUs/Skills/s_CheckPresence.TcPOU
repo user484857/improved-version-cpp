@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_CheckPresence" Id="{f955c3f4-c004-4b34-bfd8-dcf6e81837e4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION s_CheckPresence : BOOL
+VAR_INPUT
+	eAnwesenheit_pruefen_Geraet : Devices_CheckPresence;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Zuweisung der Ausgangsvariable zum entsprechenden Aktor
+CASE eAnwesenheit_pruefen_Geraet OF
+	//SST
+	0: s_CheckPresence := gvl_SL.bLightBarrier_SL_beforecolor;
+	1: s_CheckPresence := gvl_SL.bLightBarrier_SL_aftercolor;
+	2: s_CheckPresence := gvl_SL.bLightBarrier_SL_white;
+	3: s_CheckPresence := gvl_SL.bLightBarrier_SL_red;
+	4: s_CheckPresence := gvl_SL.bLightBarrier_SL_blue;
+	5: s_CheckPresence := gvl_SL.bPulseCounter_SL;
+	//BS
+	6: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_Turntable_attransferunit;
+	7: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_Turntable_atconveyorbelt;
+	8: s_CheckPresence := gvl_MS.bLightBarrier_MS_conveyorbelt;
+	9: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_Turntable_atsaw;
+	10: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_TransferUnit_atturntable;
+	11: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_OvenSlider_inside;
+	12: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_OvenSlider_outside;
+	13: s_CheckPresence := gvl_MS.bReferenceSwitch_MS_TransferUnit_atoven;
+	14: s_CheckPresence := gvl_MS.bLightBarrier_MS_oven;
+	//HRL
+	15: s_CheckPresence := gvl_HBW.bReferenceSwitch_HBW_horizontal;
+	16: s_CheckPresence := gvl_HBW.bReferenceSwitch_HBW_vertical;
+	17: s_CheckPresence := gvl_HBW.bReferenceSwitch_HBW_Cantilever_back;
+	18: s_CheckPresence := gvl_HBW.bReferenceSwitch_HBW_Cantilever_front;
+	19: s_CheckPresence := gvl_HBW.bLightBarrier_HBW_inside;
+	20: s_CheckPresence := gvl_HBW.bLightBarrier_HBW_outside;
+	//VSG
+	21: s_CheckPresence := gvl_C.bReferenceSwitch_C_horizontal;
+	22: s_CheckPresence := gvl_C.bReferenceSwitch_C_vertical;
+	23: s_CheckPresence := gvl_C.bReferenceSwitch_C_rotate;
+	24: s_CheckPresence := gvl_PM.bLightBarrier_PM_entry;
+	25: s_CheckPresence := gvl_PM.bLightBarrier_PM_tool;
+	26: s_CheckPresence := gvl_PM.bReferenceSwitch_PM_top;
+	27: s_CheckPresence := gvl_PM.bReferenceSwitch_PM_bottom;
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="s_CheckPresence">
+      <LineId Id="31" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="22" Count="8" />
+      <LineId Id="40" Count="4" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="2" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

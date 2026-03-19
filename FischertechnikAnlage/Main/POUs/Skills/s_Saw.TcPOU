@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_Saw" Id="{e010e7de-4ad5-4fd1-95a6-22ac92ee66d6}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM s_Saw
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF LocalVariables.eSaw_Saw = Saw.on THEN
+	gvl_MS.bMotor_MS_Saw := TRUE;
+ELSE
+	gvl_MS.bMotor_MS_Saw := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="s_Saw">
+      <LineId Id="5" Count="1" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Burning" Id="{bed188b3-9cc1-4131-84c8-5a7940e3eed2}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Burning
+VAR
+	iStep : UINT;		// step variable, guides through process
+	iTimer : UINT;		// incremental timer
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// ============================================================================
+// p_Burning — Burns the workpiece (WP) inside the oven
+// ============================================================================
+// Triggered when iMS_Step = 0 (burning is the first step in the machining station).
+// Sequence: Open door → Slide WP in → Close door → Burn → Open door → Slide WP out
+//           → Close door → Check if WP is still there → Request p_Delivering
+//
+// The oven door is pneumatic (valve-controlled) and has NO position sensor,
+// so we use timers to allow enough time for the door to fully open/close.
+// The oven slider DOES have reference switches (_inside / _outside).
+// Cycle time is ~1ms, so 500 iterations ≈ 0.5s, 1500 iterations ≈ 1.5s.
+// ============================================================================
+
+// check if p_Burning is requested (iMS_Step: 0=burning, 1=delivering, 2=sawing)
+IF LocalVariables.iMS_Step = 0 THEN
+	CASE iStep OF
+
+		// === STEP 0: Open oven door ===
+		// The door is initially closed. We pump air into the pneumatic cylinder
+		// to push it open. Since there is no sensor to detect the door position,
+		// we keep the valve open for 500 iterations (~0.5s) to ensure it is fully open.
+		0:	iTimer := iTimer + 1;
+			IF iTimer < 500 THEN
+					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.open;
+				s_Move();
+			ELSE
+				// door should be fully open by now, reset timer and advance
+				iTimer := 0;
+				iStep := 1;
+			END_IF
+
+		// === STEP 1: Retract oven slider (WP slides into the oven) ===
+		// The slider starts in the "outside" position with the WP on it.
+		// We retract it so the WP moves into the oven.
+		// We must keep sending OvenDoor.open every cycle to maintain pressure
+		// on the pneumatic cylinder — otherwise the spring closes the door.
+		// The slider has a reference switch (_inside) so we use that as condition.
+		1:		LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.open;
+				s_Move();
+			IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_inside) THEN
+				// slider has not reached the inside position yet — keep retracting
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.retract;
+				s_Move();
+			ELSE
+				// slider is fully inside — switch off slider motor and advance
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.switchoff;
+				s_Move();
+				iStep := 2;
+			END_IF
+
+		// === STEP 2: Close oven door ===
+		// Release the pneumatic valve so the spring closes the door.
+		// Wait 500 iterations (~0.5s) to ensure the door is fully closed.
+		2:	iTimer := iTimer + 1;
+			IF iTimer < 500 THEN
+					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.close;
+				s_Move();
+			ELSE
+				// door should be fully closed, reset timer and advance
+				iTimer := 0;
+				iStep := 3;
+			END_IF
+
+		// === STEP 3: Burn the workpiece (lamp on) ===
+		// Simulate burning by turning on the oven lamp for 1500 iterations (~1.5s).
+		// The burning duration can be adjusted — just change the 1500 value.
+		3:	iTimer := iTimer + 1;
+			IF iTimer < 1500 THEN
+				// burning in progress — keep lamp on
+					LocalVariables.eBurn_Lamp := Lamp.on;
+				s_Burn();
+			ELSE
+				// burning complete — turn lamp off, reset timer and advance
+					LocalVariables.eBurn_Lamp := Lamp.off;
+				s_Burn();
+				iTimer := 0;
+				iStep := 4;
+			END_IF
+
+		// === STEP 4: Open oven door again (after burning) ===
+		// Same as step 0: pump air for 500 iterations to open the door.
+		4:	iTimer := iTimer + 1;
+			IF iTimer < 500 THEN
+					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.open;
+				s_Move();
+			ELSE
+				// door should be fully open, reset timer and advance
+				iTimer := 0;
+				iStep := 5;
+			END_IF
+
+		// === STEP 5: Extend oven slider (WP slides out of the oven) ===
+		// Same as step 1 but in reverse: extend slider until reference switch _outside.
+		// Keep door open by sending OvenDoor.open every cycle.
+		5:		LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.open;
+				s_Move();
+			IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_outside) THEN
+				// slider has not reached outside position yet — keep extending
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.extend;
+				s_Move();
+			ELSE
+				// slider is fully outside — switch off slider motor and advance
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.switchoff;
+				s_Move();
+				iStep := 6;
+			END_IF
+
+		// === STEP 6: Close oven door, check WP, request next process ===
+		// Close door for 500 iterations, then verify the workpiece is still
+		// on the slider using LightBarrier_MS_oven. If WP is present,
+		// hand off to p_Delivering (iMS_Step := 1). Reset iStep to 0.
+		6:	iTimer := iTimer + 1;
+			IF iTimer < 500 THEN
+				// closing door — release pneumatic valve
+					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
+					LocalVariables.eMove_OvenDoor := OvenDoor.close;
+				s_Move();
+			ELSE
+				iTimer := 0;
+				// check if WP is still on oven slider (not lost during process)
+				IF s_CheckPresence(Devices_CheckPresence.LightBarrier_MS_oven) THEN
+					LocalVariables.iMS_Step := 1; // request p_Delivering
+				END_IF
+				iStep := 0;
+			END_IF
+
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_Burning">
+      <LineId Id="47" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

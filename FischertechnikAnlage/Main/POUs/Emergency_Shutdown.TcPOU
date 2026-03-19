@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Emergency_Shutdown" Id="{3001431a-1fec-4b85-9e79-de5f88de339b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Emergency_Shutdown
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[gvl_MS.bCompressor_MS := FALSE;		//BS
+gvl_MS.bLamp_MS := FALSE;
+gvl_MS.bMotor_MS_Turntable_counterclockwise := FALSE;
+gvl_MS.bMotor_MS_Turntable_clockwise := FALSE;
+gvl_MS.bMotor_MS_ConveyorBelt_forward := FALSE;
+gvl_MS.bMotor_MS_OvenSlider_moveout := FALSE;
+gvl_MS.bMotor_MS_OvenSlider_movein := FALSE;
+gvl_MS.bMotor_MS_Saw := FALSE;
+gvl_MS.bMotor_MS_TransferUnit_toturntable := FALSE;
+gvl_MS.bMotor_MS_TransferUnit_tooven := FALSE;
+gvl_MS.bValve_MS_OvenDoor := FALSE;
+gvl_MS.bValve_MS_Ejector := FALSE;
+gvl_MS.bValve_MS_TransferUnit := FALSE;
+gvl_MS.bValve_MS_Vacuum := FALSE;
+
+gvl_HBW.bMotor_HBW_Cantilever_backward := FALSE; 		//HRL
+gvl_HBW.bMotor_HBW_Cantilever_forward := FALSE;
+gvl_HBW.bMotor_HBW_ConveyorBelt_backward := FALSE;
+gvl_HBW.bMotor_HBW_ConveyorBelt_forward := FALSE;
+gvl_HBW.bMotor_HBW_StackerCrane_toconveyorbelt := FALSE;
+gvl_HBW.bMotor_HBW_StackerCrane_torack := FALSE;
+gvl_HBW.bMotor_HBW_StackerCrane_upward := FALSE;
+gvl_HBW.bMotor_HBW_StackerCrane_downward := FALSE;
+
+gvl_SL.bCompressor_SL := FALSE;		//SST
+gvl_SL.bMotor_SL_ConveyorBelt := FALSE;
+gvl_SL.bValve_SL_blue := FALSE;
+gvl_SL.bValve_SL_red := FALSE;
+gvl_SL.bValve_SL_white := FALSE;
+
+gvl_PM.bMotor_PM_ConveyorBelt_forward := FALSE; 		//ST
+gvl_PM.bMotor_PM_ConveyorBelt_backward := FALSE;
+gvl_PM.bMotor_PM_Tool_upward := FALSE;
+gvl_PM.bMotor_PM_Tool_downward := FALSE;
+
+gvl_C.bCompressor_C := FALSE; 		//VSG
+gvl_C.bMotor_C_counterclockwise := FALSE;
+gvl_C.bMotor_C_clockwise := FALSE;
+gvl_C.bMotor_C_backward := FALSE;
+gvl_C.bMotor_C_forward := FALSE;
+gvl_C.bMotor_C_upward := FALSE;
+gvl_C.bMotor_C_downward := FALSE;
+gvl_C.bValve_C := FALSE;]]></ST>
+    </Implementation>
+    <LineIds Name="Emergency_Shutdown">
+      <LineId Id="5" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="3" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="65" Count="3" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="75" Count="2" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="6" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

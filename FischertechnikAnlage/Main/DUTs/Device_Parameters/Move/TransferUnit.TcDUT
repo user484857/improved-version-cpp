@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="TransferUnit" Id="{7189ba75-a741-4c88-a4fa-4f58522e2770}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE TransferUnit :
+(
+	toward_Turntable := 0,
+	toward_Oven,
+	switchoff
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_CheckColor" Id="{a9fc5149-afc6-4a2b-91c1-b56fbed4fbf7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION s_CheckColor : INT
+VAR_INPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[s_CheckColor := gvl_SL.iColorSensor_SL;
+]]></ST>
+    </Implementation>
+    <LineIds Name="s_CheckColor">
+      <LineId Id="7" Count="0" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

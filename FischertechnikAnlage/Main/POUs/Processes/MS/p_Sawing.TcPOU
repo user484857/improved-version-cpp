@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Sawing" Id="{0bfc4d37-47c4-4625-88f1-ddd9a4acb3e3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Sawing
+VAR
+	iStep : UINT;		// step variable, guides through process
+	iTimer : UINT;		// incremental timer
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// check if p_Sawing is requested
+IF LocalVariables.iMS_Step = 2 THEN
+	CASE iStep OF
+		
+		// orientate turntable (with workpiece) towards saw
+		0: 	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_Turntable_atsaw) THEN
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.clockwise;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.switchoff;
+				s_Move();	
+				iStep := 1;
+			END_IF
+			
+		// simulate sawing of WP (for ~1500 iterations)
+		1: 	iTimer := iTimer+1;
+			IF iTimer <= 1500 THEN
+					LocalVariables.eSaw_Saw := Saw.on;	
+				s_Saw();	
+			ELSE 
+					LocalVariables.eSaw_Saw := Saw.off;	
+				s_Saw();
+				iStep := 2;
+				iTimer := 0;
+			END_IF
+			
+		// orientate turntable (with WP) towards conveyor belt
+		2: 	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_Turntable_atconveyorbelt) THEN
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.clockwise;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.switchoff;
+				s_Move();	
+				iStep := 3;
+			END_IF
+			
+		// eject WP on conveyor belt (takes ~750 iterations)
+		3:	iTimer := iTimer+1;
+			IF iTimer <= 750 THEN
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+				s_SupplyCompressedAir();
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_Turntable;
+					LocalVariables.eMove_Cylinder := Cylinder.extend;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_MS_Turntable;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();
+				iTimer := 0;
+				iStep := 4;
+			END_IF
+		
+		// start/stop conveyor belts of MS+SL/MS (use light barrier of SL) and request p_ColorSorting via LocalVariables
+		4:  IF s_CheckPresence(Devices_CheckPresence.LightBarrier_SL_beforecolor) THEN	
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_MS;
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.forward;
+				s_Move();
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_SL;		
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.forward;
+				s_Move();
+			ELSE
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+				s_SupplyCompressedAir();	
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_MS;
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.switchoff;
+				s_Move();
+				LocalVariables.bSL_SortingRequested := TRUE;
+				iStep := 5;
+			END_IF
+			
+		// orientate turntable towards transfer unit an request p_Burning via step variable of MS
+		5:	IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_Turntable_attransferunit) THEN
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.counterclockwise;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Turntable_MS;
+					LocalVariables.eMove_Turntable := Turntable.switchoff;
+				s_Move();
+				LocalVariables.iMS_Step := 0;
+				iStep := 0;
+			END_IF
+			
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_Sawing">
+      <LineId Id="530" Count="89" />
+      <LineId Id="484" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

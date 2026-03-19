@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4022.29">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000001}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BIT</Name>
+			<BitSize>1</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>1</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000006}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..5] OF BIT</Name>
+			<BitSize>6</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<ImageDatas>
+		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ff808080808080808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000c00000c0ffffffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1001">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1002">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1003">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
+	</ImageDatas>
+	<Project ProjectGUID="{EDE581C0-92CA-41BF-B56E-F2F32165EA70}" ShowHideConfigurations="#x306">
+		<System>
+			<Settings MaxCpus="2">
+				<Cpu/>
+				<Cpu CpuId="1"/>
+			</Settings>
+			<Licenses>
+				<Target>
+					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
+				</Target>
+			</Licenses>
+			<Tasks>
+				<Task Id="3" Priority="20" CycleTime="10000" AmsPort="350" Watchdog="1" ExceedWarning="1" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
+			</Tasks>
+		</System>
+		<Plc>
+			<Project GUID="{F45BD750-561F-44BD-AA4F-3C85B8604C21}" Name="Main" PrjFilePath="Main\Main.plcproj" TmcFilePath="Main\Main.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="Main\Main.tmc">
+					<Name>Main Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Vars VarGrpType="1">
+						<Name>PlcTask Inputs</Name>
+						<Var>
+							<Name>gvl_C.bReferenceSwitch_C_vertical</Name>
+							<Comment>
+								<![CDATA[ crane is at max. height]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bReferenceSwitch_C_horizontal</Name>
+							<Comment>
+								<![CDATA[ crane is min. extended ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bReferenceSwitch_C_rotate</Name>
+							<Comment>
+								<![CDATA[ crane is at stop position in clockwise direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_vertical1</Name>
+							<Comment>
+								<![CDATA[ registers pulse if crane moves in vertical direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_vertical2</Name>
+							<Comment>
+								<![CDATA[ (not used) registers second pulse if crane moves in vertical direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_horizontal1</Name>
+							<Comment>
+								<![CDATA[ registers pulse if crane moves in horizontal direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_horizontal2</Name>
+							<Comment>
+								<![CDATA[ (not used) registers second pulse if crane moves in horizontal direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_rotate1</Name>
+							<Comment>
+								<![CDATA[ registers pulse if crane rotates ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bEncoderImpulse_C_rotate2</Name>
+							<Comment>
+								<![CDATA[ (not used) registers second pulse if crane rotates]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bReferenceSwitch_HBW_horizontal</Name>
+							<Comment>
+								<![CDATA[ stacker crane is at stop position next to conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bLightBarrier_HBW_inside</Name>
+							<Comment>
+								<![CDATA[ light barrier at conveyor belt next to stacker crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bLightBarrier_HBW_outside</Name>
+							<Comment>
+								<![CDATA[ light barrier at conveyor belt next to crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bReferenceSwitch_HBW_vertical</Name>
+							<Comment>
+								<![CDATA[ stacker crane is at highest position]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bReferenceSwitch_HBW_Cantilever_front</Name>
+							<Comment>
+								<![CDATA[ cantilever is extended]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bReferenceSwitch_HBW_Cantilever_back</Name>
+							<Comment>
+								<![CDATA[ cantilever is retracted]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bTrailSensor_HBW_bottom</Name>
+							<Comment>
+								<![CDATA[ (not used)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bTrailSensor_HBW_top</Name>
+							<Comment>
+								<![CDATA[ (not used)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bEncoderImpulse_HBW_horizontal1</Name>
+							<Comment>
+								<![CDATA[ registers pulse if stacker crane moves in horizontal direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bEncoderImpulse_HBW_horizontal2</Name>
+							<Comment>
+								<![CDATA[ (not used) registers second pulse if crane moves in horizontal direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bEncoderImpulse_HBW_vertical1</Name>
+							<Comment>
+								<![CDATA[ registers pulse if stacker crane moves in vertical direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bEncoderImpulse_HBW_vertical2</Name>
+							<Comment>
+								<![CDATA[ (not used) registers second pulse if stacker crane moves in vertical direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_Turntable_attransferunit</Name>
+							<Comment>
+								<![CDATA[ turntable is orientated towards transfer unit]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_Turntable_atconveyorbelt</Name>
+							<Comment>
+								<![CDATA[ turntable is orientated towards conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bLightBarrier_MS_conveyorbelt</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP on conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_Turntable_atsaw</Name>
+							<Comment>
+								<![CDATA[ turntable is orientated towards saw]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_TransferUnit_atturntable</Name>
+							<Comment>
+								<![CDATA[ transfer unit is located next to turntable]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_OvenSlider_inside</Name>
+							<Comment>
+								<![CDATA[ oven slider is inside oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_OvenSlider_outside</Name>
+							<Comment>
+								<![CDATA[ oven slider is outside oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bReferenceSwitch_MS_TransferUnit_atoven</Name>
+							<Comment>
+								<![CDATA[ transfer unit is located next to oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bLightBarrier_MS_oven</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP on oven slider]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bLightBarrier_PM_entry</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP at begining of conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bLightBarrier_PM_tool</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP at end of conveyor belt (underneath punching tool)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bReferenceSwitch_PM_top</Name>
+							<Comment>
+								<![CDATA[ punching tool is at max. height]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bReferenceSwitch_PM_bottom</Name>
+							<Comment>
+								<![CDATA[ punching tool is at min. height]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bPulseCounter_SL</Name>
+							<Comment>
+								<![CDATA[ registers pulse if conveyor belt next to storage locations is moving]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bLightBarrier_SL_beforecolor</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP on conveyor belt right before color sensor]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bLightBarrier_SL_aftercolor</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP on conveyor belt right behind color sensor]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bLightBarrier_SL_white</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP in first storage location (white)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bLightBarrier_SL_red</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP in second storage location (red)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bLightBarrier_SL_blue</Name>
+							<Comment>
+								<![CDATA[ light barrier that detects WP in third storage location (blue)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.iColorSensor_SL</Name>
+							<Comment>
+								<![CDATA[ value of color sensor (white: 250...300 / red: 130...190 / blue: 40...60) ]]>
+							</Comment>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>LocalVariables.bEmergencyShutdown_NotPressed</Name>
+							<Comment>
+								<![CDATA[ signal of emergency shutdown button (true = no emergency shutdown requested)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>gvl_C.bMotor_C_upward</Name>
+							<Comment>
+								<![CDATA[ rise crane ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bMotor_C_downward</Name>
+							<Comment>
+								<![CDATA[ lower crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bMotor_C_backward</Name>
+							<Comment>
+								<![CDATA[ retract crane in horizontal direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bMotor_C_forward</Name>
+							<Comment>
+								<![CDATA[ extend crane in horizontal direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bMotor_C_clockwise</Name>
+							<Comment>
+								<![CDATA[ rotate crane clockwise]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bMotor_C_counterclockwise</Name>
+							<Comment>
+								<![CDATA[ rotate crane counterclockwise]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bCompressor_C</Name>
+							<Comment>
+								<![CDATA[ activate compressor (needed for vaccuum gripper)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_C.bValve_C</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for vacuum gripper)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_ConveyorBelt_forward</Name>
+							<Comment>
+								<![CDATA[ move conveyor belt towards crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_ConveyorBelt_backward</Name>
+							<Comment>
+								<![CDATA[ move conveyor belt towards stacker crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_StackerCrane_torack</Name>
+							<Comment>
+								<![CDATA[ move stacker crane in horizontal direction towards rack]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_StackerCrane_toconveyorbelt</Name>
+							<Comment>
+								<![CDATA[ move stacker crane in horizontal direction towards conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_StackerCrane_downward</Name>
+							<Comment>
+								<![CDATA[ lower stacker crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_StackerCrane_upward</Name>
+							<Comment>
+								<![CDATA[ rise stacker crane]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_Cantilever_forward</Name>
+							<Comment>
+								<![CDATA[ extend cantilever in horizontal direction ]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_HBW.bMotor_HBW_Cantilever_backward</Name>
+							<Comment>
+								<![CDATA[ retract cantilever in horizontal direction]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_Turntable_clockwise</Name>
+							<Comment>
+								<![CDATA[ rotate turntable clockwise]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_Turntable_counterclockwise</Name>
+							<Comment>
+								<![CDATA[ rotate turntable counterclockwise]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_ConveyorBelt_forward</Name>
+							<Comment>
+								<![CDATA[ move conveyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_Saw</Name>
+							<Comment>
+								<![CDATA[ activate saw]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_OvenSlider_movein</Name>
+							<Comment>
+								<![CDATA[ move oven slider into oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_OvenSlider_moveout</Name>
+							<Comment>
+								<![CDATA[ move oven slider out of oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_TransferUnit_tooven</Name>
+							<Comment>
+								<![CDATA[ move ransfer unit towards oven]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bMotor_MS_TransferUnit_toturntable</Name>
+							<Comment>
+								<![CDATA[ move transfer unit towards turntable]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bLamp_MS</Name>
+							<Comment>
+								<![CDATA[ activate lamp that simulates burning of WP]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bCompressor_MS</Name>
+							<Comment>
+								<![CDATA[ activate compressor (needed for vaccuum gripper, transfer unit, oven door and ejector)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bValve_MS_Vacuum</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for vaccuum gripper)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bValve_MS_TransferUnit</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for height of vacuum gripper)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bValve_MS_OvenDoor</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for opening/closing oven door)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_MS.bValve_MS_Ejector</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for ejector)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bMotor_PM_ConveyorBelt_forward</Name>
+							<Comment>
+								<![CDATA[ move conveyor belt towards punching tool]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bMotor_PM_ConveyorBelt_backward</Name>
+							<Comment>
+								<![CDATA[ move conveyor belt away from punching tool]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bMotor_PM_Tool_upward</Name>
+							<Comment>
+								<![CDATA[ raise punching tool]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_PM.bMotor_PM_Tool_downward</Name>
+							<Comment>
+								<![CDATA[ lower punching tool]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bMotor_SL_ConveyorBelt</Name>
+							<Comment>
+								<![CDATA[ activate conyeyor belt]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bCompressor_SL</Name>
+							<Comment>
+								<![CDATA[ activate compressor (needed for the three pneumatic cylinders)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bValve_SL_white</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for cylinder at first/white storage location)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bValve_SL_red</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for cylinder at second/red storage location)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>gvl_SL.bValve_SL_blue</Name>
+							<Comment>
+								<![CDATA[ activate valve (needed for cylinder at third/blue storage location)]]>
+							</Comment>
+							<Type>BOOL</Type>
+						</Var>
+					</Vars>
+					<UnrestoredVarLinks ImportTime="2020-04-28T14:16:11">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^Untitled1^Untitled1 Instance" Type="2">
+							<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 4 (EL2809)">
+								<Link VarA="test.test" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Output" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2020-06-02T16:05:28">
+						<OwnerA Name="InputDst" Prefix="TIPC^Main^Main Instance" Type="1">
+							<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 9 (EL1809)">
+								<Link VarA="Hochregallager_HRL.fSpursensor1_HRL" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 14^Input" Size="1" RestoreInfo="ANotFound"/>
+								<Link VarA="Hochregallager_HRL.fSpursensor2_HRL" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 6^Input" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2021-02-11T13:12:09">
+						<OwnerA Name="InputDst" Prefix="TIPC^Main^Main Instance" Type="1">
+							<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 10 (EL1809)">
+								<Link VarA="LocalVariables.bErkenne_Notaus" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 11^Input" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
+				</Instance>
+			</Project>
+		</Plc>
+		<Io>
+			<Device DevType="111" DevFlags="#x0003" AmsPort="28673" AmsNetId="129.187.158.64.2.1" RemoteName="Device 1 (EtherCAT)" Id="1">
+				<Name>Device 1 (EtherCAT)</Name>
+				<AddressInfo>
+					<Ccat>
+						<Address>-268435456</Address>
+						<Offset>131072</Offset>
+						<Size>8192</Size>
+						<BaseAddr>0</BaseAddr>
+						<BusNo>4</BusNo>
+						<SlotNo>0</SlotNo>
+						<VendorId>5612</VendorId>
+						<DeviceId>20480</DeviceId>
+						<Dma>
+							<Address>0</Address>
+							<Offset>4096</Offset>
+							<Size>256</Size>
+							<BaseAddr>2</BaseAddr>
+							<RxChn>0</RxChn>
+							<TxChn>1</TxChn>
+						</Dma>
+						<Identification>
+							<Value>1064123047</Value>
+							<Version>1</Version>
+							<Size>256</Size>
+						</Identification>
+					</Ccat>
+				</AddressInfo>
+				<Image Id="1" AddrType="9" ImageType="3">
+					<Name>Image</Name>
+				</Image>
+				<Box BoxType="9099" Id="8">
+					<Name>Term 8 (EK1200)</Name>
+					<ImageId>1000</ImageId>
+					<EtherCAT PdiType="#x0100" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x04b02c52" RevisionNo="#x00001388" InfoDataState="false" PortPhys="49" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1200-5000 EtherCAT Power supply (2A E-Bus)" Desc="EK1200" PortABoxInfo="#x00ffffff"/>
+					<Box BoxType="9099" Id="9">
+						<Name>Term 9 (EL1809)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x07113052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1809 16Ch. Dig. Input 24V, 3ms" Desc="EL1809" PortABoxInfo="#x01000008">
+							<SyncMan>001002000000010004000000000000000200001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 9" Index="#x1a08" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6080" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 10" Index="#x1a09" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6090" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 11" Index="#x1a0a" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60a0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 12" Index="#x1a0b" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60b0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 13" Index="#x1a0c" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60c0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 14" Index="#x1a0d" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60d0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60e0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60f0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="10">
+						<Name>Term 10 (EL1809)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x07113052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1809 16Ch. Dig. Input 24V, 3ms" Desc="EL1809" PortABoxInfo="#x01000009">
+							<SyncMan>001002000000010004000000000000000200001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 9" Index="#x1a08" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6080" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 10" Index="#x1a09" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6090" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 11" Index="#x1a0a" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60a0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 12" Index="#x1a0b" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60b0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 13" Index="#x1a0c" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60c0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 14" Index="#x1a0d" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60d0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60e0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60f0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="11">
+						<Name>Term 11 (EL1819)</Name>
+						<ImageId>7</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x071b3052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL1819 16Ch. Dig. Input 24V, 10µs" Desc="EL1819" PortABoxInfo="#x0100000a">
+							<SyncMan>001002000000010004000000000000000200001000010000</SyncMan>
+							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1a02" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1a03" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1a04" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1a05" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1a06" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1a07" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 9" Index="#x1a08" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6080" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 10" Index="#x1a09" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x6090" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 11" Index="#x1a0a" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60a0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 12" Index="#x1a0b" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60b0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 13" Index="#x1a0c" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60c0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 14" Index="#x1a0d" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60d0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 15" Index="#x1a0e" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60e0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 16" Index="#x1a0f" Flags="#x0011" SyncMan="0">
+								<Entry Name="Input" Index="#x60f0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" BoxFlags="#x00000020" Id="12">
+						<Name>Term 12 (EL3062)</Name>
+						<ImageId>1001</ImageId>
+						<EtherCAT SlaveType="2" PdiType="#x0005" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="7" FoeType="1" VendorId="#x00000002" ProductCode="#x0bf63052" RevisionNo="#x00140000" InfoDataAddr="true" TimeoutMailbox2="2000" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL3062 2Ch. Ana. Input 0-10V" Desc="EL3062" PortABoxInfo="#x0100000b">
+							<SyncMan>001080002600010001000000800080008000001026010000</SyncMan>
+							<SyncMan>801080002200010002000000800080008000801022010000</SyncMan>
+							<SyncMan>001100000400000003000000000000000000001104000000</SyncMan>
+							<SyncMan>801108002000010004000000000000000800801120010000</SyncMan>
+							<Fmmu>0000000000000000801100010100000002000000000000000000000000000000</Fmmu>
+							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+							<BootStrapData>0010f400f410f400</BootStrapData>
+							<Pdo Name="AI Standard Channel 1" Index="#x1a00" Flags="#x0010" SyncMan="3">
+								<ExcludePdo>#x1a01</ExcludePdo>
+								<Entry Name="Status__Underrange" Index="#x6000" Sub="#x01" Flags="#x00008020">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Underrange event active]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Overrange" Index="#x6000" Sub="#x02" Flags="#x00008020">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Overrange event active]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Limit 1" Index="#x6000" Sub="#x03" Flags="#x00008020">
+									<Type>BIT2</Type>
+									<Comment>
+										<![CDATA[Bit0: Value smaller/equal Limit1
+Bit1: Value bigger/equal Limit1]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Limit 2" Index="#x6000" Sub="#x05">
+									<Type>BIT2</Type>
+									<Comment>
+										<![CDATA[Bit0: Value smaller/equal Limit2
+Bit1: Value bigger/equal Limit2]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Error" Index="#x6000" Sub="#x07">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Bit set when Over- or Underrange]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__">
+									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
+								</Entry>
+								<Entry Name="Status__">
+									<Type GUID="{18071995-0000-0000-0000-002000000006}">ARRAY [0..5] OF BIT</Type>
+								</Entry>
+								<Entry Name="Status__TxPDO State" Index="#x6000" Sub="#x0f">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[TRUE when this TxPDO is not valid]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__TxPDO Toggle" Index="#x6000" Sub="#x10">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Bit toggles everytime when new value available]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Value" Index="#x6000" Sub="#x11" Flags="#x00020000">
+									<Type>INT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="AI Compact Channel 1" Index="#x1a01" Flags="#x0010">
+								<ExcludePdo>#x1a00</ExcludePdo>
+								<Entry Name="Value" Index="#x6000" Sub="#x11" Flags="#x00020000">
+									<Type>INT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="AI Standard Channel 2" Index="#x1a02" Flags="#x0010" SyncMan="3">
+								<ExcludePdo>#x1a03</ExcludePdo>
+								<Entry Name="Status__Underrange" Index="#x6010" Sub="#x01">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Underrange event active]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Overrange" Index="#x6010" Sub="#x02">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Overrange event active]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Limit 1" Index="#x6010" Sub="#x03">
+									<Type>BIT2</Type>
+									<Comment>
+										<![CDATA[Bit0: Value smaller/equal Limit1
+Bit1: Value bigger/equal Limit1]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Limit 2" Index="#x6010" Sub="#x05">
+									<Type>BIT2</Type>
+									<Comment>
+										<![CDATA[Bit0: Value smaller/equal Limit2
+Bit1: Value bigger/equal Limit2]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__Error" Index="#x6010" Sub="#x07">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Bit set when Over- or Underrange]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__">
+									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
+								</Entry>
+								<Entry Name="Status__">
+									<Type GUID="{18071995-0000-0000-0000-002000000006}">ARRAY [0..5] OF BIT</Type>
+								</Entry>
+								<Entry Name="Status__TxPDO State" Index="#x6010" Sub="#x0f">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[TRUE when this TxPDO is not valid]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Status__TxPDO Toggle" Index="#x6010" Sub="#x10">
+									<Type>BIT</Type>
+									<Comment>
+										<![CDATA[Bit toggles everytime when new value available]]>
+									</Comment>
+								</Entry>
+								<Entry Name="Value" Index="#x6010" Sub="#x11" Flags="#x00020000">
+									<Type>INT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="AI Compact Channel 2" Index="#x1a03" Flags="#x0010">
+								<ExcludePdo>#x1a02</ExcludePdo>
+								<Entry Name="Value" Index="#x6010" Sub="#x11" Flags="#x00020000">
+									<Type>INT</Type>
+								</Entry>
+							</Pdo>
+							<CoeProfile ProfileNo="19665801"/>
+							<CoeProfile ProfileNo="19665801"/>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="13">
+						<Name>Term 13 (EL2809)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x0af93052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2809 16Ch. Dig. Output 24V, 0.5A" Desc="EL2809" PortABoxInfo="#x0100000c">
+							<SyncMan>000f01004400010003000000000000000100000f44090000</SyncMan>
+							<SyncMan>010f01004400010003000000000000000100010f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 9" Index="#x1608" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x7080" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 10" Index="#x1609" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x7090" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 11" Index="#x160a" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70a0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 12" Index="#x160b" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70b0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 13" Index="#x160c" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70c0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 14" Index="#x160d" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70d0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 15" Index="#x160e" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70e0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 16" Index="#x160f" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70f0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="14">
+						<Name>Term 14 (EL2809)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x0af93052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2809 16Ch. Dig. Output 24V, 0.5A" Desc="EL2809" PortABoxInfo="#x0100000d">
+							<SyncMan>000f01004400010003000000000000000100000f44090000</SyncMan>
+							<SyncMan>010f01004400010003000000000000000100010f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7040" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7050" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7060" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7070" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 9" Index="#x1608" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x7080" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 10" Index="#x1609" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x7090" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 11" Index="#x160a" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70a0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 12" Index="#x160b" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70b0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 13" Index="#x160c" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70c0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 14" Index="#x160d" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70d0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 15" Index="#x160e" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70e0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 16" Index="#x160f" InOut="1" Flags="#x0011" SyncMan="1">
+								<Entry Name="Output" Index="#x70f0" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="15">
+						<Name>Term 15 (EL2004)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x07d43052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2004 4Ch. Dig. Output 24V, 0.5A" Desc="EL2004" PortABoxInfo="#x0100000e">
+							<SyncMan>000f01004400010003000000000000000000000f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="16">
+						<Name>Term 16 (EL2004)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x07d43052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2004 4Ch. Dig. Output 24V, 0.5A" Desc="EL2004" PortABoxInfo="#x0100000f">
+							<SyncMan>000f01004400010003000000000000000000000f44090000</SyncMan>
+							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
+							<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7000" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7010" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7020" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
+								<Entry Name="Output" Index="#x7030" Sub="#x01">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+						</EtherCAT>
+					</Box>
+					<Box BoxType="9099" Id="17">
+						<Name>Term 17 (EL9011)</Name>
+						<ImageId>1003</ImageId>
+						<EtherCAT CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x23333050" InfoDataState="false" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL9011 End Terminal" Desc="EL9011" PortABoxInfo="#x01000010"/>
+					</Box>
+				</Box>
+				<EtherCAT/>
+			</Device>
+			<Device Disabled="true" DevType="127" AmsPort="28677" AmsNetId="129.187.158.64.6.1" RemoteName="Device 5 (CX2030-0120-M310)" Id="5">
+				<Name>Device 5 (CX2030-0120-M310)</Name>
+				<AddressInfo>
+					<Ccat>
+						<Address>-268435456</Address>
+						<Offset>65536</Offset>
+						<Size>65536</Size>
+						<BaseAddr>0</BaseAddr>
+						<BusNo>4</BusNo>
+						<SlotNo>0</SlotNo>
+						<VendorId>5612</VendorId>
+						<DeviceId>20480</DeviceId>
+						<Identification>
+							<Value>177163754</Value>
+							<Version>1</Version>
+							<Size>256</Size>
+						</Identification>
+					</Ccat>
+				</AddressInfo>
+				<Image Id="6" AddrType="1" ImageType="3">
+					<Name>Image</Name>
+				</Image>
+				<Profibus>
+					<Fcxxxx>
+						<DevSettings NetId="81bb9e400601" CcatParam="4097" PciBase2Offs="1024" PciBase2Size="128" PciBase3Offs="768" PciBase3Size="32" ProductCode="133062709" Revision="1301086328"/>
+						<EquiParameter RelationShiftCycle="25"/>
+					</Fcxxxx>
+					<BusParameter Ttr="33300" MinSlaveInterval="0"/>
+				</Profibus>
+			</Device>
+		</Io>
+	</Project>
+	<Mappings>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030010"/>
+		<OwnerA Name="TIPC^Main^Main Instance">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 10 (EL1809)">
+				<Link VarA="PlcTask Inputs^LocalVariables.bEmergencyShutdown_NotPressed" VarB="Channel 11^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bReferenceSwitch_C_horizontal" VarB="Channel 9^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bReferenceSwitch_C_rotate" VarB="Channel 10^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bReferenceSwitch_C_vertical" VarB="Channel 8^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_Turntable_atconveyorbelt" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bLightBarrier_SL_aftercolor" VarB="Channel 4^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bLightBarrier_SL_beforecolor" VarB="Channel 3^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bLightBarrier_SL_blue" VarB="Channel 7^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bLightBarrier_SL_red" VarB="Channel 6^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bLightBarrier_SL_white" VarB="Channel 5^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_SL.bPulseCounter_SL" VarB="Channel 2^Input"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 11 (EL1819)">
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_horizontal1" VarB="Channel 7^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_horizontal2" VarB="Channel 8^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_rotate1" VarB="Channel 9^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_rotate2" VarB="Channel 10^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_vertical1" VarB="Channel 5^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_C.bEncoderImpulse_C_vertical2" VarB="Channel 6^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bEncoderImpulse_HBW_horizontal1" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bEncoderImpulse_HBW_horizontal2" VarB="Channel 2^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bEncoderImpulse_HBW_vertical1" VarB="Channel 3^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bEncoderImpulse_HBW_vertical2" VarB="Channel 4^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_PM.bLightBarrier_PM_entry" VarB="Channel 11^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_PM.bLightBarrier_PM_tool" VarB="Channel 12^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_PM.bReferenceSwitch_PM_bottom" VarB="Channel 14^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_PM.bReferenceSwitch_PM_top" VarB="Channel 13^Input"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 12 (EL3062)">
+				<Link VarA="PlcTask Inputs^gvl_SL.iColorSensor_SL" VarB="AI Standard Channel 1^Value"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 13 (EL2809)">
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_Cantilever_backward" VarB="Channel 8^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_Cantilever_forward" VarB="Channel 7^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_ConveyorBelt_backward" VarB="Channel 2^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_ConveyorBelt_forward" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_StackerCrane_downward" VarB="Channel 5^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_StackerCrane_toconveyorbelt" VarB="Channel 4^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_StackerCrane_torack" VarB="Channel 3^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_HBW.bMotor_HBW_StackerCrane_upward" VarB="Channel 6^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_ConveyorBelt_forward" VarB="Channel 11^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_OvenSlider_movein" VarB="Channel 13^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_OvenSlider_moveout" VarB="Channel 14^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_Saw" VarB="Channel 12^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_TransferUnit_tooven" VarB="Channel 15^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_TransferUnit_toturntable" VarB="Channel 16^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_Turntable_clockwise" VarB="Channel 9^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bMotor_MS_Turntable_counterclockwise" VarB="Channel 10^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 14 (EL2809)">
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_backward" VarB="Channel 11^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_clockwise" VarB="Channel 13^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_downward" VarB="Channel 10^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_forward" VarB="Channel 12^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_upward" VarB="Channel 9^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bCompressor_MS" VarB="Channel 15^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bLamp_MS" VarB="Channel 16^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bValve_MS_Ejector" VarB="Channel 6^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bValve_MS_OvenDoor" VarB="Channel 7^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bValve_MS_TransferUnit" VarB="Channel 8^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_MS.bValve_MS_Vacuum" VarB="Channel 14^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_SL.bCompressor_SL" VarB="Channel 2^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_SL.bMotor_SL_ConveyorBelt" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_SL.bValve_SL_blue" VarB="Channel 5^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_SL.bValve_SL_red" VarB="Channel 4^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_SL.bValve_SL_white" VarB="Channel 3^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 15 (EL2004)">
+				<Link VarA="PlcTask Outputs^gvl_C.bCompressor_C" VarB="Channel 2^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bMotor_C_counterclockwise" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_C.bValve_C" VarB="Channel 3^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 16 (EL2004)">
+				<Link VarA="PlcTask Outputs^gvl_PM.bMotor_PM_ConveyorBelt_backward" VarB="Channel 2^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_PM.bMotor_PM_ConveyorBelt_forward" VarB="Channel 1^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_PM.bMotor_PM_Tool_downward" VarB="Channel 4^Output"/>
+				<Link VarA="PlcTask Outputs^gvl_PM.bMotor_PM_Tool_upward" VarB="Channel 3^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 8 (EK1200)^Term 9 (EL1809)">
+				<Link VarA="PlcTask Inputs^gvl_HBW.bLightBarrier_HBW_inside" VarB="Channel 16^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bLightBarrier_HBW_outside" VarB="Channel 7^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bReferenceSwitch_HBW_Cantilever_back" VarB="Channel 13^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bReferenceSwitch_HBW_Cantilever_front" VarB="Channel 5^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bReferenceSwitch_HBW_horizontal" VarB="Channel 8^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bReferenceSwitch_HBW_vertical" VarB="Channel 15^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bTrailSensor_HBW_bottom" VarB="Channel 14^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_HBW.bTrailSensor_HBW_top" VarB="Channel 6^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bLightBarrier_MS_conveyorbelt" VarB="Channel 12^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bLightBarrier_MS_oven" VarB="Channel 2^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_OvenSlider_inside" VarB="Channel 9^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_OvenSlider_outside" VarB="Channel 3^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_TransferUnit_atoven" VarB="Channel 11^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_TransferUnit_atturntable" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_Turntable_atsaw" VarB="Channel 4^Input"/>
+				<Link VarA="PlcTask Inputs^gvl_MS.bReferenceSwitch_MS_Turntable_attransferunit" VarB="Channel 10^Input"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmProject>

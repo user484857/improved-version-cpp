@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <GVL Name="gvl_PM" Id="{5f3f5c0a-0141-4379-b485-07b8f10a7647}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// digital inputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_PM_entry AT%I* : BOOL;		// light barrier that detects WP at begining of conveyor belt
+	{attribute 'OPC.UA.DA' := '1'}
+	bLightBarrier_PM_tool AT%I* : BOOL;			// light barrier that detects WP at end of conveyor belt (underneath punching tool)
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_PM_top AT%I* : BOOL;		// punching tool is at max. height
+	{attribute 'OPC.UA.DA' := '1'}
+	bReferenceSwitch_PM_bottom AT%I* : BOOL;	// punching tool is at min. height
+	
+	// digital outputs
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_PM_ConveyorBelt_forward AT%Q* : BOOL; 	// move conveyor belt towards punching tool
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_PM_ConveyorBelt_backward AT%Q* : BOOL;	// move conveyor belt away from punching tool
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_PM_Tool_upward AT%Q* : BOOL;				// raise punching tool
+	{attribute 'OPC.UA.DA' := '1'}
+	bMotor_PM_Tool_downward AT%Q* : BOOL;			// lower punching tool
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

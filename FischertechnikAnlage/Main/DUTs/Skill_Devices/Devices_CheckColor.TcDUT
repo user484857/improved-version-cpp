@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <DUT Name="Devices_CheckColor" Id="{b870faa6-a55d-4255-a6b0-99f21b33b0cc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Devices_CheckColor :
+(
+	ColorSensor_SL := 0
+) ;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <GVL Name="LocalVariables" Id="{f7852424-867b-4933-89c9-b7ce43cde381}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// general
+	bEndSimulation : BOOL;						// true = every workpiece has been stored again (ends simulation)
+	bEmergencyShutdown_NotPressed AT%I* : BOOL; // signal of emergency shutdown button (true = no emergency shutdown requested)
+	bEmergencyShutdown_Memory : BOOL;			// memorizes emergency shutdown so that program doesn't continue
+	
+	
+	// initialization completed
+	bAllDevices_InitPos : BOOL;			// all devices in initial position
+	bCrane_InitPos : BOOL;				// in initial position
+	bOven_InitPos : BOOL; 				// in initial position
+	bPunchingMachine_InitPos : BOOL;	// in initial position
+	bStackerCrane_InitPos : BOOL;		// in initial position
+	bTransferUnit_InitPos : BOOL;		// in initial position
+	bTurntable_InitPos : BOOL;			// in initial position
+	
+	// variables for Skill_Devices:
+	eMove_Device : Devices_Move;
+	eSecure_Device : Devices_Secure;
+	eSupplyCompressedAir_Device : Devices_SupplyCompressedAir;
+	
+	// variables for Device_Parameters
+	eBurn_Lamp : Lamp;
+	eMove_Cantilever : Cantilever;
+	eMove_ConveyorBelt : ConveyorBelt;
+	eMove_Crane : Crane;
+	eMove_Cylinder : Cylinder;
+	eMove_OvenDoor : OvenDoor;
+	eMove_OvenSlider : OvenSlider;
+	eMove_PunchingMachine : PunchingMachine;
+	eMove_StackerCrane : StackerCrane;
+	eMove_TransferUnit : TransferUnit;
+	eMove_Turntable : Turntable;
+	eSaw_Saw : Saw;
+	eSecure_SuctionCup : VacuumGripper;
+	eSupplyCompressedAir_Compressor : Compressor;
+
+	// HBW (high bay warehouse)
+	// HBW status
+	bHBW_NoWPRemaining : BOOL;												// true = every workpiece has been retrieved (continue with storing)
+	bHBW_CallC : BOOL; 														// HBW calls crane (to pick up a workpiece)
+	bHBW_RetrievingWPCRequested : BOOL; 									// HBW should deliver an empty/loaded workpiece carrier to crane 	
+	bHBW_StoringWPCRequested : BOOL;										// HBW should store an empty/loaded workpiece carrier in rack
+	bHBW_WPCNotEmpty : BOOL;												// currently handled workpiece carrier contains a workpiece 
+	// HBW current coordinates
+	iHBW_TravelledDistanceH_StackerCrane : INT;								// travelled distance in horizontal direction of stacker crane
+	iHBW_TravelledDistanceV_StackerCrane : INT;								// travelled distance in vertical direction of stacker crane
+	// HBW storage coordinates
+	iHBW_CoordH_PreviousStorageLocation : INT; 								// horizontal coordinate of previous storage location
+	iHBW_CoordV_PreviousStorageLocation : INT; 								// vertical coordinate of previous storage location
+	iHBW_CoordH_StorageLocation : ARRAY [0..2] OF INT := [730, 1310, 1895]; // horizontal coordinates of all storage locations
+	iHBW_CoordV_StorageLocation : ARRAY [0..2] OF INT := [80, 430, 810];	// vertical coordinates of all storage locations 
+	iHBW_IndexH : INT; 														// index of horizontal storage location 
+	iHBW_IndexV : INT; 														// index of vertical storage location (0=top, 2=bottom)
+	
+	// C (crane)
+	// C status
+	bC_WPSecured : BOOL;												// crane holds workpiece at collision-free position
+	// C current coordinates
+	iC_CoordH : INT;													// horizontal coordinate of crane
+	iC_CoordV : INT; 													// vertical coordinate of crane
+	iC_CoordR : INT; 													// rotational coordinate of crane
+	// C picking coordinates
+	eC_PickingStation : PickingLocation;								// name of station where workpiece gets picked
+	piC_Coord_Picking1 : POINTER TO INT;								// pointer on picking coordinates
+	piC_Coord_Picking2 : POINTER TO INT;								// pointer on picking coordinates
+	iC_Coord_Picking : ARRAY [0..2, 0..3] OF INT := [1347, 170, 150, 	// HBW [rot, hor, ver]
+												  	  445, 380, 800,	// SL_white [rot, hor, ver]
+											  		  367, 435, 800, 	// SL_red [rot, hor, ver]
+											  		  301, 580, 800];	// SL_blue [rot, hor, ver]
+	// C placing coordinates
+	eC_PlacingStation : PlacingLocation;								// name of station where workpiece gets placed
+	piC_Coord_Placing1 : POINTER TO INT;								// pointer on placing coordinates
+	piC_Coord_Placing2 : POINTER TO INT;								// pointer on placing coordinates
+	iC_Coord_Placing : ARRAY [0..2, 0..1] OF INT := [890, 870, 500, 	// MS [rot, hor, ver]
+											 		 1343, 180, 150];	// HBW [rot, hor, ver]
+	
+	// MS (machining Station)												 
+	// MS state variables
+	iMS_Step : UINT;		// 0=firing, 1=delivering, 2=sawing
+	
+	// SL (sorting line)
+	// SL status		
+	bSL_SortingRequested : BOOL;							// MS tells SL that WP is on conveyor belt and needs to be sorted
+	// SL current coordinates
+	iSL_Coord_Workpiece : UINT; 							// actual index (=number of impulses registered by pulse switch) since workpiece started moving
+	// SL storage coordinates
+	iSL_Coord_Storage : ARRAY [0..2] OF UINT := [3, 8, 13];	// coordinates of corresponding storage location (white, red, blue)
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

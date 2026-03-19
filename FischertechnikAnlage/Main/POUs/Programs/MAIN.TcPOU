@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="MAIN" Id="{513cd54a-c978-4501-9e28-088f022fa890}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	bcheck : BOOL;
+	iFarbe : INT;
+	zero : BOOL;
+	btime : UINT;
+	ipoint: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT LocalVariables.bEmergencyShutdown_NotPressed THEN
+	LocalVariables.bEmergencyShutdown_Memory := TRUE;
+	Emergency_Shutdown();
+END_IF
+
+IF NOT LocalVariables.bEmergencyShutdown_Memory THEN
+	IF NOT LocalVariables.bHBW_NoWPRemaining THEN
+		LocalVariables.bEndSimulation := TRUE;
+	END_IF
+	IF LocalVariables.bEndSimulation THEN
+		IF NOT LocalVariables.bAllDevices_InitPos THEN
+			PRG_Init();
+		ELSE
+			PRG_MainControl();
+		END_IF
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="189" Count="2" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="193" Count="3" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="199" Count="1" />
+      <LineId Id="203" Count="3" />
+      <LineId Id="174" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

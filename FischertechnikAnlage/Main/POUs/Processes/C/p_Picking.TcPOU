@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_Picking" Id="{5ac39702-2ce9-4401-b7ef-c40436ed9b5d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_Picking
+VAR
+	iStep : UINT;
+	pPulseRegistered_vertical : BOOL;	// memorizes registered pulse in order to update vertical coordinate of crane
+	bPulseRegistered_horizontal : BOOL;	// memorizes registered pulse in order to update horizontal coordinate of crane
+	bPulseRegistered_rotate : BOOL;		// memorizes registered pulse in order to update rotate coordinate of crane
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (LocalVariables.bHBW_CallC AND NOT LocalVariables.bHBW_NoWPRemaining) OR (LocalVariables.bHBW_NoWPRemaining AND LocalVariables.bHBW_WPCNotEmpty) THEN
+	CASE iStep OF
+		
+		// move crane to initial position
+		0:	Init_Crane();
+			IF LocalVariables.bCrane_InitPos THEN
+				iStep := 1;
+			END_IF
+		
+		// handle coordinates (if: HBW->MS, else: SL->HBW) 
+		1:	// delivering WPs from HBW to MS
+			IF NOT LocalVariables.bHBW_NoWPRemaining THEN
+				IF LocalVariables.eC_PickingStation = PickingLocation.HBW THEN
+					LocalVariables.piC_Coord_Picking1 := ADR(LocalVariables.iC_Coord_Picking);
+					LocalVariables.piC_Coord_Picking2 := LocalVariables.piC_Coord_Picking1 + SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+				END_IF
+			// delivering WPs from SL to HBW
+			ELSE
+				LocalVariables.eC_PlacingStation := PlacingLocation.HBW;
+				LocalVariables.eC_PickingStation := PickingLocation.SL;
+				// white WPs
+				IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_SL_white) THEN
+					LocalVariables.piC_Coord_Picking1 := ADR(LocalVariables.iC_Coord_Picking) + 3*SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+					LocalVariables.piC_Coord_Picking2 := LocalVariables.piC_Coord_Picking1 + SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+				ELSE 
+				// red WPs
+					IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_SL_red) THEN
+						LocalVariables.piC_Coord_Picking1 := ADR(LocalVariables.iC_Coord_Picking) + 6*SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+						LocalVariables.piC_Coord_Picking2 := LocalVariables.piC_Coord_Picking1 + SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+					ELSE
+				// blue WPs
+						IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_SL_blue) THEN
+							LocalVariables.piC_Coord_Picking1 := ADR(LocalVariables.iC_Coord_Picking) + 9*SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+							LocalVariables.piC_Coord_Picking2 := LocalVariables.piC_Coord_Picking1 + SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+						ELSE
+				// finished
+							LocalVariables.bHBW_WPCNotEmpty := FALSE;
+						END_IF
+					END_IF
+				END_IF
+			END_IF
+			iStep := 2;
+			
+		// rotate + move horizontally
+		2:	// update difference in rotation
+			IF gvl_C.bEncoderImpulse_C_rotate1 THEN
+				bPulseRegistered_rotate := TRUE;		
+			END_IF
+			IF bPulseRegistered_rotate AND NOT gvl_C.bEncoderImpulse_C_rotate1 THEN
+				bPulseRegistered_rotate := FALSE;
+				LocalVariables.iC_CoordR := LocalVariables.iC_CoordR + 1; 
+			END_IF
+			// execute rotational movement
+			IF LocalVariables.iC_CoordR >= LocalVariables.piC_Coord_Picking1^ THEN	
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.switchoff_rotate;
+				s_Move();
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.counterclockwise;
+				s_Move();					
+			END_IF
+			// update travelled distance in horizontal direction
+			IF gvl_C.bEncoderImpulse_C_horizontal1 THEN
+				bPulseRegistered_horizontal := TRUE;		
+			END_IF
+			IF bPulseRegistered_horizontal AND NOT gvl_C.bEncoderImpulse_C_horizontal1 THEN
+				bPulseRegistered_horizontal := FALSE;
+				LocalVariables.iC_CoordH := LocalVariables.iC_CoordH + 1; 
+			END_IF
+			// execute movement in horizontal direction and proceed with next state if both movements are fulfilled
+			IF LocalVariables.iC_CoordH >= LocalVariables.piC_Coord_Picking2^ THEN
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.switchoff_horizontal;
+				s_Move();
+				IF LocalVariables.iC_CoordR >= LocalVariables.piC_Coord_Picking1^ THEN
+					LocalVariables.iC_CoordH := 0;		
+					LocalVariables.iC_CoordR := 0; 		
+					iStep := 3;		
+					LocalVariables.piC_Coord_Picking2 := LocalVariables.piC_Coord_Picking2 + SIZEOF(LocalVariables.iC_Coord_Picking[0,0]);
+				END_IF
+			ELSE
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.forward;
+				s_Move();					
+			END_IF
+		
+		// lower vacuum gripper to workpiece
+		3:	IF gvl_C.bEncoderImpulse_C_vertical1 THEN
+				pPulseRegistered_vertical := TRUE;		
+			END_IF
+			IF pPulseRegistered_vertical AND NOT gvl_C.bEncoderImpulse_C_vertical1 THEN
+				pPulseRegistered_vertical := FALSE;
+				LocalVariables.iC_CoordV := LocalVariables.iC_CoordV + 1; 
+			END_IF
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.downward;
+			s_Move();
+			IF LocalVariables.iC_CoordV = LocalVariables.piC_Coord_Picking2^ THEN
+				LocalVariables.iC_CoordV := 0;
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.switchoff_vertical;
+				s_Move();
+				iStep := 4;
+			END_IF
+			
+		// lift vacuum gripper with workpiece
+		4:		LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_C;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+			s_SupplyCompressedAir();
+				LocalVariables.eSecure_Device := Devices_Secure.VacuumGripper_C;
+				LocalVariables.eSecure_SuctionCup := VacuumGripper.on;
+			s_Secure();
+				LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.upward;
+			s_Move();
+			IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_C_vertical) THEN
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.switchoff_vertical;
+				s_Move();
+				iStep := 5;
+			END_IF
+			
+		// pull in vacuum gripper with workpiece in horizontal direction and reset variables
+		5:		LocalVariables.eMove_Device := Devices_Move.Crane_C;
+				LocalVariables.eMove_Crane := Crane.backward;
+			s_Move();
+			IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_C_horizontal) THEN
+					LocalVariables.eMove_Device := Devices_Move.Crane_C;
+					LocalVariables.eMove_Crane := Crane.switchoff_horizontal;
+				s_Move();
+				LocalVariables.bHBW_CallC := FALSE;
+				iStep := 0;
+				LocalVariables.bC_WPSecured := TRUE;
+				LocalVariables.bHBW_WPCNotEmpty := FALSE;
+			END_IF
+			
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_Picking">
+      <LineId Id="964" Count="137" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="s_Burn" Id="{204ecb93-3665-448e-933f-03e7996f42ab}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM s_Burn
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF LocalVariables.eBurn_Lamp = Lamp.on THEN
+	gvl_MS.bLamp_MS := TRUE;
+ELSE 
+	gvl_MS.bLamp_MS := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="s_Burn">
+      <LineId Id="5" Count="1" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

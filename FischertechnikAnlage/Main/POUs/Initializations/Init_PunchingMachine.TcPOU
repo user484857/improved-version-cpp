@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Init_PunchingMachine" Id="{f2ba7d38-8438-46c4-8347-919d21624ada}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_PunchingMachine
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_PM_top) THEN
+		LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+		LocalVariables.eMove_PunchingMachine := PunchingMachine.upward;
+	s_Move();
+ELSE
+		LocalVariables.eMove_Device := Devices_Move.Tool_PM;
+		LocalVariables.eMove_PunchingMachine := PunchingMachine.switchoff;
+	s_Move();
+	LocalVariables.bPunchingMachine_InitPos := True;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="Init_PunchingMachine">
+      <LineId Id="6" Count="8" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

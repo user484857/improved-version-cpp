@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.12">
+  <POU Name="Init_TransferUnit" Id="{a73c826b-de1e-4f70-9945-481b23ab1e10}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Init_TransferUnit
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_TransferUnit_atturntable) THEN
+		LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+		LocalVariables.eMove_TransferUnit := TransferUnit.toward_Turntable;
+	s_Move();
+ELSE
+		LocalVariables.eMove_Device := Devices_Move.TransferUnit_MS;
+		LocalVariables.eMove_TransferUnit := TransferUnit.switchoff;
+	s_Move();
+	LocalVariables.bTransferUnit_InitPos := TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="Init_TransferUnit">
+      <LineId Id="6" Count="4" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

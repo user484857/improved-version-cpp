@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="p_ColorSorting" Id="{6d0e50bd-3421-496b-83bd-fc0e5ec25fb3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM p_ColorSorting
+VAR
+	iStep : UINT;				// step variable, guides through process
+	iTimer : UINT;				// incremental timer
+	iColorValue : INT;			// memorizes maximum color value (=reflection intensity) provided by color sensor (white: >220, red: >100, blue: else)
+	iColorIndex : UINT;			// 0=white, 1=red, 2=blue
+	bPulseRegistered : BOOL;	// memorizes registered pulse in order to update coordinate of workpiece
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// check if p_ColorSorting is requested
+IF LocalVariables.bSL_SortingRequested THEN
+	CASE iStep OF 
+
+		// get max. reflection intensity until WP reaches second light barrier of SL
+		0:	IF s_CheckPresence(Devices_CheckPresence.LightBarrier_SL_aftercolor) THEN 
+				IF s_CheckColor() > iColorValue THEN
+					iColorValue := s_CheckColor();				
+				END_IF
+			ELSE
+				iStep := 1;
+			END_IF
+		
+		// 	assign corresponding color index which helps to get coordinates of storage location in next step 
+		1:	IF iColorValue > 220 THEN						// white
+				iColorIndex := 0;
+			ELSIF iColorValue > 100 THEN					// red
+				iColorIndex := 1;
+			ELSE											// blue
+				iColorIndex := 2;
+			END_IF
+			iStep := 2;
+			
+		// track coordinate of WP, switchoff conveyor belt if storage coordinate is reached (see LocalVariables)
+		2:	IF s_CheckPresence(Devices_CheckPresence.PulseCounter_SL) THEN
+				bPulseRegistered := TRUE;
+			END_IF
+			IF NOT s_CheckPresence(Devices_CheckPresence.PulseCounter_SL) AND bPulseRegistered THEN 
+				bPulseRegistered := FALSE;
+				LocalVariables.iSL_Coord_Workpiece := LocalVariables.iSL_Coord_Workpiece + 1;
+			END_IF
+			
+			IF LocalVariables.iSL_Coord_Workpiece >= LocalVariables.iSL_Coord_Storage[iColorIndex] THEN
+					LocalVariables.eMove_Device := Devices_Move.ConveyorBelt_SL;
+					LocalVariables.eMove_ConveyorBelt := ConveyorBelt.switchoff;
+				s_Move();
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_SL;
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+				s_SupplyCompressedAir();
+				iStep := 3;
+			END_IF	
+			
+		// wait until conveyor belt stopped (takes ~200 iterations) and extend the cylinder that corresponds to the color index
+		3:	iTimer := iTimer + 1;
+			IF iTimer >= 200 THEN
+				CASE iColorIndex OF
+				0:		LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_white; 
+						LocalVariables.eMove_Cylinder := Cylinder.extend;
+					s_Move();
+				1:		LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_red; 
+						LocalVariables.eMove_Cylinder := Cylinder.extend;
+					s_Move();
+				2:		LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_blue; 
+						LocalVariables.eMove_Cylinder := Cylinder.extend;
+					s_Move();
+				END_CASE
+				iTimer := 0;
+				iStep := 4;
+			END_IF
+			
+		// wait until cylinder is extended (takes ~300 iterations) and reset all devices (cylinder, compressor) and variables (coordinate, sortingrequested, colorvalue) of SL
+		4: 	iTimer := iTimer + 1;
+			IF iTimer >= 300 THEN
+				// cylinders:
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_white;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_red;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();
+					LocalVariables.eMove_Device := Devices_Move.Cylinder_SL_blue;
+					LocalVariables.eMove_Cylinder := Cylinder.retract;
+				s_Move();
+				// compressor:
+					LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_SL; 
+					LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+				s_SupplyCompressedAir();
+				// variables:
+				LocalVariables.iSL_Coord_Workpiece := 0;
+				LocalVariables.bSL_SortingRequested := FALSE;
+				iColorValue := 0;
+				iTimer := 0;
+				iStep := 0;
+			END_IF
+			
+	END_CASE
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="p_ColorSorting">
+      <LineId Id="2042" Count="85" />
+      <LineId Id="1902" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
