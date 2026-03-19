@@ -1,6 +1,8 @@
 /**
  * Fischertechnik Factory — Professional Glass Dashboard
  * Data-driven station cards, live polling, dark/light theme.
+ * Views: Live (real-time) | History (SQLite queries)
+ * Settings: Theme (dark/light) | Data source (demo/live)
  */
 
 const POLL_INTERVAL = 400;
@@ -25,14 +27,19 @@ const STATION_ICONS = {
     info: `<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>`,
 };
 
-// --- History & chart ---
-const history = { timestamps: [] };
+// --- State ---
+let currentView = "live";    // "live" | "history"
+let serverMode = "demo";     // "demo" | "live" (data source on server)
+const chartHistory = { timestamps: [] };
 const TRACKED_SIGNALS = {};
 let chart = null;
 let varConfig = null;
+let pollTimer = null;
+let historyStation = "";
+let historyRunId = "";
 
 // ============================================
-//  Theme Toggle
+//  Theme
 // ============================================
 
 function getTheme() {
@@ -42,21 +49,8 @@ function getTheme() {
 function setTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
-    updateThemeIcons(theme);
+    updateSegmented("theme-segmented", theme === "dark" ? 0 : 1);
     updateChartColors();
-}
-
-function updateThemeIcons(theme) {
-    const sun = document.getElementById("icon-sun");
-    const moon = document.getElementById("icon-moon");
-    if (!sun || !moon) return;
-    if (theme === "dark") {
-        sun.style.display = "none";
-        moon.style.display = "block";
-    } else {
-        sun.style.display = "block";
-        moon.style.display = "none";
-    }
 }
 
 function updateChartColors() {
@@ -79,18 +73,159 @@ function updateChartColors() {
 }
 
 // ============================================
+//  Segmented Controls
+// ============================================
+
+function updateSegmented(id, activeIndex) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute("data-active", activeIndex);
+    const btns = el.querySelectorAll(".seg-btn");
+    btns.forEach((btn, i) => {
+        btn.classList.toggle("active", i === activeIndex);
+    });
+}
+
+function initSegmented(id, values, currentValue, onChange) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const btns = el.querySelectorAll(".seg-btn");
+    const idx = values.indexOf(currentValue);
+    updateSegmented(id, Math.max(0, idx));
+
+    btns.forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+            updateSegmented(id, i);
+            onChange(values[i]);
+        });
+    });
+}
+
+// ============================================
+//  View Toggle (Live / History)
+// ============================================
+
+function switchView(view) {
+    currentView = view;
+    const toggle = document.getElementById("view-toggle");
+    const liveView = document.getElementById("live-view");
+    const historyView = document.getElementById("history-view");
+
+    toggle.setAttribute("data-active", view);
+    toggle.querySelectorAll(".view-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === view);
+    });
+
+    if (view === "live") {
+        liveView.style.display = "";
+        historyView.style.display = "none";
+        startPolling();
+    } else {
+        liveView.style.display = "none";
+        historyView.style.display = "";
+        stopPolling();
+        loadHistoryMeta();
+    }
+}
+
+// ============================================
+//  Settings Panel
+// ============================================
+
+function openSettings() {
+    document.getElementById("settings-overlay").classList.add("open");
+    loadDbStats();
+}
+
+function closeSettings() {
+    document.getElementById("settings-overlay").classList.remove("open");
+}
+
+async function switchSource(newMode) {
+    const desc = document.getElementById("source-desc");
+    desc.textContent = "Switching...";
+
+    try {
+        const res = await fetch("/api/switch-mode", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: newMode }),
+        });
+        const json = await res.json();
+
+        if (res.ok) {
+            serverMode = json.mode;
+            desc.textContent = serverMode === "demo"
+                ? `CSV replay: ${json.csv || "auto"}`
+                : "OPC UA real-time";
+        } else {
+            desc.textContent = `Error: ${json.error}`;
+            // Revert segmented to current mode
+            const idx = serverMode === "demo" ? 0 : 1;
+            updateSegmented("source-segmented", idx);
+        }
+    } catch (e) {
+        desc.textContent = `Connection error`;
+        const idx = serverMode === "demo" ? 0 : 1;
+        updateSegmented("source-segmented", idx);
+    }
+}
+
+async function loadDbStats() {
+    try {
+        const res = await fetch("/api/db-stats");
+        if (!res.ok) throw new Error("not available");
+        const stats = await res.json();
+        document.getElementById("db-badge").textContent =
+            stats.total_events?.toLocaleString() || "--";
+        document.getElementById("db-status-desc").textContent =
+            `${stats.total_runs} runs, ${stats.total_events?.toLocaleString()} events`;
+    } catch {
+        document.getElementById("db-badge").textContent = "N/A";
+        document.getElementById("db-status-desc").textContent = "SQLite not available";
+    }
+}
+
+// ============================================
 //  Initialization
 // ============================================
 
 async function init() {
-    // Theme toggle
-    const toggle = document.getElementById("theme-toggle");
-    if (toggle) {
-        toggle.addEventListener("click", () => {
-            setTheme(getTheme() === "dark" ? "light" : "dark");
+    // View toggle
+    document.querySelectorAll(".view-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchView(btn.dataset.view));
+    });
+
+    // Settings
+    document.getElementById("settings-btn").addEventListener("click", openSettings);
+    document.getElementById("settings-close").addEventListener("click", closeSettings);
+    document.getElementById("settings-backdrop").addEventListener("click", closeSettings);
+
+    // Theme segmented
+    initSegmented("theme-segmented", ["dark", "light"], getTheme(), setTheme);
+
+    // Source segmented — get current mode from server first
+    try {
+        const statusRes = await fetch("/api/status");
+        const status = await statusRes.json();
+        serverMode = status.mode || "demo";
+    } catch { /* keep default */ }
+
+    initSegmented("source-segmented", ["demo", "live"], serverMode, switchSource);
+    document.getElementById("source-desc").textContent =
+        serverMode === "demo" ? "CSV replay mode" : "OPC UA real-time";
+
+    // Station pills
+    document.querySelectorAll("#station-pills .pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+            document.querySelectorAll("#station-pills .pill").forEach(p => p.classList.remove("active"));
+            pill.classList.add("active");
+            historyStation = pill.dataset.station;
         });
-    }
-    updateThemeIcons(getTheme());
+    });
+
+    // History load button
+    document.getElementById("history-load-btn").addEventListener("click", loadHistoryData);
 
     // Load config
     try {
@@ -106,7 +241,35 @@ async function init() {
     }
 
     initChart();
-    poll();
+    startPolling();
+}
+
+// ============================================
+//  Polling
+// ============================================
+
+function startPolling() {
+    if (pollTimer) return;
+    pollOnce();
+}
+
+function stopPolling() {
+    if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+    }
+}
+
+async function pollOnce() {
+    if (currentView !== "live") return;
+    try {
+        const res = await fetch("/api/data");
+        const json = await res.json();
+        updateUI(json);
+    } catch {
+        updateConnectionStatus("disconnected", "Offline");
+    }
+    pollTimer = setTimeout(pollOnce, POLL_INTERVAL);
 }
 
 // ============================================
@@ -250,7 +413,7 @@ function autoDetectTrackedSignals(config) {
                             station, group, label,
                             color: CHART_COLORS[colorIdx % CHART_COLORS.length],
                         };
-                        history[label] = [];
+                        chartHistory[label] = [];
                         colorIdx++;
                         break;
                     }
@@ -342,22 +505,13 @@ function rebuildChartDatasets() {
 }
 
 // ============================================
-//  Polling & UI Update
+//  Live UI Update
 // ============================================
 
-async function poll() {
-    try {
-        const res = await fetch("/api/data");
-        const json = await res.json();
-        updateUI(json);
-    } catch {
-        updateConnectionStatus("disconnected", "Offline");
-    }
-    setTimeout(poll, POLL_INTERVAL);
-}
-
 function updateUI(json) {
-    const { status, data, mode: serverMode, progress } = json;
+    const { status, data, mode: srvMode, progress } = json;
+    serverMode = srvMode || serverMode;
+
     const now = new Date().toLocaleTimeString("de-DE", {
         hour: "2-digit", minute: "2-digit", second: "2-digit",
     });
@@ -368,7 +522,7 @@ function updateUI(json) {
     );
 
     const modeBadge = document.getElementById("mode-badge");
-    if (serverMode === "demo") {
+    if (srvMode === "demo") {
         modeBadge.style.display = "flex";
         document.getElementById("mode-text").textContent = "DEMO";
         const circle = document.getElementById("progress-circle");
@@ -399,7 +553,7 @@ function updateUI(json) {
     }
 
     updateColorSensor(data);
-    updateHistory(data, now);
+    updateChartHistory(data, now);
 }
 
 function updateConnectionStatus(state, text) {
@@ -483,12 +637,12 @@ function updateColorSensor(data) {
 }
 
 // ============================================
-//  History & Chart
+//  Chart History
 // ============================================
 
-function updateHistory(data, timestamp) {
-    history.timestamps.push(timestamp);
-    if (history.timestamps.length > MAX_HISTORY) history.timestamps.shift();
+function updateChartHistory(data, timestamp) {
+    chartHistory.timestamps.push(timestamp);
+    if (chartHistory.timestamps.length > MAX_HISTORY) chartHistory.timestamps.shift();
 
     for (const [key, sig] of Object.entries(TRACKED_SIGNALS)) {
         let value = data?.[sig.station]?.[sig.group]?.[sig.label];
@@ -496,17 +650,113 @@ function updateHistory(data, timestamp) {
         if (typeof value === "string") value = 0;
         value = value ?? 0;
 
-        history[key].push(value);
-        if (history[key].length > MAX_HISTORY) history[key].shift();
+        chartHistory[key].push(value);
+        if (chartHistory[key].length > MAX_HISTORY) chartHistory[key].shift();
     }
 
-    chart.data.labels = [...history.timestamps];
+    chart.data.labels = [...chartHistory.timestamps];
     Object.keys(TRACKED_SIGNALS).forEach((key, i) => {
         if (chart.data.datasets[i]) {
-            chart.data.datasets[i].data = [...history[key]];
+            chart.data.datasets[i].data = [...chartHistory[key]];
         }
     });
     chart.update("none");
+}
+
+// ============================================
+//  History View
+// ============================================
+
+async function loadHistoryMeta() {
+    // Load runs
+    try {
+        const [runsRes, statsRes] = await Promise.all([
+            fetch("/api/runs"),
+            fetch("/api/db-stats"),
+        ]);
+
+        if (runsRes.ok) {
+            const runs = await runsRes.json();
+            const select = document.getElementById("run-select");
+            select.innerHTML = '<option value="">All Runs</option>';
+            for (const run of runs) {
+                const opt = document.createElement("option");
+                opt.value = run.run_id;
+                const count = run.event_count?.toLocaleString() || "0";
+                const date = run.started_at?.split(" ")[0] || "";
+                opt.textContent = `${run.run_id} (${count} events)`;
+                select.appendChild(opt);
+            }
+        }
+
+        if (statsRes.ok) {
+            const stats = await statsRes.json();
+            document.getElementById("stat-total-events").textContent =
+                stats.total_events?.toLocaleString() || "0";
+            document.getElementById("stat-total-runs").textContent =
+                stats.total_runs || "0";
+
+            // Find top station
+            if (stats.by_station) {
+                const top = Object.entries(stats.by_station)
+                    .sort((a, b) => b[1] - a[1])[0];
+                document.getElementById("stat-top-station").textContent =
+                    top ? top[0] : "--";
+            }
+        }
+    } catch {
+        document.getElementById("stat-total-events").textContent = "N/A";
+        document.getElementById("stat-total-runs").textContent = "N/A";
+    }
+
+    // Auto-load data
+    loadHistoryData();
+}
+
+async function loadHistoryData() {
+    const runId = document.getElementById("run-select").value;
+    const limit = document.getElementById("limit-select").value;
+    const station = historyStation;
+
+    const params = new URLSearchParams({ limit });
+    if (station) params.set("station", station);
+    if (runId) params.set("run_id", runId);
+
+    try {
+        const res = await fetch(`/api/history?${params}`);
+        if (!res.ok) throw new Error("Failed to load");
+        const rows = await res.json();
+        renderHistoryTable(rows);
+    } catch (e) {
+        document.getElementById("history-tbody").innerHTML =
+            `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-tertiary)">
+                Could not load history data. Is SQLite available?
+            </td></tr>`;
+        document.getElementById("history-count").textContent = "Error";
+    }
+}
+
+function renderHistoryTable(rows) {
+    const tbody = document.getElementById("history-tbody");
+    const countEl = document.getElementById("history-count");
+    countEl.textContent = `${rows.length} events`;
+
+    if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-tertiary)">
+            No events found for this filter.
+        </td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = rows.map(row => `
+        <tr>
+            <td>${row.timestamp || "--"}</td>
+            <td><span class="station-tag-cell" data-station="${row.station}">${row.station}</span></td>
+            <td>${row.variable || "--"}</td>
+            <td>${row.value ?? "--"}</td>
+            <td>${row.source || "--"}</td>
+        </tr>
+    `).join("");
 }
 
 // ============================================

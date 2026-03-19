@@ -79,19 +79,120 @@ def api_config():
 def api_status():
     """Return server status and mode info."""
     info = {"mode": mode}
-    if mode == "demo":
+    if mode == "demo" and data_source:
         info["csv"] = str(data_source.csv_path.name)
         info["progress"] = data_source.get_progress()
         info["events"] = len(data_source._events)
     return jsonify(info)
 
 
+@app.route("/api/switch-mode", methods=["POST"])
+def api_switch_mode():
+    """Switch between demo and live data source at runtime."""
+    from flask import request
+    global data_source, mode
+
+    target = request.json.get("mode")
+
+    if target == "demo":
+        csv_path = find_csv()
+        if not csv_path:
+            return jsonify({"error": "No CSV file found for demo mode"}), 400
+        # Stop current source
+        if data_source and hasattr(data_source, "stop"):
+            data_source.stop()
+        from demo_player import DemoPlayer
+        data_source = DemoPlayer(csv_path, speed=2.0, loop=True)
+        data_source.start()
+        mode = "demo"
+        return jsonify({"mode": mode, "csv": os.path.basename(csv_path)})
+
+    elif target == "live":
+        try:
+            from opcua_client import PLCConnection
+            if data_source and hasattr(data_source, "stop"):
+                data_source.stop()
+            data_source = PLCConnection()
+            mode = "live"
+            return jsonify({"mode": mode})
+        except Exception as e:
+            return jsonify({"error": f"Cannot connect to PLC: {e}"}), 500
+
+    return jsonify({"error": "Invalid mode. Use 'demo' or 'live'."}), 400
+
+
+# ---------------------------------------------------------------------------
+# History API — queries SQLite database (if available)
+# ---------------------------------------------------------------------------
+_factory_db = None
+
+
+def _get_db():
+    """Lazy-load the factory database."""
+    global _factory_db
+    if _factory_db is None:
+        try:
+            import sys
+            db_module = os.path.normpath(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tag 6"
+            ))
+            if db_module not in sys.path:
+                sys.path.insert(0, db_module)
+            from database import FactoryDB
+            _factory_db = FactoryDB()
+        except Exception:
+            return None
+    return _factory_db
+
+
+@app.route("/api/history")
+def api_history():
+    """Query historical events from SQLite.
+
+    Query params: station, variable, since, until, run_id, limit (default 200)
+    """
+    from flask import request
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+
+    rows = db.query(
+        station=request.args.get("station"),
+        variable=request.args.get("variable"),
+        since=request.args.get("since"),
+        until=request.args.get("until"),
+        run_id=request.args.get("run_id"),
+        limit=int(request.args.get("limit", 200)),
+    )
+    return jsonify(rows)
+
+
+@app.route("/api/runs")
+def api_runs():
+    """List all recorded runs from SQLite."""
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+    return jsonify(db.list_runs())
+
+
+@app.route("/api/db-stats")
+def api_db_stats():
+    """Return database statistics."""
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+    return jsonify(db.stats())
+
+
 def find_csv():
     """Auto-discover the largest CSV in nearby data directories."""
     base = os.path.dirname(os.path.abspath(__file__))
+    # base = dashboard/, ../../../ = cpp/ (up from dashboard → Day5 → tag5 → cpp)
+    cpp_root = os.path.normpath(os.path.join(base, "..", "..", ".."))
     search_paths = [
-        os.path.join(base, "..", "..", "tag 6", "data", "factory_run_*.csv"),
-        os.path.join(base, "..", "..", "tag 6", "data", "*.csv"),
+        os.path.join(cpp_root, "tag 6", "data", "factory_run_*.csv"),
+        os.path.join(cpp_root, "tag 6", "data", "*.csv"),
         os.path.join(base, "data", "*.csv"),
         os.path.join(base, "*.csv"),
     ]
