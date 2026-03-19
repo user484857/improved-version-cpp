@@ -650,7 +650,8 @@ def get_spc_metrics():
 
     specs = {
         "burn_time": {"LSL": 2.5, "USL": 3.5, "target": 3.0, "unit": "s"},
-        "color_sensor_value": {"LSL": 40, "USL": 300, "target": 170, "unit": ""},
+        # color_sensor_value Cpk removed: statistically meaningless across 3 disjoint
+        # populations (Grade A/B/C color ranges). Only burn_time Cpk is valid.
     }
 
     results = {}

@@ -127,7 +127,6 @@ let chartDonut = null;
 let chartHistogram = null;
 let chartTemp = null;
 let chartScatter = null;
-let chartCycle = null;
 let chartSpcBell = null;
 let chartDriftBurn = null;
 let chartDriftColor = null;
@@ -166,7 +165,6 @@ async function init() {
     renderSPC();
     renderDrift();
     initSPCSelector();
-    renderCycleLife();
     renderTable(gradesData);
 }
 
@@ -590,6 +588,8 @@ function renderScatter(grades) {
 //  6. Traceability Table
 // ============================================
 
+let tableExpanded = false;
+
 function renderTable(grades) {
     const sorted = [...grades].sort((a, b) => b.run - a.run);
     const tbody = document.getElementById('trace-tbody');
@@ -597,7 +597,9 @@ function renderTable(grades) {
 
     if (countEl) countEl.textContent = sorted.length + ' records';
 
-    tbody.innerHTML = sorted.map(g => {
+    const display = tableExpanded ? sorted : sorted.slice(0, 3);
+
+    tbody.innerHTML = display.map(g => {
         const ts = g.timestamp ? new Date(g.timestamp).toLocaleString('de-DE', {
             day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
         }) : '--';
@@ -610,132 +612,36 @@ function renderTable(grades) {
             '<td>' + ts + '</td>' +
             '</tr>';
     }).join('');
+
+    // Show more button
+    const existingBtn = document.getElementById('table-show-more');
+    if (existingBtn) existingBtn.remove();
+
+    if (!tableExpanded && sorted.length > 3) {
+        const btn = document.createElement('button');
+        btn.id = 'table-show-more';
+        btn.className = 'show-more-btn';
+        btn.textContent = 'Show all ' + sorted.length + ' records';
+        btn.onclick = function() {
+            tableExpanded = true;
+            renderTable(grades);
+        };
+        const tableCard = tbody.closest('.card-body');
+        if (tableCard) tableCard.appendChild(btn);
+    }
 }
 
-// ============================================
-//  7. Simulated Cycle Life
-// ============================================
-
-function renderCycleLife() {
-    const tc = themeColors();
-    const ctx = document.getElementById('chart-cycle').getContext('2d');
-
-    // Horizontal bar chart
-    chartCycle = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Grade A — EV/Racing', 'Grade B — Stationary Storage', 'Grade C — Consumer Electronics'],
-            datasets: [
-                {
-                    label: 'Expected Cycles',
-                    data: [2200, 750, 80],
-                    backgroundColor: [
-                        GRADE_COLORS.A + 'BB',
-                        GRADE_COLORS.B + 'BB',
-                        GRADE_COLORS.C + 'BB',
-                    ],
-                    borderColor: [GRADE_COLORS.A, GRADE_COLORS.B, GRADE_COLORS.C],
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    barThickness: 28,
-                },
-            ],
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    ...baseTooltip(),
-                    callbacks: {
-                        label(ctx) {
-                            return ctx.parsed.x.toLocaleString() + ' cycles';
-                        },
-                    },
-                },
-            },
-            scales: {
-                x: {
-                    ...baseScale('x'),
-                    beginAtZero: true,
-                    title: { display: true, text: 'Cycle Life', color: tc.tick, font: { family: 'Inter', size: 11, weight: '500' } },
-                },
-                y: {
-                    ...baseScale('y'),
-                    grid: { display: false },
-                    ticks: {
-                        color: tc.tick,
-                        font: { family: 'Inter', size: 11, weight: '500' },
-                    },
-                },
-            },
-        },
-        plugins: [whiskerPlugin()],
-    });
-}
-
-// Whisker / error bar plugin for cycle life chart
-function whiskerPlugin() {
-    return {
-        id: 'whiskers',
-        afterDraw(chart) {
-            const { ctx: c, chartArea, scales } = chart;
-            const meta = chart.getDatasetMeta(0);
-            if (!meta || !scales.x) return;
-
-            // Confidence intervals [min, max] for each bar
-            const intervals = [
-                [2000, 2500],
-                [500, 1000],
-                [30, 100],
-            ];
-
-            c.save();
-            c.lineWidth = 1.5;
-            c.strokeStyle = themeColors().tick;
-
-            meta.data.forEach((bar, i) => {
-                const ci = intervals[i];
-                if (!ci) return;
-
-                const xMin = scales.x.getPixelForValue(ci[0]);
-                const xMax = scales.x.getPixelForValue(ci[1]);
-                const y = bar.y;
-                const capH = 6;
-
-                c.beginPath();
-                // Horizontal line
-                c.moveTo(xMin, y);
-                c.lineTo(xMax, y);
-                // Left cap
-                c.moveTo(xMin, y - capH);
-                c.lineTo(xMin, y + capH);
-                // Right cap
-                c.moveTo(xMax, y - capH);
-                c.lineTo(xMax, y + capH);
-                c.stroke();
-            });
-            c.restore();
-        },
-    };
-}
+// Store grades globally for re-render
+let _allGrades = null;
 
 // ============================================
 //  8. SPC Metrics (Cp/Cpk + Bell Curve)
 // ============================================
 
 function initSPCSelector() {
-    const btns = document.querySelectorAll('.spc-param-selector .param-btn');
-    btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            btns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            spcSelectedParam = btn.dataset.param;
-            renderSPC();
-        });
-    });
+    // Only burn_time Cpk is shown (color_sensor_value Cpk removed as statistically
+    // meaningless across 3 disjoint populations). No selector needed.
+    spcSelectedParam = 'burn_time';
 }
 
 function cpkColorClass(cpk) {
@@ -1046,7 +952,7 @@ function renderDriftParam(param, canvasId, arrowId, summaryId) {
 
 function updateAllChartThemes() {
     const tc = themeColors();
-    const charts = [chartDonut, chartHistogram, chartTemp, chartScatter, chartCycle, chartSpcBell, chartDriftBurn, chartDriftColor];
+    const charts = [chartDonut, chartHistogram, chartTemp, chartScatter, chartSpcBell, chartDriftBurn, chartDriftColor];
 
     for (const ch of charts) {
         if (!ch) continue;
@@ -1074,6 +980,23 @@ function updateAllChartThemes() {
         }
 
         ch.update('none');
+    }
+}
+
+// ============================================
+//  Collapsible Sections
+// ============================================
+
+function toggleCollapsible(headerEl) {
+    const body = headerEl.nextElementSibling;
+    if (!body || !body.classList.contains('collapsible-body')) return;
+    const isExpanded = body.classList.contains('expanded');
+    if (isExpanded) {
+        body.classList.remove('expanded');
+        headerEl.classList.remove('expanded');
+    } else {
+        body.classList.add('expanded');
+        headerEl.classList.add('expanded');
     }
 }
 

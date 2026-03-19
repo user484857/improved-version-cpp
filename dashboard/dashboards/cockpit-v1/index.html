@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andon Board — Traffic Light Wall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/cockpit-v1/style.css">
+</head>
+<body>
+    <div class="andon">
+
+        <!-- FACTORY HEALTH BANNER -->
+        <div class="health-banner" id="health-banner">
+            <div class="health-pulse" id="health-pulse"></div>
+            <span class="health-text" id="health-text">CONNECTING...</span>
+        </div>
+
+        <!-- ROW 1: GIANT TRAFFIC LIGHTS — one per station -->
+        <div class="station-row">
+            <div class="station-light" id="station-HBW">
+                <div class="light-ring">
+                    <div class="light-circle idle" id="circle-HBW"></div>
+                </div>
+                <span class="station-name">HBW</span>
+            </div>
+            <div class="station-light" id="station-Crane">
+                <div class="light-ring">
+                    <div class="light-circle idle" id="circle-Crane"></div>
+                </div>
+                <span class="station-name">Crane</span>
+            </div>
+            <div class="station-light" id="station-MS">
+                <div class="light-ring">
+                    <div class="light-circle idle" id="circle-MS"></div>
+                </div>
+                <span class="station-name">MS</span>
+            </div>
+            <div class="station-light" id="station-PM">
+                <div class="light-ring">
+                    <div class="light-circle idle" id="circle-PM"></div>
+                </div>
+                <span class="station-name">PM</span>
+            </div>
+            <div class="station-light" id="station-SL">
+                <div class="light-ring">
+                    <div class="light-circle idle" id="circle-SL"></div>
+                </div>
+                <span class="station-name">SL</span>
+            </div>
+        </div>
+
+        <!-- ROW 2: BIG METRIC BLOCKS -->
+        <div class="metric-row">
+            <div class="metric-block" id="metric-quality">
+                <div class="metric-indicator" id="indicator-quality"></div>
+                <div class="metric-body">
+                    <span class="metric-value mono" id="value-quality">--</span>
+                    <span class="metric-label">Quality</span>
+                </div>
+            </div>
+            <div class="metric-block" id="metric-oee">
+                <div class="metric-indicator" id="indicator-oee"></div>
+                <div class="metric-body">
+                    <span class="metric-value mono" id="value-oee">--</span>
+                    <span class="metric-label">OEE <span class="demo-tag">Demo Mode</span></span>
+                </div>
+            </div>
+            <div class="metric-block" id="metric-throughput">
+                <div class="metric-indicator" id="indicator-throughput"></div>
+                <div class="metric-body">
+                    <span class="metric-value mono" id="value-throughput">--</span>
+                    <span class="metric-label">Throughput</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: ALERT BADGE -->
+        <div class="alert-row">
+            <button class="alert-badge" id="alert-badge" onclick="toggleAlerts()">
+                <span class="alert-badge-dot" id="alert-dot"></span>
+                <span class="alert-badge-text" id="alert-text">Loading...</span>
+                <span class="alert-badge-chevron" id="alert-chevron">&#9662;</span>
+            </button>
+            <div class="alert-drawer" id="alert-drawer">
+                <div class="alert-list" id="alert-list"></div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="andon-footer">
+            <span class="footer-label mono" id="footer-time">--:--:--</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-label" id="footer-mode">Demo</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-label mono" id="footer-updated">--</span>
+        </div>
+
+    </div>
+
+    <script src="/dashboards/cockpit-v1/app.js"></script>
+</body>
+</html>

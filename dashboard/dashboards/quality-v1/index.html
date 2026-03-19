@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yield Monitor — Quality v1</title>
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/quality-v1/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#yg)"/>
+                        <circle cx="16" cy="16" r="7" stroke="white" stroke-width="2" fill="none"/>
+                        <circle cx="16" cy="16" r="2.5" fill="white"/>
+                        <defs><linearGradient id="yg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#FFD60A"/><stop offset="1" stop-color="#FF9F0A"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Yield Monitor</h1>
+                    <p class="dash-subtitle">Color-Sensor Quality Classification</p>
+                </div>
+            </div>
+            <div class="dash-header-right">
+                <span class="last-updated-indicator mono" id="last-updated">--:--:--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- HERO: Giant Yield + Donut -->
+        <section class="hero-section mb-18">
+            <div class="hero-card glass">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <span class="hero-value mono" id="hero-pct">--%</span>
+                        <span class="hero-label">Grade A Yield</span>
+                        <span class="hero-detail" id="hero-detail">-- of -- units classified as Grade A (white)</span>
+                    </div>
+                    <div class="hero-donut-wrap">
+                        <canvas id="chart-donut"></canvas>
+                        <div class="hero-donut-center">
+                            <span class="hero-donut-pct mono" id="donut-center-pct">--</span>
+                            <span class="hero-donut-sub">Grade A</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grade Cards -->
+        <section class="grade-cards mb-18">
+            <div class="grade-card glass" data-grade="A">
+                <div class="grade-dot grade-dot-a"></div>
+                <div class="grade-info">
+                    <span class="grade-card-label">Grade A</span>
+                    <span class="grade-card-color">White</span>
+                </div>
+                <div class="grade-stats">
+                    <span class="grade-count mono" id="grade-a-count">--</span>
+                    <span class="grade-pct mono" id="grade-a-pct">--%</span>
+                </div>
+            </div>
+            <div class="grade-card glass" data-grade="B">
+                <div class="grade-dot grade-dot-b"></div>
+                <div class="grade-info">
+                    <span class="grade-card-label">Grade B</span>
+                    <span class="grade-card-color">Red</span>
+                </div>
+                <div class="grade-stats">
+                    <span class="grade-count mono" id="grade-b-count">--</span>
+                    <span class="grade-pct mono" id="grade-b-pct">--%</span>
+                </div>
+            </div>
+            <div class="grade-card glass" data-grade="C">
+                <div class="grade-dot grade-dot-c"></div>
+                <div class="grade-info">
+                    <span class="grade-card-label">Grade C</span>
+                    <span class="grade-card-color">Blue</span>
+                </div>
+                <div class="grade-stats">
+                    <span class="grade-count mono" id="grade-c-count">--</span>
+                    <span class="grade-pct mono" id="grade-c-pct">--%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Burn Time Distribution -->
+        <section class="burn-section mb-18">
+            <div class="card glass">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Burn Time Distribution</h2>
+                        <p class="card-subtitle">Measured oven lamp on/off duration per run</p>
+                    </div>
+                    <span class="card-subtitle mono" id="burn-avg">Avg: --s</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container burn-chart-height">
+                        <canvas id="chart-burn"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disclaimer -->
+        <footer class="disclaimer">
+            <p>Measured data: color sensor classification (3 bins), oven lamp timing. All other values are estimated from these signals.</p>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/quality-v1/app.js"></script>
+</body>
+</html>

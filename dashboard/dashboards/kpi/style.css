@@ -97,6 +97,14 @@
     color: var(--text-primary);
 }
 
+.oee-context-note {
+    font-size: 0.68rem;
+    color: var(--orange);
+    text-align: center;
+    margin-top: 6px;
+    font-style: italic;
+}
+
 /* ---- Bottleneck Card ---- */
 .bottleneck-badge {
     display: inline-flex;
@@ -366,6 +374,10 @@
 /* ---- Chart containers ---- */
 .chart-container-short {
     height: 120px;
+}
+
+.timeline-chart-size {
+    height: 300px;
 }
 
 /* ---- MS Legend ---- */

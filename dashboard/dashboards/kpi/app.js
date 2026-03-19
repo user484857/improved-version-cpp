@@ -43,6 +43,7 @@ let cycleTimeChart = null;
 let msSubstepChart = null;
 let trendChart = null;
 let cumulativeChart = null;
+let timelineChart = null;
 
 // --- Theme ---
 function toggleTheme() {
@@ -148,7 +149,7 @@ function getThemeColors() {
 
 function updateChartTheme() {
     const c = getThemeColors();
-    [cycleTimeChart, msSubstepChart, trendChart, cumulativeChart].forEach(chart => {
+    [cycleTimeChart, msSubstepChart, trendChart, cumulativeChart, timelineChart].forEach(chart => {
         if (!chart) return;
         const opts = chart.options;
         if (opts.scales) {
@@ -234,6 +235,12 @@ function renderOEE(data) {
     document.getElementById('formula-p').textContent = (data.performance * 100).toFixed(0) + '%';
     document.getElementById('formula-q').textContent = (data.quality * 100).toFixed(0) + '%';
     document.getElementById('formula-oee').textContent = (oeeVal * 100).toFixed(1) + '%';
+
+    // Show context note when OEE is low (demo mode artifact)
+    const noteEl = document.getElementById('oee-context-note');
+    if (noteEl) {
+        noteEl.style.display = oeeVal < 0.50 ? 'block' : 'none';
+    }
 }
 
 // --- Render: Bottleneck ---
@@ -758,14 +765,132 @@ function renderCumulativeChart(throughputData) {
     });
 }
 
+// --- Collapsible Sections ---
+function toggleCollapsible(headerEl) {
+    const body = headerEl.nextElementSibling;
+    if (!body || !body.classList.contains('collapsible-body')) return;
+    const isExpanded = body.classList.contains('expanded');
+    if (isExpanded) {
+        body.classList.remove('expanded');
+        headerEl.classList.remove('expanded');
+    } else {
+        body.classList.add('expanded');
+        headerEl.classList.add('expanded');
+    }
+}
+
+// --- Utility ---
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+// --- Render: Production Timeline (Gantt) ---
+function renderTimeline(timeline) {
+    if (!timeline || timeline.length === 0) return;
+
+    let minTs = Infinity;
+    for (const entry of timeline) {
+        const ts = new Date(entry.start).getTime();
+        if (ts < minTs) minTs = ts;
+    }
+
+    const runMap = {};
+    for (const entry of timeline) {
+        const runKey = entry.run;
+        if (!runMap[runKey]) runMap[runKey] = {};
+        const startOff = (new Date(entry.start).getTime() - minTs) / 1000;
+        const endOff = (new Date(entry.end).getTime() - minTs) / 1000;
+        runMap[runKey][entry.station] = [startOff, endOff];
+    }
+
+    const runs = Object.keys(runMap).map(Number).sort((a, b) => a - b);
+    const datasets = [];
+
+    for (const run of runs) {
+        const runData = runMap[run];
+        const opacity = 0.55 + (run % 3) * 0.15;
+
+        for (const station of STATION_ORDER) {
+            if (!runData[station]) continue;
+            const [start, end] = runData[station];
+            const color = STATION_COLORS[station];
+            const rgbaFill = hexToRgba(color, opacity);
+            const rgbaBorder = hexToRgba(color, Math.min(opacity + 0.3, 1.0));
+
+            datasets.push({
+                label: station + ' #' + run,
+                data: STATION_ORDER.map(s => s === station ? [start, end] : null),
+                backgroundColor: rgbaFill,
+                borderColor: rgbaBorder,
+                borderWidth: 1,
+                borderRadius: 3,
+                borderSkipped: false,
+                barPercentage: 0.7,
+                categoryPercentage: 0.85,
+            });
+        }
+    }
+
+    const ctx = document.getElementById('chart-timeline');
+    if (!ctx) return;
+    const c = getThemeColors();
+
+    if (timelineChart) timelineChart.destroy();
+
+    timelineChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: STATION_ORDER, datasets: datasets },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 300 },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleFont: { family: 'Inter', weight: '600', size: 12 },
+                    bodyFont: { family: "'SF Mono', monospace", size: 11 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(items) { return items.length ? items[0].dataset.label : ''; },
+                        label: function(ctx) {
+                            const val = ctx.raw;
+                            if (!val) return '';
+                            return 'Time: ' + val[0].toFixed(1) + 's - ' + val[1].toFixed(1) + 's (' + (val[1] - val[0]).toFixed(1) + 's)';
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: { display: true, text: 'Time (seconds)', color: c.textSec, font: { size: 11 } },
+                    grid: { color: c.grid },
+                    ticks: { color: c.tick, font: { family: "'SF Mono', monospace", size: 10 }, callback: function(val) { return val + 's'; } },
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: c.tick, font: { size: 11, weight: '600' } },
+                },
+            },
+        },
+    });
+}
+
 // --- Init ---
 async function init() {
     initSettings();
-    const [cycleData, oeeData, throughputData, bottleneckData] = await Promise.all([
+    const [cycleData, oeeData, throughputData, bottleneckData, timelineData] = await Promise.all([
         fetchJSON('/api/analytics/cycle-times'),
         fetchJSON('/api/analytics/oee'),
         fetchJSON('/api/analytics/throughput'),
-        fetchJSON('/api/analytics/bottleneck')
+        fetchJSON('/api/analytics/bottleneck'),
+        fetchJSON('/api/analytics/timeline')
     ]);
 
     renderOEE(oeeData);
@@ -774,6 +899,7 @@ async function init() {
     renderCycleTimeChart(cycleData);
     renderMSSubsteps(cycleData);
     renderTrendChart(cycleData);
+    renderTimeline(timelineData);
     renderCumulativeChart(throughputData);
 }
 

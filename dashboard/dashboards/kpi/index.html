@@ -109,6 +109,7 @@
                     <div class="oee-formula mono">
                         <span id="formula-a">--</span> x <span id="formula-p">--</span> x <span id="formula-q">--</span> = <span id="formula-oee">--</span>
                     </div>
+                    <p class="oee-context-note" id="oee-context-note" style="display:none">Demo mode — OEE reflects simulated cycle with pauses</p>
                 </div>
             </div>
 
@@ -239,6 +240,23 @@
                 <div class="card-body">
                     <div class="chart-container">
                         <canvas id="trend-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Timeline (moved from Cockpit, collapsible) -->
+        <div class="card glass mb-18">
+            <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title">Production Timeline</h2>
+                    <span class="card-subtitle">Gantt view of station activity per run</span>
+                </div>
+            </div>
+            <div class="collapsible-body">
+                <div class="card-body">
+                    <div class="chart-container timeline-chart-size">
+                        <canvas id="chart-timeline"></canvas>
                     </div>
                 </div>
             </div>

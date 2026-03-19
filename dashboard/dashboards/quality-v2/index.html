@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Dashboard v2 — Interactive Drill-Down</title>
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/quality-v2/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#lg)"/>
+                        <path d="M8 16h4l3-6 4 12 3-6h4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#007AFF"/><stop offset="1" stop-color="#5856D6"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Quality Dashboard</h1>
+                    <p class="dash-subtitle">Interactive Drill-Down Analysis</p>
+                </div>
+            </div>
+            <nav class="dash-nav">
+                <a href="/twin">Twin</a>
+                <a href="/quality" class="active">Quality</a>
+                <a href="/kpi">KPI</a>
+                <a href="/cockpit">Cockpit</a>
+            </nav>
+            <div class="dash-header-right">
+                <span class="last-updated-indicator mono" id="last-updated">--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Pills -->
+        <div class="kpi-pills">
+            <div class="kpi-pill glass" id="pill-yield">
+                <span class="kpi-pill-value mono" id="kpi-yield">--</span>
+                <span class="kpi-pill-label">Yield</span>
+            </div>
+            <div class="kpi-pill glass" id="pill-runs">
+                <span class="kpi-pill-value mono" id="kpi-runs">--</span>
+                <span class="kpi-pill-label">Total Runs</span>
+            </div>
+            <div class="kpi-pill glass" id="pill-chamber">
+                <span class="kpi-pill-value mono" id="kpi-chamber">--</span>
+                <span class="kpi-pill-label">Avg Chamber Time</span>
+            </div>
+            <div class="kpi-pill glass" id="pill-grade-a">
+                <span class="kpi-pill-value mono grade-a-accent" id="kpi-grade-a">--</span>
+                <span class="kpi-pill-label">Grade A</span>
+            </div>
+        </div>
+
+        <!-- Main: Donut + Histogram (always visible) -->
+        <div class="main-charts">
+            <div class="card glass donut-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Quality Yield</h2>
+                        <p class="card-subtitle">Grade distribution by color sensor</p>
+                    </div>
+                </div>
+                <div class="card-body donut-body">
+                    <div class="donut-wrap">
+                        <div class="donut-canvas-wrap">
+                            <canvas id="chart-donut"></canvas>
+                        </div>
+                        <div class="donut-center">
+                            <span class="donut-pct mono" id="donut-pct">--</span>
+                            <span class="donut-sub">Grade A</span>
+                        </div>
+                    </div>
+                    <div class="donut-legend" id="donut-legend"></div>
+                </div>
+            </div>
+            <div class="card glass hist-card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Sensor Distribution</h2>
+                        <p class="card-subtitle">Color sensor value histogram with grade boundaries</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="chart-histogram"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expandable Section 1: Run Details -->
+        <div class="expandable-section" id="section-runs">
+            <div class="expandable-header glass" onclick="toggleSection('section-runs')">
+                <div class="expandable-header-left">
+                    <span class="expandable-arrow">&#9656;</span>
+                    <div>
+                        <h2 class="expandable-title">Run Details</h2>
+                        <p class="expandable-subtitle">Traceability log for every production run</p>
+                    </div>
+                </div>
+                <span class="expandable-badge mono" id="run-count-badge">--</span>
+            </div>
+            <div class="expandable-body">
+                <div class="card glass expandable-card">
+                    <div class="card-body table-body">
+                        <div class="table-scroll" id="table-scroll">
+                            <table class="data-table" id="trace-table">
+                                <thead>
+                                    <tr>
+                                        <th>Run</th>
+                                        <th>Chamber Time</th>
+                                        <th>Color Value</th>
+                                        <th>Grade</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trace-tbody"></tbody>
+                            </table>
+                        </div>
+                        <button class="show-more-btn" id="table-show-more" style="display:none">Show all records</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expandable Section 2: Timing Analysis -->
+        <div class="expandable-section" id="section-timing">
+            <div class="expandable-header glass" onclick="toggleSection('section-timing')">
+                <div class="expandable-header-left">
+                    <span class="expandable-arrow">&#9656;</span>
+                    <div>
+                        <h2 class="expandable-title">Timing Analysis</h2>
+                        <p class="expandable-subtitle">Chamber burn time grouped by quality grade</p>
+                    </div>
+                </div>
+                <span class="expandable-badge mono" id="timing-badge">--</span>
+            </div>
+            <div class="expandable-body">
+                <div class="card glass expandable-card">
+                    <div class="card-body">
+                        <div class="chart-container timing-chart-height">
+                            <canvas id="chart-timing"></canvas>
+                        </div>
+                        <div class="timing-stats" id="timing-stats"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expandable Section 3: About This Data -->
+        <div class="expandable-section" id="section-about">
+            <div class="expandable-header glass" onclick="toggleSection('section-about')">
+                <div class="expandable-header-left">
+                    <span class="expandable-arrow">&#9656;</span>
+                    <div>
+                        <h2 class="expandable-title">About This Data</h2>
+                        <p class="expandable-subtitle">What is measured vs estimated, data sources</p>
+                    </div>
+                </div>
+            </div>
+            <div class="expandable-body">
+                <div class="card glass expandable-card">
+                    <div class="card-body about-body">
+                        <div class="about-grid">
+                            <div class="about-column">
+                                <h3 class="about-heading measured-heading">Measured (Real Sensors)</h3>
+                                <ul class="about-list">
+                                    <li class="about-item">
+                                        <span class="about-dot measured-dot"></span>
+                                        <div>
+                                            <strong>Color Sensor Value</strong>
+                                            <p>Read from <code>iColorSensor_SL</code> at the Sorting Line station. Integer value 0-300.</p>
+                                        </div>
+                                    </li>
+                                    <li class="about-item">
+                                        <span class="about-dot measured-dot"></span>
+                                        <div>
+                                            <strong>Quality Grade (A/B/C)</strong>
+                                            <p>Derived directly from color sensor ranges: A = 250-300, B = 130-190, C = 40-60.</p>
+                                        </div>
+                                    </li>
+                                    <li class="about-item">
+                                        <span class="about-dot measured-dot"></span>
+                                        <div>
+                                            <strong>Chamber Burn Time</strong>
+                                            <p>Duration between <code>bLamp_MS = True</code> and <code>bLamp_MS = False</code>. Timed from actuator events.</p>
+                                        </div>
+                                    </li>
+                                    <li class="about-item">
+                                        <span class="about-dot measured-dot"></span>
+                                        <div>
+                                            <strong>Run Count / Timestamps</strong>
+                                            <p>Each run starts when <code>bMotor_HBW_StackerCrane_torack</code> fires. Timestamps from CSV event log.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="about-column">
+                                <h3 class="about-heading estimated-heading">Not Available</h3>
+                                <ul class="about-list">
+                                    <li class="about-item">
+                                        <span class="about-dot estimated-dot"></span>
+                                        <div>
+                                            <strong>Temperature</strong>
+                                            <p>No temperature sensor on the Fischertechnik oven. Any temperature shown elsewhere uses Newton's heating law model (estimated).</p>
+                                        </div>
+                                    </li>
+                                    <li class="about-item">
+                                        <span class="about-dot estimated-dot"></span>
+                                        <div>
+                                            <strong>Capacity / Throughput Limit</strong>
+                                            <p>Theoretical max throughput is calculated from ideal cycle times, not from actual machine capacity specifications.</p>
+                                        </div>
+                                    </li>
+                                    <li class="about-item">
+                                        <span class="about-dot estimated-dot"></span>
+                                        <div>
+                                            <strong>Failure Causes</strong>
+                                            <p>The system has no failure detection. Grade C is not a "failure" - it is a valid sorting outcome based on workpiece color.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="about-source">
+                            <span class="about-source-label">Data Source</span>
+                            <span class="about-source-value mono" id="about-source">Simulated CSV replay via /api/analytics/*</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/dashboards/quality-v2/app.js"></script>
+</body>
+</html>

@@ -236,6 +236,7 @@ class WorkpieceManager {
 
 let stationStates    = {};
 let cachedCycleTimes = {};
+let lastSuccessfulFetch = 0;
 let lastColorValue   = null;
 let lastColorName    = null;
 let lastColorCSS     = null;
@@ -1152,6 +1153,7 @@ async function update() {
     const data = await fetchData();
     if (!data) return;
 
+    lastSuccessfulFetch = Date.now();
     latestData = data;
 
     // Derive station states
@@ -1171,6 +1173,27 @@ async function update() {
 
     // Update KPIs
     updateKPIs(data);
+}
+
+// ============================================================
+//  STALENESS INDICATOR
+// ============================================================
+
+function updateLastUpdatedIndicator() {
+    const el = document.getElementById('last-updated');
+    if (!el) return;
+    if (lastSuccessfulFetch === 0) {
+        el.textContent = 'Last updated: --';
+        el.classList.remove('stale');
+        return;
+    }
+    const secsAgo = Math.round((Date.now() - lastSuccessfulFetch) / 1000);
+    el.textContent = 'Updated ' + secsAgo + 's ago';
+    if (secsAgo > 30) {
+        el.classList.add('stale');
+    } else {
+        el.classList.remove('stale');
+    }
 }
 
 // ============================================================
@@ -1201,6 +1224,9 @@ function init() {
         updateAnalyticsKPIs();
         refreshCycleTimes();
     }, 5000);
+
+    // Staleness indicator (updates every second)
+    setInterval(updateLastUpdatedIndicator, 1000);
 
     // Initial data fetch
     update();

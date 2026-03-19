@@ -10,13 +10,13 @@ const STATION_COLORS = {
 };
 const STATION_NAMES = {
     HBW: 'Cell Storage', Crane: 'Cell Handler', MS: 'Testing Station',
-    PM: 'Marking Station', SL: 'Quality Classification'
+    PM: 'Capacity Test', SL: 'Quality Classification'
 };
 const STATION_ORDER = ['HBW', 'Crane', 'MS', 'PM', 'SL'];
 
-let timelineChart = null;
 let pollTimer = null;
 let analyticsData = {};
+let lastSuccessfulFetch = 0;
 
 // ============================================
 //  Theme
@@ -115,22 +115,7 @@ function isDark() {
 }
 
 function updateChartTheme() {
-    if (!timelineChart) return;
-    const dark = isDark();
-    const tickColor = dark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.30)';
-    const gridColor = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
-    const tooltipBg = dark ? 'rgba(20,20,30,0.92)' : 'rgba(255,255,255,0.95)';
-    const tooltipBorder = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-    const tooltipText = dark ? '#fff' : '#000';
-
-    timelineChart.options.scales.x.ticks.color = tickColor;
-    timelineChart.options.scales.x.grid.color = gridColor;
-    timelineChart.options.scales.y.ticks.color = tickColor;
-    timelineChart.options.plugins.tooltip.backgroundColor = tooltipBg;
-    timelineChart.options.plugins.tooltip.borderColor = tooltipBorder;
-    timelineChart.options.plugins.tooltip.titleColor = tooltipText;
-    timelineChart.options.plugins.tooltip.bodyColor = tooltipText;
-    timelineChart.update('none');
+    // No charts remain on cockpit page (timeline moved to KPI)
 }
 
 // ============================================
@@ -141,27 +126,25 @@ async function init() {
     initSettings();
     await loadAnalytics();
     startPolling();
+    setInterval(updateLastUpdatedIndicator, 1000);
 }
 
 async function loadAnalytics() {
     try {
-        const [summaryRes, alertsRes, timelineRes, cycleRes] = await Promise.all([
+        const [summaryRes, alertsRes, cycleRes] = await Promise.all([
             fetch('/api/analytics/summary'),
             fetch('/api/analytics/alerts'),
-            fetch('/api/analytics/timeline'),
             fetch('/api/analytics/cycle-times'),
         ]);
 
         const summary = await summaryRes.json();
         const alerts = await alertsRes.json();
-        const timeline = await timelineRes.json();
         const cycleTimes = await cycleRes.json();
 
-        analyticsData = { summary, alerts, timeline, cycleTimes };
+        analyticsData = { summary, alerts, cycleTimes };
 
         renderSQCDP(summary);
         renderAlerts(alerts);
-        renderTimeline(timeline);
         renderCycleTimes(cycleTimes);
         renderShiftSummary(summary, alerts, cycleTimes);
     } catch (e) {
@@ -222,6 +205,8 @@ function setSQCDP(letter, value, colorClass) {
 //  Alert Log
 // ============================================
 
+let alertsExpanded = false;
+
 function renderAlerts(alerts) {
     const list = document.getElementById('alert-list');
     const countEl = document.getElementById('alert-count');
@@ -235,15 +220,15 @@ function renderAlerts(alerts) {
         return (b.run || 0) - (a.run || 0);
     });
 
-    const display = sorted.slice(0, 20);
+    const display = alertsExpanded ? sorted : sorted.slice(0, 3);
     countEl.textContent = alerts.length + ' total';
 
-    if (display.length === 0) {
+    if (sorted.length === 0) {
         list.innerHTML = '<div class="alert-empty">No alerts detected</div>';
         return;
     }
 
-    list.innerHTML = display.map(a => {
+    let html = display.map(a => {
         const stationColor = STATION_COLORS[a.station] || '#5AC8FA';
         const sevClass = a.severity || 'info';
         const runText = a.run ? 'Run #' + a.run : '';
@@ -257,128 +242,17 @@ function renderAlerts(alerts) {
             </div>
         </div>`;
     }).join('');
+
+    if (!alertsExpanded && sorted.length > 3) {
+        html += `<button class="show-more-btn" onclick="expandAlerts()">Show all ${sorted.length} alerts</button>`;
+    }
+
+    list.innerHTML = html;
 }
 
-// ============================================
-//  Production Timeline (Gantt Chart)
-// ============================================
-
-function renderTimeline(timeline) {
-    if (!timeline || timeline.length === 0) return;
-
-    // Find the earliest timestamp to compute offsets
-    let minTs = Infinity;
-    for (const entry of timeline) {
-        const ts = new Date(entry.start).getTime();
-        if (ts < minTs) minTs = ts;
-    }
-
-    // Group by run, build datasets per station
-    const runMap = {};
-    for (const entry of timeline) {
-        const runKey = entry.run;
-        if (!runMap[runKey]) runMap[runKey] = {};
-        const startOff = (new Date(entry.start).getTime() - minTs) / 1000;
-        const endOff = (new Date(entry.end).getTime() - minTs) / 1000;
-        runMap[runKey][entry.station] = [startOff, endOff];
-    }
-
-    const runs = Object.keys(runMap).map(Number).sort((a, b) => a - b);
-    const datasets = [];
-
-    for (const run of runs) {
-        const runData = runMap[run];
-        const opacity = 0.55 + (run % 3) * 0.15;
-
-        for (const station of STATION_ORDER) {
-            if (!runData[station]) continue;
-            const [start, end] = runData[station];
-            const color = STATION_COLORS[station];
-            const rgbaFill = hexToRgba(color, opacity);
-            const rgbaBorder = hexToRgba(color, Math.min(opacity + 0.3, 1.0));
-
-            datasets.push({
-                label: station + ' #' + run,
-                data: STATION_ORDER.map(s => s === station ? [start, end] : null),
-                backgroundColor: rgbaFill,
-                borderColor: rgbaBorder,
-                borderWidth: 1,
-                borderRadius: 3,
-                borderSkipped: false,
-                barPercentage: 0.7,
-                categoryPercentage: 0.85,
-            });
-        }
-    }
-
-    const ctx = document.getElementById('chart-timeline').getContext('2d');
-    const dark = isDark();
-
-    timelineChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: STATION_ORDER,
-            datasets: datasets,
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 300 },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: dark ? 'rgba(20,20,30,0.92)' : 'rgba(255,255,255,0.95)',
-                    titleFont: { family: 'Inter', weight: '600', size: 12 },
-                    bodyFont: { family: "'SF Mono', monospace", size: 11 },
-                    titleColor: dark ? '#fff' : '#000',
-                    bodyColor: dark ? '#fff' : '#000',
-                    padding: 10,
-                    cornerRadius: 8,
-                    borderColor: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-                    borderWidth: 1,
-                    callbacks: {
-                        title: function(items) {
-                            if (!items.length) return '';
-                            return items[0].dataset.label;
-                        },
-                        label: function(ctx) {
-                            const val = ctx.raw;
-                            if (!val) return '';
-                            return 'Time: ' + val[0].toFixed(1) + 's - ' + val[1].toFixed(1) + 's (' + (val[1] - val[0]).toFixed(1) + 's)';
-                        },
-                    },
-                },
-            },
-            scales: {
-                x: {
-                    type: 'linear',
-                    title: {
-                        display: true,
-                        text: 'Time (seconds)',
-                        font: { family: 'Inter', size: 11, weight: '500' },
-                        color: dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-                    },
-                    grid: {
-                        color: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
-                        drawBorder: false,
-                    },
-                    ticks: {
-                        color: dark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.30)',
-                        font: { family: "'SF Mono', monospace", size: 10 },
-                        callback: function(val) { return val + 's'; },
-                    },
-                },
-                y: {
-                    grid: { display: false },
-                    ticks: {
-                        color: dark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.30)',
-                        font: { family: 'Inter', size: 11, weight: '600' },
-                    },
-                },
-            },
-        },
-    });
+function expandAlerts() {
+    alertsExpanded = true;
+    if (analyticsData.alerts) renderAlerts(analyticsData.alerts);
 }
 
 // ============================================
@@ -469,7 +343,9 @@ async function pollOnce() {
     try {
         const res = await fetch('/api/data');
         const json = await res.json();
+        lastSuccessfulFetch = Date.now();
         updateStationStatus(json.data || {});
+        updateHealthBanner(json.data || {});
     } catch (e) {
         // Set all stations to idle on error
         for (const station of STATION_ORDER) {
@@ -477,6 +353,38 @@ async function pollOnce() {
         }
     }
     pollTimer = setTimeout(pollOnce, 2000);
+}
+
+function updateHealthBanner(data) {
+    const banner = document.getElementById('health-banner');
+    const dot = document.getElementById('health-dot');
+    const text = document.getElementById('health-text');
+    if (!banner || !text) return;
+
+    let anyActive = false;
+    for (const station of STATION_ORDER) {
+        const stationData = data[station];
+        if (stationData) {
+            for (const [groupName, vars] of Object.entries(stationData)) {
+                for (const [label, value] of Object.entries(vars)) {
+                    if (typeof value === 'boolean' && value === true) {
+                        if (/motor|valve|lamp|compressor/i.test(label)) {
+                            anyActive = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    banner.classList.remove('running', 'idle', 'alert');
+    if (anyActive) {
+        banner.classList.add('running');
+        text.textContent = 'Line Running';
+    } else {
+        banner.classList.add('idle');
+        text.textContent = 'Line Idle';
+    }
 }
 
 function updateStationStatus(data) {
@@ -514,6 +422,27 @@ function setStationLight(station, active) {
         light.className = 'traffic-light grey';
         stateEl.textContent = 'Idle';
         stateEl.classList.remove('active-text');
+    }
+}
+
+// ============================================
+//  Staleness Indicator
+// ============================================
+
+function updateLastUpdatedIndicator() {
+    const el = document.getElementById('last-updated');
+    if (!el) return;
+    if (lastSuccessfulFetch === 0) {
+        el.textContent = 'Last updated: --';
+        el.classList.remove('stale');
+        return;
+    }
+    const secsAgo = Math.round((Date.now() - lastSuccessfulFetch) / 1000);
+    el.textContent = 'Updated ' + secsAgo + 's ago';
+    if (secsAgo > 30) {
+        el.classList.add('stale');
+    } else {
+        el.classList.remove('stale');
     }
 }
 

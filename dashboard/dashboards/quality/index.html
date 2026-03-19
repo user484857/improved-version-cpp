@@ -102,31 +102,35 @@
             </div>
         </div>
 
-        <!-- Row 3: Temp Curve + Scatter -->
+        <!-- Row 3: Temp Curve + Scatter (collapsible) -->
         <div class="grid-2 mb-18">
             <div class="card glass">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
                     <div>
-                        <h2 class="card-title">Temperature Curves</h2>
-                        <p class="card-subtitle">Last 5 runs overlaid</p>
+                        <h2 class="card-title">Temperature Curves (Estimated Model)</h2>
+                        <p class="card-subtitle">Based on Newton's law cooling model — no real temperature sensor</p>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="chart-temp"></canvas>
+                <div class="collapsible-body">
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chart-temp"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="card glass">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
                     <div>
                         <h2 class="card-title">Chamber Time vs Grade</h2>
                         <p class="card-subtitle">Scatter plot with grade regions</p>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="chart-scatter"></canvas>
+                <div class="collapsible-body">
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="chart-scatter"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -140,10 +144,7 @@
                         <h2 class="card-title">Statistical Process Control</h2>
                         <p class="card-subtitle">Process capability indices</p>
                     </div>
-                    <div class="spc-param-selector">
-                        <button class="param-btn active" data-param="burn_time">Burn Time</button>
-                        <button class="param-btn" data-param="color_sensor_value">Color Sensor</button>
-                    </div>
+                    <span class="card-subtitle mono">Burn Time</span>
                 </div>
                 <div class="card-body">
                     <div class="spc-metrics-row">
@@ -172,12 +173,13 @@
                 </div>
             </div>
             <div class="card glass drift-card">
-                <div class="card-header">
+                <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
                     <div>
                         <h2 class="card-title">Process Drift Detection</h2>
                         <p class="card-subtitle">First half vs second half comparison</p>
                     </div>
                 </div>
+                <div class="collapsible-body">
                 <div class="card-body">
                     <div class="drift-params">
                         <div class="drift-param-block" id="drift-burn-time">
@@ -207,24 +209,12 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
 
-        <!-- Row 5: Cycle-Life + Table -->
-        <div class="row-cycle-table">
-            <div class="card glass cycle-card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">Simulated Cycle Life</h2>
-                        <p class="card-subtitle">Expected battery lifespan by grade</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container cycle-chart-size">
-                        <canvas id="chart-cycle"></canvas>
-                    </div>
-                </div>
-            </div>
+        <!-- Row 5: Traceability Table -->
+        <div class="mb-18">
             <div class="card glass table-card">
                 <div class="card-header">
                     <div>

@@ -53,6 +53,74 @@ def dashboard_cockpit():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit"), "index.html")
 
 
+
+@app.route("/cockpit-v1")
+def dashboard_cockpit_v1():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-v1"), "index.html")
+
+@app.route("/cockpit-v2")
+def dashboard_cockpit_v2():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-v2"), "index.html")
+
+@app.route("/cockpit-v3")
+def dashboard_cockpit_v3():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-v3"), "index.html")
+
+@app.route("/cockpit-r2a")
+def dashboard_cockpit_r2a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-r2a"), "index.html")
+
+
+@app.route("/kpi-r2a")
+def dashboard_kpi_r2a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-r2a"), "index.html")
+
+@app.route("/kpi-v1")
+def dashboard_kpi_v1():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-v1"), "index.html")
+
+@app.route("/kpi-v2")
+def dashboard_kpi_v2():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-v2"), "index.html")
+
+@app.route("/kpi-v3")
+def dashboard_kpi_v3():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-v3"), "index.html")
+
+
+@app.route("/quality-v1")
+def dashboard_quality_v1():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-v1"), "index.html")
+
+@app.route("/quality-v2")
+def dashboard_quality_v2():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-v2"), "index.html")
+
+@app.route("/quality-v3")
+def dashboard_quality_v3():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-v3"), "index.html")
+
+@app.route("/quality-r2a")
+def dashboard_quality_r2a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-r2a"), "index.html")
+
+
+@app.route("/twin-v1")
+def dashboard_twin_v1():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-v1"), "index.html")
+
+@app.route("/twin-v2")
+def dashboard_twin_v2():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-v2"), "index.html")
+
+@app.route("/twin-v3")
+def dashboard_twin_v3():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-v3"), "index.html")
+
+@app.route("/twin-r2a")
+def dashboard_twin_r2a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-r2a"), "index.html")
+
 @app.route("/dashboards/<path:path>")
 def dashboard_files(path):
     return send_from_directory(DASHBOARD_DIR, path)

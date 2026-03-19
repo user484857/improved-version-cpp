@@ -9,7 +9,7 @@
 .twin-header,
 .legend-item,
 .station-tooltip {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .mono,
@@ -89,14 +89,14 @@
 
 /* ---- SVG Text Styles ---- */
 .station-label {
-    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.04em;
 }
 
 .station-sublabel {
-    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 9px;
     font-weight: 500;
     fill: var(--text-tertiary);
@@ -104,7 +104,7 @@
 }
 
 .component-label {
-    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: 8px;
     font-weight: 500;
     fill: var(--text-tertiary);

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI R2A — Production Efficiency Gap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/kpi-r2a/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#lg-r2a)"/>
+                        <path d="M8 22V10l4 4 4-8 4 8 4-4v12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <defs><linearGradient id="lg-r2a" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#FF453A"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Production Efficiency</h1>
+                    <p class="dash-subtitle">Timing gap analysis with improvement potential</p>
+                </div>
+            </div>
+            <nav class="dash-nav">
+                <a href="/twin">Twin</a>
+                <a href="/quality">Quality</a>
+                <a href="/kpi" class="active">KPI</a>
+                <a href="/cockpit">Cockpit</a>
+            </nav>
+            <div class="dash-header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- HERO: Production Efficiency Gap Banner -->
+        <section class="hero-banner glass" id="hero-banner">
+            <div class="hero-inner">
+                <div class="hero-left">
+                    <span class="hero-label">Production Efficiency Gap</span>
+                    <span class="hero-desc">Total time lost across all stations vs. theoretical optimum</span>
+                </div>
+                <div class="hero-right">
+                    <span class="hero-value mono" id="hero-gap-value">--</span>
+                    <span class="hero-unit">%</span>
+                </div>
+            </div>
+            <div class="hero-bar-track">
+                <div class="hero-bar-efficient" id="hero-bar-eff"></div>
+                <div class="hero-bar-gap" id="hero-bar-gap"></div>
+            </div>
+            <div class="hero-bar-labels">
+                <span class="hero-label-eff mono" id="hero-label-eff">Efficient: --%</span>
+                <span class="hero-label-gap mono" id="hero-label-gap">Gap: --%</span>
+            </div>
+            <div class="hero-totals">
+                <span class="hero-total-item mono" id="hero-actual-total">Actual: --s</span>
+                <span class="hero-total-sep">/</span>
+                <span class="hero-total-item mono" id="hero-target-total">Target: --s</span>
+                <span class="hero-total-sep">/</span>
+                <span class="hero-total-item hero-total-excess mono" id="hero-excess-total">Excess: --s</span>
+            </div>
+        </section>
+
+        <!-- ROW 1: Stacked Comparison Bars -->
+        <section class="card glass mb-18" id="stacked-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Cycle Time Comparison</h2>
+                    <span class="card-subtitle">All 5 stations stacked — actual vs. theoretical</span>
+                </div>
+                <span class="card-subtitle mono" id="stacked-runs-label">-- runs</span>
+            </div>
+            <div class="card-body">
+                <div class="stacked-container">
+                    <!-- Actual bar -->
+                    <div class="stacked-row">
+                        <span class="stacked-label">Actual</span>
+                        <div class="stacked-bar-track" id="stacked-actual-track"></div>
+                        <span class="stacked-total mono" id="stacked-actual-total">--s</span>
+                    </div>
+                    <!-- Target bar -->
+                    <div class="stacked-row">
+                        <span class="stacked-label">Target</span>
+                        <div class="stacked-bar-track" id="stacked-target-track"></div>
+                        <span class="stacked-total mono" id="stacked-target-total">--s</span>
+                    </div>
+                    <!-- Legend -->
+                    <div class="stacked-legend" id="stacked-legend"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROW 2: Per-Station Timing Cards -->
+        <section class="station-cards-grid" id="station-cards-grid">
+            <!-- Populated by JS -->
+        </section>
+
+        <!-- ROW 3: What-If Optimizer (collapsible) -->
+        <section class="card glass mb-18">
+            <div class="card-header collapsible-header expanded" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title">What-If Optimizer</h2>
+                    <span class="card-subtitle">Drag sliders to see improvement potential</span>
+                </div>
+            </div>
+            <div class="collapsible-body expanded">
+                <div class="card-body">
+                    <div class="whatif-container" id="whatif-container">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="whatif-result glass" id="whatif-result">
+                        <div class="whatif-result-inner">
+                            <span class="whatif-result-label">Projected cycle time</span>
+                            <span class="whatif-result-value mono" id="whatif-projected">--s</span>
+                        </div>
+                        <div class="whatif-result-bar-track" id="whatif-result-bar">
+                            <div class="whatif-result-bar-current" id="whatif-bar-current"></div>
+                            <div class="whatif-result-bar-projected" id="whatif-bar-projected"></div>
+                        </div>
+                        <div class="whatif-savings" id="whatif-savings">
+                            <!-- Savings summary populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROW 4: Waterfall Chart (collapsible) -->
+        <section class="card glass mb-18">
+            <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title">Time Loss Waterfall</h2>
+                    <span class="card-subtitle">Where time is lost, station by station</span>
+                </div>
+                <span class="card-subtitle mono" id="waterfall-total">Total excess: --s</span>
+            </div>
+            <div class="collapsible-body">
+                <div class="card-body">
+                    <div class="chart-container waterfall-chart-size">
+                        <canvas id="waterfall-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-note glass">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="opacity:0.4;flex-shrink:0"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            <span>Configured targets — not measured baselines. Actual improvement potential may vary based on process constraints.</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/kpi-r2a/app.js"></script>
+</body>
+</html>

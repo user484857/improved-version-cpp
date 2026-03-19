@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cockpit R2A — Andon Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/cockpit-r2a/style.css">
+</head>
+<body>
+    <div class="andon">
+
+        <!-- HEALTH BANNER -->
+        <header class="health-banner" id="health-banner">
+            <div class="health-pulse" id="health-pulse"></div>
+            <span class="health-text" id="health-text">CONNECTING</span>
+        </header>
+
+        <!-- PROCESS FLOW — 7 steps in correct order -->
+        <section class="process-flow">
+
+            <!-- 1. HBW -->
+            <div class="step-card" id="step-HBW" data-station="HBW">
+                <div class="step-ring">
+                    <div class="step-circle idle" id="circle-HBW">
+                        <div class="workpiece-dot" id="wp-HBW"></div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-HBW" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">HBW</span>
+                <span class="step-sub" id="sub-HBW">Rack Storage</span>
+                <!-- HBW rack dots -->
+                <div class="rack-grid" id="rack-grid">
+                    <div class="rack-dot" data-slot="0"></div>
+                    <div class="rack-dot" data-slot="1"></div>
+                    <div class="rack-dot" data-slot="2"></div>
+                    <div class="rack-dot" data-slot="3"></div>
+                    <div class="rack-dot" data-slot="4"></div>
+                    <div class="rack-dot" data-slot="5"></div>
+                    <div class="rack-dot" data-slot="6"></div>
+                    <div class="rack-dot" data-slot="7"></div>
+                    <div class="rack-dot" data-slot="8"></div>
+                </div>
+            </div>
+
+            <div class="flow-arrow"><span></span></div>
+
+            <!-- 2. Crane (to oven) -->
+            <div class="step-card" id="step-Crane1" data-station="Crane">
+                <div class="step-ring">
+                    <div class="step-circle idle" id="circle-Crane1">
+                        <div class="workpiece-dot" id="wp-Crane1"></div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-Crane1" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">Crane</span>
+                <span class="step-sub" id="sub-Crane1">To Oven</span>
+            </div>
+
+            <div class="flow-arrow"><span></span></div>
+
+            <!-- 3. Oven (burn) -->
+            <div class="step-card" id="step-Oven" data-station="MS">
+                <div class="step-ring oven-ring" id="oven-ring-wrapper">
+                    <div class="step-circle idle" id="circle-Oven">
+                        <div class="workpiece-dot" id="wp-Oven"></div>
+                        <div class="oven-icon" id="oven-icon">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2c0 3-2 5-2 8s2 5 2 8"/>
+                                <path d="M8 6c0 2-1.5 3.5-1.5 5.5S8 15 8 17"/>
+                                <path d="M16 6c0 2-1.5 3.5-1.5 5.5S16 15 16 17"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-Oven" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">Oven</span>
+                <span class="step-sub" id="sub-Oven">Burn</span>
+            </div>
+
+            <div class="flow-arrow"><span></span></div>
+
+            <!-- 4. Color Sensor -->
+            <div class="step-card" id="step-Color" data-station="SL">
+                <div class="step-ring">
+                    <div class="step-circle idle" id="circle-Color">
+                        <div class="workpiece-dot color-reveal" id="wp-Color"></div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-Color" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">Color</span>
+                <span class="step-sub" id="sub-Color">Measurement</span>
+            </div>
+
+            <div class="flow-arrow"><span></span></div>
+
+            <!-- 5. Sorting -->
+            <div class="step-card" id="step-Sort" data-station="SL">
+                <div class="step-ring">
+                    <div class="step-circle idle" id="circle-Sort">
+                        <div class="workpiece-dot" id="wp-Sort"></div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-Sort" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">Sort</span>
+                <span class="step-sub" id="sub-Sort">By Color</span>
+                <!-- Sorting bins -->
+                <div class="sort-bins" id="sort-bins">
+                    <div class="bin-col" id="bin-white">
+                        <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                        <span class="bin-label">W</span>
+                    </div>
+                    <div class="bin-col" id="bin-red">
+                        <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                        <span class="bin-label">R</span>
+                    </div>
+                    <div class="bin-col" id="bin-blue">
+                        <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                        <span class="bin-label">B</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow"><span></span></div>
+
+            <!-- 6. Crane (back to rack) -->
+            <div class="step-card" id="step-Crane2" data-station="Crane">
+                <div class="step-ring">
+                    <div class="step-circle idle" id="circle-Crane2">
+                        <div class="workpiece-dot" id="wp-Crane2"></div>
+                    </div>
+                    <svg class="traffic-ring" viewBox="0 0 120 120">
+                        <circle class="ring-track" cx="60" cy="60" r="56"/>
+                        <circle class="ring-fill" id="ring-Crane2" cx="60" cy="60" r="56"/>
+                    </svg>
+                </div>
+                <span class="step-label">Crane</span>
+                <span class="step-sub" id="sub-Crane2">To Rack</span>
+            </div>
+
+        </section>
+
+        <!-- BOTTOM ROW: Production progress + Alerts -->
+        <section class="info-row">
+
+            <!-- Production Today -->
+            <div class="info-block" id="block-production">
+                <div class="production-header">
+                    <span class="info-title">Produced Today</span>
+                    <span class="production-count" id="prod-count">0 / 9</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="prod-fill" style="width:0%"></div>
+                </div>
+                <div class="production-grades" id="prod-grades"></div>
+            </div>
+
+            <!-- Cycle Time -->
+            <div class="info-block" id="block-cycle">
+                <span class="info-title">Last Cycle</span>
+                <span class="cycle-value" id="cycle-value">--</span>
+                <span class="cycle-avg" id="cycle-avg">avg --</span>
+            </div>
+
+            <!-- Alert Toggle -->
+            <button class="alert-badge" id="alert-badge" onclick="toggleAlerts()">
+                <span class="alert-dot" id="alert-dot"></span>
+                <span class="alert-text" id="alert-text">Loading</span>
+                <span class="alert-chevron" id="alert-chevron">&#9662;</span>
+            </button>
+
+        </section>
+
+        <!-- Alert Drawer -->
+        <div class="alert-drawer" id="alert-drawer">
+            <div class="alert-list" id="alert-list"></div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="andon-footer">
+            <span class="footer-item" id="footer-time">--:--:--</span>
+            <span class="footer-sep"></span>
+            <span class="footer-item" id="footer-mode">Demo</span>
+            <span class="footer-sep"></span>
+            <span class="footer-item" id="footer-updated">--</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/cockpit-r2a/app.js"></script>
+</body>
+</html>
