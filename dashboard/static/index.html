@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,21 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        // Apply saved theme before paint to prevent flash
+        (function() {
+            var t = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", t);
+        })();
+    </script>
 </head>
 <body>
-    <!-- Animated background orbs -->
-    <div class="bg-mesh">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
-
     <div class="app">
         <!-- Header -->
         <header class="header glass">
             <div class="header-left">
                 <div class="logo">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
                         <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
                         <path d="M8 16h4l3-6 4 12 3-6h4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#007AFF"/><stop offset="1" stop-color="#5856D6"/></linearGradient></defs>
@@ -39,7 +39,7 @@
                     <span id="mode-text">DEMO</span>
                     <div class="progress-ring" id="progress-ring">
                         <svg viewBox="0 0 20 20">
-                            <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                            <circle cx="10" cy="10" r="8" fill="none" stroke="var(--separator)" stroke-width="2"/>
                             <circle cx="10" cy="10" r="8" fill="none" stroke="var(--orange)" stroke-width="2"
                                     stroke-dasharray="50.26" stroke-dashoffset="50.26" stroke-linecap="round"
                                     id="progress-circle" transform="rotate(-90 10 10)"/>
@@ -51,6 +51,10 @@
                     <span id="connection-text">Connecting...</span>
                 </div>
                 <span class="timestamp" id="timestamp">--:--:--</span>
+                <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+                    <svg id="icon-sun" viewBox="0 0 20 20" fill="currentColor" style="display:none"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                    <svg id="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
             </div>
         </header>
 

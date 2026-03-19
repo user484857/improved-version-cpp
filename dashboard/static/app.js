@@ -1,20 +1,19 @@
 /**
- * Fischertechnik Factory — Glass Dashboard
- * Fully data-driven: builds station cards from /api/config,
- * polls /api/data for live or demo-replay updates.
+ * Fischertechnik Factory — Professional Glass Dashboard
+ * Data-driven station cards, live polling, dark/light theme.
  */
 
 const POLL_INTERVAL = 400;
 const MAX_HISTORY = 300;
 
-// Station metadata for styling
+// Station metadata
 const STATION_META = {
     MS:    { name: "Machining Station", accent: "#007AFF", icon: "gear" },
     SL:    { name: "Sorting Line",      accent: "#FF9F0A", icon: "sort" },
     Crane: { name: "Crane",             accent: "#30D158", icon: "crane" },
-    HBW:   { name: "High Bay Warehouse",accent: "#BF5AF2", icon: "warehouse" },
+    HBW:   { name: "High Bay Warehouse",accent: "#AF52DE", icon: "warehouse" },
     PM:    { name: "Punching Machine",  accent: "#FF453A", icon: "punch" },
-    State: { name: "Process State",     accent: "#64D2FF", icon: "info" },
+    State: { name: "Process State",     accent: "#5AC8FA", icon: "info" },
 };
 
 const STATION_ICONS = {
@@ -26,19 +25,74 @@ const STATION_ICONS = {
     info: `<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>`,
 };
 
-// --- History for chart ---
+// --- History & chart ---
 const history = { timestamps: [] };
-const TRACKED_SIGNALS = {};  // Will be auto-populated
-
-// --- Chart ---
+const TRACKED_SIGNALS = {};
 let chart = null;
 let varConfig = null;
+
+// ============================================
+//  Theme Toggle
+// ============================================
+
+function getTheme() {
+    return localStorage.getItem("theme") || "dark";
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+    updateThemeIcons(theme);
+    updateChartColors();
+}
+
+function updateThemeIcons(theme) {
+    const sun = document.getElementById("icon-sun");
+    const moon = document.getElementById("icon-moon");
+    if (!sun || !moon) return;
+    if (theme === "dark") {
+        sun.style.display = "none";
+        moon.style.display = "block";
+    } else {
+        sun.style.display = "block";
+        moon.style.display = "none";
+    }
+}
+
+function updateChartColors() {
+    if (!chart) return;
+    const isDark = getTheme() === "dark";
+    const tickColor = isDark ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.30)";
+    const gridColor = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)";
+    const tooltipBg = isDark ? "rgba(20,20,30,0.92)" : "rgba(255,255,255,0.95)";
+    const tooltipBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+    const tooltipText = isDark ? "#fff" : "#000";
+
+    chart.options.scales.x.ticks.color = tickColor;
+    chart.options.scales.y.ticks.color = tickColor;
+    chart.options.scales.y.grid.color = gridColor;
+    chart.options.plugins.tooltip.backgroundColor = tooltipBg;
+    chart.options.plugins.tooltip.borderColor = tooltipBorder;
+    chart.options.plugins.tooltip.titleColor = tooltipText;
+    chart.options.plugins.tooltip.bodyColor = tooltipText;
+    chart.update("none");
+}
 
 // ============================================
 //  Initialization
 // ============================================
 
 async function init() {
+    // Theme toggle
+    const toggle = document.getElementById("theme-toggle");
+    if (toggle) {
+        toggle.addEventListener("click", () => {
+            setTheme(getTheme() === "dark" ? "light" : "dark");
+        });
+    }
+    updateThemeIcons(getTheme());
+
+    // Load config
     try {
         const res = await fetch("/api/config");
         varConfig = await res.json();
@@ -63,24 +117,21 @@ function buildStationCards(config) {
     const grid = document.getElementById("station-grid");
     grid.innerHTML = "";
 
-    // Order stations
     const stationOrder = ["MS", "SL", "Crane", "HBW", "PM", "State"];
     const stations = stationOrder.filter(s => config[s]);
-    // Add any unknown stations
     for (const s of Object.keys(config)) {
         if (!stations.includes(s)) stations.push(s);
     }
 
     for (const station of stations) {
         const groups = config[station];
-        const meta = STATION_META[station] || { name: station, accent: "#64D2FF", icon: "info" };
+        const meta = STATION_META[station] || { name: station, accent: "#5AC8FA", icon: "info" };
+        const isState = station === "State";
 
         const card = document.createElement("div");
         card.className = "station-card glass";
         card.dataset.station = station;
 
-        // Header
-        const isState = station === "State";
         card.innerHTML = `
             <div class="card-header">
                 <div class="station-icon" style="--accent: ${meta.accent}">
@@ -103,8 +154,7 @@ function buildStationCards(config) {
 
         for (const [groupName, vars] of Object.entries(groups)) {
             if (isState) {
-                // State variables rendered as key-value rows
-                for (const [label, varType] of Object.entries(vars)) {
+                for (const [label] of Object.entries(vars)) {
                     const id = makeId(station, label);
                     const div = document.createElement("div");
                     div.className = "state-var";
@@ -123,7 +173,7 @@ function buildStationCards(config) {
                 varGrid.className = "var-grid";
                 varGrid.id = `${groupName}-${station}`;
 
-                for (const [label, varType] of Object.entries(vars)) {
+                for (const [label] of Object.entries(vars)) {
                     const id = makeId(station, label);
                     const div = document.createElement("div");
                     div.className = "var-item";
@@ -141,11 +191,9 @@ function buildStationCards(config) {
             }
         }
 
-        // Add color sensor bar for SL
         if (station === "SL") {
             const colorDiv = document.createElement("div");
             colorDiv.className = "color-sensor-display";
-            colorDiv.id = "color-sensor-display";
             colorDiv.innerHTML = `
                 <span class="section-label">Color Sensor Value</span>
                 <div class="color-bar-track">
@@ -170,11 +218,11 @@ function makeId(station, label) {
 }
 
 // ============================================
-//  Auto-detect interesting signals for chart
+//  Auto-detect tracked signals for chart
 // ============================================
 
 function autoDetectTrackedSignals(config) {
-    const CHART_COLORS = ["#FF9F0A", "#007AFF", "#BF5AF2", "#64D2FF", "#30D158", "#FF375F", "#FF453A"];
+    const CHART_COLORS = ["#FF9F0A", "#007AFF", "#AF52DE", "#5AC8FA", "#30D158", "#FF375F"];
     const interestingPatterns = [
         { pattern: /lamp/i, station: null },
         { pattern: /saw/i, station: null },
@@ -207,12 +255,10 @@ function autoDetectTrackedSignals(config) {
                         break;
                     }
                 }
-                if (TRACKED_SIGNALS[label]) break;
             }
         }
     }
 
-    // Build legend
     const legendEl = document.getElementById("chart-legend");
     legendEl.innerHTML = "";
     for (const [key, sig] of Object.entries(TRACKED_SIGNALS)) {
@@ -224,11 +270,12 @@ function autoDetectTrackedSignals(config) {
 }
 
 // ============================================
-//  Chart.js Setup
+//  Chart.js
 // ============================================
 
 function initChart() {
     const ctx = document.getElementById("timeline-chart").getContext("2d");
+    const isDark = getTheme() === "dark";
 
     chart = new Chart(ctx, {
         type: "line",
@@ -241,12 +288,14 @@ function initChart() {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: "rgba(20, 20, 30, 0.92)",
+                    backgroundColor: isDark ? "rgba(20,20,30,0.92)" : "rgba(255,255,255,0.95)",
                     titleFont: { family: "Inter", weight: "600", size: 12 },
                     bodyFont: { family: "'SF Mono', monospace", size: 11 },
+                    titleColor: isDark ? "#fff" : "#000",
+                    bodyColor: isDark ? "#fff" : "#000",
                     padding: 10,
-                    cornerRadius: 10,
-                    borderColor: "rgba(255,255,255,0.1)",
+                    cornerRadius: 8,
+                    borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
                     borderWidth: 1,
                 },
             },
@@ -255,16 +304,19 @@ function initChart() {
                     display: true,
                     grid: { display: false },
                     ticks: {
-                        color: "rgba(255,255,255,0.25)",
+                        color: isDark ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.30)",
                         font: { family: "'SF Mono', monospace", size: 10 },
                         maxTicksLimit: 8,
                     },
                 },
                 y: {
                     display: true,
-                    grid: { color: "rgba(255,255,255,0.04)", drawBorder: false },
+                    grid: {
+                        color: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                        drawBorder: false,
+                    },
                     ticks: {
-                        color: "rgba(255,255,255,0.25)",
+                        color: isDark ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.30)",
                         font: { family: "'SF Mono', monospace", size: 10 },
                     },
                 },
@@ -272,7 +324,6 @@ function initChart() {
         },
     });
 
-    // Build datasets from tracked signals
     rebuildChartDatasets();
 }
 
@@ -282,8 +333,8 @@ function rebuildChartDatasets() {
         label: key,
         data: [],
         borderColor: sig.color,
-        backgroundColor: sig.color + "20",
-        borderWidth: 2,
+        backgroundColor: sig.color + "18",
+        borderWidth: 1.5,
         pointRadius: 0,
         tension: 0.3,
         fill: false,
@@ -311,38 +362,31 @@ function updateUI(json) {
         hour: "2-digit", minute: "2-digit", second: "2-digit",
     });
 
-    // Connection
     updateConnectionStatus(
         status === "connected" ? "connected" : "disconnected",
         status === "connected" ? "Connected" : "Disconnected"
     );
 
-    // Mode badge
     const modeBadge = document.getElementById("mode-badge");
-    const modeText = document.getElementById("mode-text");
     if (serverMode === "demo") {
         modeBadge.style.display = "flex";
-        modeText.textContent = "DEMO";
-        // Update progress ring
+        document.getElementById("mode-text").textContent = "DEMO";
         const circle = document.getElementById("progress-circle");
-        const circumference = 2 * Math.PI * 8; // r=8
+        const circumference = 2 * Math.PI * 8;
         circle.setAttribute("stroke-dashoffset", circumference * (1 - (progress || 0)));
     } else {
         modeBadge.style.display = "none";
     }
 
     document.getElementById("timestamp").textContent = now;
-
     if (!data || Object.keys(data).length === 0) return;
 
-    // Update all variables
     for (const [station, groups] of Object.entries(data)) {
         let stationHasActivity = false;
 
         for (const [groupName, vars] of Object.entries(groups)) {
             for (const [label, value] of Object.entries(vars)) {
                 const id = makeId(station, label);
-
                 if (station === "State") {
                     updateStateVar(id, label, value);
                 } else {
@@ -351,22 +395,16 @@ function updateUI(json) {
             }
         }
 
-        if (station !== "State") {
-            updateStationStatus(station, stationHasActivity);
-        }
+        if (station !== "State") updateStationStatus(station, stationHasActivity);
     }
 
-    // Color sensor
     updateColorSensor(data);
-
-    // History & chart
     updateHistory(data, now);
 }
 
 function updateConnectionStatus(state, text) {
-    const badge = document.getElementById("connection-badge");
     document.getElementById("connection-text").textContent = text;
-    badge.className = `connection-badge ${state}`;
+    document.getElementById("connection-badge").className = `connection-badge ${state}`;
 }
 
 function updateVarItem(id, value) {
@@ -424,15 +462,11 @@ function updateColorSensor(data) {
     const valEl = document.getElementById("color-value");
     if (!fill || !valEl) return;
 
-    // Find color sensor value in SL sensors
     let colorVal = null;
     const slSensors = data?.SL?.sensors;
     if (slSensors) {
         for (const [label, val] of Object.entries(slSensors)) {
-            if (/color.?sensor/i.test(label)) {
-                colorVal = val;
-                break;
-            }
+            if (/color.?sensor/i.test(label)) { colorVal = val; break; }
         }
     }
     if (colorVal == null) return;
@@ -466,10 +500,8 @@ function updateHistory(data, timestamp) {
         if (history[key].length > MAX_HISTORY) history[key].shift();
     }
 
-    // Update chart
     chart.data.labels = [...history.timestamps];
-    const keys = Object.keys(TRACKED_SIGNALS);
-    keys.forEach((key, i) => {
+    Object.keys(TRACKED_SIGNALS).forEach((key, i) => {
         if (chart.data.datasets[i]) {
             chart.data.datasets[i].data = [...history[key]];
         }
