@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fischertechnik Factory</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Animated background orbs -->
+    <div class="bg-mesh">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app">
+        <!-- Header -->
+        <header class="header glass">
+            <div class="header-left">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
+                        <path d="M8 16h4l3-6 4 12 3-6h4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#007AFF"/><stop offset="1" stop-color="#5856D6"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="header-title">Fischertechnik Factory</h1>
+                    <p class="header-subtitle">Smart Factory Live Monitor</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="connection-badge" id="connection-badge">
+                    <span class="pulse-dot" id="pulse-dot"></span>
+                    <span id="connection-text">Connecting...</span>
+                </div>
+                <span class="timestamp" id="timestamp">--:--:--</span>
+            </div>
+        </header>
+
+        <!-- Emergency Banner (hidden by default) -->
+        <div class="emergency-banner glass-danger" id="emergency-banner" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/></svg>
+            <span>EMERGENCY SHUTDOWN ACTIVE</span>
+        </div>
+
+        <!-- Station Grid -->
+        <div class="station-grid">
+            <!-- Machining Station -->
+            <div class="station-card glass" data-station="MS">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #007AFF">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">Machining Station</h2>
+                        <span class="station-tag">MS</span>
+                    </div>
+                    <div class="station-status" id="status-MS">
+                        <span class="status-dot idle"></span>
+                        <span class="status-label">Idle</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <h3 class="section-label">Sensors</h3>
+                        <div class="var-grid" id="sensors-MS"></div>
+                    </div>
+                    <div class="var-section">
+                        <h3 class="section-label">Actuators</h3>
+                        <div class="var-grid" id="actuators-MS"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sorting Line -->
+            <div class="station-card glass" data-station="SL">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #FF9F0A">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h7a1 1 0 100-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM15 8a1 1 0 10-2 0v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L15 13.586V8z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">Sorting Line</h2>
+                        <span class="station-tag">SL</span>
+                    </div>
+                    <div class="station-status" id="status-SL">
+                        <span class="status-dot idle"></span>
+                        <span class="status-label">Idle</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <h3 class="section-label">Sensors</h3>
+                        <div class="var-grid" id="sensors-SL"></div>
+                    </div>
+                    <div class="var-section">
+                        <h3 class="section-label">Actuators</h3>
+                        <div class="var-grid" id="actuators-SL"></div>
+                    </div>
+                    <!-- Color sensor bar -->
+                    <div class="color-sensor-display" id="color-sensor-display">
+                        <span class="section-label">Color Sensor</span>
+                        <div class="color-bar-track">
+                            <div class="color-bar-fill" id="color-bar-fill"></div>
+                        </div>
+                        <div class="color-bar-labels">
+                            <span class="color-label blue">Blue</span>
+                            <span class="color-label red">Red</span>
+                            <span class="color-label white">White</span>
+                        </div>
+                        <span class="color-value" id="color-value">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crane -->
+            <div class="station-card glass" data-station="Crane">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #30D158">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">Crane</h2>
+                        <span class="station-tag">C</span>
+                    </div>
+                    <div class="station-status" id="status-Crane">
+                        <span class="status-dot idle"></span>
+                        <span class="status-label">Idle</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <h3 class="section-label">Sensors</h3>
+                        <div class="var-grid" id="sensors-Crane"></div>
+                    </div>
+                    <div class="var-section">
+                        <h3 class="section-label">Actuators</h3>
+                        <div class="var-grid" id="actuators-Crane"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- High Bay Warehouse -->
+            <div class="station-card glass" data-station="HBW">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #BF5AF2">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4zM3 8h2v9a2 2 0 002 2h6a2 2 0 002-2V8h2a1 1 0 001-1H2a1 1 0 001 1zm5 2a1 1 0 112 0v4a1 1 0 11-2 0v-4z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">High Bay Warehouse</h2>
+                        <span class="station-tag">HBW</span>
+                    </div>
+                    <div class="station-status" id="status-HBW">
+                        <span class="status-dot idle"></span>
+                        <span class="status-label">Idle</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <h3 class="section-label">Sensors</h3>
+                        <div class="var-grid" id="sensors-HBW"></div>
+                    </div>
+                    <div class="var-section">
+                        <h3 class="section-label">Actuators</h3>
+                        <div class="var-grid" id="actuators-HBW"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Punching Machine -->
+            <div class="station-card glass" data-station="PM">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #FF453A">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">Punching Machine</h2>
+                        <span class="station-tag">PM</span>
+                    </div>
+                    <div class="station-status" id="status-PM">
+                        <span class="status-dot idle"></span>
+                        <span class="status-label">Idle</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <h3 class="section-label">Sensors</h3>
+                        <div class="var-grid" id="sensors-PM"></div>
+                    </div>
+                    <div class="var-section">
+                        <h3 class="section-label">Actuators</h3>
+                        <div class="var-grid" id="actuators-PM"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process State -->
+            <div class="station-card glass" data-station="State">
+                <div class="card-header">
+                    <div class="station-icon" style="--accent: #64D2FF">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="station-name">Process State</h2>
+                        <span class="station-tag">SYS</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="var-section">
+                        <div class="var-grid" id="state-State"></div>
+                    </div>
+                    <!-- Process step visualization -->
+                    <div class="process-steps" id="process-steps">
+                        <span class="section-label">MS Process Flow</span>
+                        <div class="step-track">
+                            <div class="step-item" data-step="0">
+                                <div class="step-dot"></div>
+                                <span>Burn</span>
+                            </div>
+                            <div class="step-connector"></div>
+                            <div class="step-item" data-step="1">
+                                <div class="step-dot"></div>
+                                <span>Deliver</span>
+                            </div>
+                            <div class="step-connector"></div>
+                            <div class="step-item" data-step="2">
+                                <div class="step-dot"></div>
+                                <span>Saw</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Chart -->
+        <div class="chart-card glass">
+            <div class="chart-header">
+                <h2 class="chart-title">Process Timeline</h2>
+                <div class="chart-legend" id="chart-legend"></div>
+            </div>
+            <div class="chart-body">
+                <canvas id="timeline-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
