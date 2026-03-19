@@ -22,20 +22,21 @@ END_VAR
 // ============================================================================
 
 // check if p_Burning is requested (iMS_Step: 0=burning, 1=delivering, 2=sawing)
-IF LocalVariables.iMS_Step = 0 THEN
+IF LocalVariables.iMS_Step = 0 AND (iStep > 0 OR NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_MS_oven)) THEN
 	CASE iStep OF
 
 		// === STEP 0: Open oven door ===
-		// The door is initially closed. We pump air into the pneumatic cylinder
-		// to push it open. Since there is no sensor to detect the door position,
-		// we keep the valve open for 500 iterations (~0.5s) to ensure it is fully open.
-		0:	iTimer := iTimer + 1;
-			IF iTimer < 500 THEN
+		// Activate compressor first, then open the pneumatic door.
+		0:	// activate compressor — needed for pneumatic oven door
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+			s_SupplyCompressedAir();
+			iTimer := iTimer + 1;
+			IF iTimer < 1500 THEN
 					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.open;
 				s_Move();
 			ELSE
-				// door should be fully open by now, reset timer and advance
 				iTimer := 0;
 				iStep := 1;
 			END_IF
@@ -49,29 +50,31 @@ IF LocalVariables.iMS_Step = 0 THEN
 		1:		LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.open;
 				s_Move();
-			IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_inside) THEN
-				// slider has not reached the inside position yet — keep retracting
-					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
-					LocalVariables.eMove_OvenSlider := OvenSlider.retract;
-				s_Move();
-			ELSE
-				// slider is fully inside — switch off slider motor and advance
+			IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_inside) THEN
+				// slider has reached the inside position — switch off slider motor and advance
 					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
 					LocalVariables.eMove_OvenSlider := OvenSlider.switchoff;
 				s_Move();
 				iStep := 2;
+			ELSE
+				// slider not yet inside — keep retracting
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.retract;
+				s_Move();
 			END_IF
 
 		// === STEP 2: Close oven door ===
-		// Release the pneumatic valve so the spring closes the door.
-		// Wait 500 iterations (~0.5s) to ensure the door is fully closed.
-		2:	iTimer := iTimer + 1;
-			IF iTimer < 500 THEN
+		// Turn off compressor, release valve — spring closes the door.
+		2:	// turn off compressor — no air needed for closing (spring-return)
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+			s_SupplyCompressedAir();
+			iTimer := iTimer + 1;
+			IF iTimer < 1500 THEN
 					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.close;
 				s_Move();
 			ELSE
-				// door should be fully closed, reset timer and advance
 				iTimer := 0;
 				iStep := 3;
 			END_IF
@@ -93,14 +96,16 @@ IF LocalVariables.iMS_Step = 0 THEN
 			END_IF
 
 		// === STEP 4: Open oven door again (after burning) ===
-		// Same as step 0: pump air for 500 iterations to open the door.
-		4:	iTimer := iTimer + 1;
-			IF iTimer < 500 THEN
+		4:	// activate compressor again — needed to open door
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.on;
+			s_SupplyCompressedAir();
+			iTimer := iTimer + 1;
+			IF iTimer < 1500 THEN
 					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.open;
 				s_Move();
 			ELSE
-				// door should be fully open, reset timer and advance
 				iTimer := 0;
 				iStep := 5;
 			END_IF
@@ -111,33 +116,36 @@ IF LocalVariables.iMS_Step = 0 THEN
 		5:		LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.open;
 				s_Move();
-			IF NOT s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_outside) THEN
-				// slider has not reached outside position yet — keep extending
-					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
-					LocalVariables.eMove_OvenSlider := OvenSlider.extend;
-				s_Move();
-			ELSE
-				// slider is fully outside — switch off slider motor and advance
+			IF s_CheckPresence(Devices_CheckPresence.ReferenceSwitch_MS_OvenSlider_outside) THEN
+				// slider has reached the outside position — switch off slider motor and advance
 					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
 					LocalVariables.eMove_OvenSlider := OvenSlider.switchoff;
 				s_Move();
 				iStep := 6;
+			ELSE
+				// slider not yet outside — keep extending
+					LocalVariables.eMove_Device := Devices_Move.OvenSlider_MS;
+					LocalVariables.eMove_OvenSlider := OvenSlider.extend;
+				s_Move();
 			END_IF
 
 		// === STEP 6: Close oven door, check WP, request next process ===
 		// Close door for 500 iterations, then verify the workpiece is still
 		// on the slider using LightBarrier_MS_oven. If WP is present,
 		// hand off to p_Delivering (iMS_Step := 1). Reset iStep to 0.
-		6:	iTimer := iTimer + 1;
+		6:	// turn off compressor — spring closes the door
+				LocalVariables.eSupplyCompressedAir_Device := Devices_SupplyCompressedAir.Compressor_MS;
+				LocalVariables.eSupplyCompressedAir_Compressor := Compressor.off;
+			s_SupplyCompressedAir();
+			iTimer := iTimer + 1;
 			IF iTimer < 500 THEN
-				// closing door — release pneumatic valve
 					LocalVariables.eMove_Device := Devices_Move.OvenDoor_MS;
 					LocalVariables.eMove_OvenDoor := OvenDoor.close;
 				s_Move();
 			ELSE
 				iTimer := 0;
 				// check if WP is still on oven slider (not lost during process)
-				IF s_CheckPresence(Devices_CheckPresence.LightBarrier_MS_oven) THEN
+				IF NOT s_CheckPresence(Devices_CheckPresence.LightBarrier_MS_oven) THEN
 					LocalVariables.iMS_Step := 1; // request p_Delivering
 				END_IF
 				iStep := 0;
