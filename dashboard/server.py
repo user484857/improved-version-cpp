@@ -21,6 +21,8 @@ from flask import Flask, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder="static")
 
+DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboards")
+
 # Will be set based on mode
 data_source = None
 mode = "demo"
@@ -29,6 +31,31 @@ mode = "demo"
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
+
+
+@app.route("/twin")
+def dashboard_twin():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin"), "index.html")
+
+
+@app.route("/quality")
+def dashboard_quality():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality"), "index.html")
+
+
+@app.route("/kpi")
+def dashboard_kpi():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi"), "index.html")
+
+
+@app.route("/cockpit")
+def dashboard_cockpit():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit"), "index.html")
+
+
+@app.route("/dashboards/<path:path>")
+def dashboard_files(path):
+    return send_from_directory(DASHBOARD_DIR, path)
 
 
 @app.route("/static/<path:path>")
@@ -185,13 +212,91 @@ def api_db_stats():
     return jsonify(db.stats())
 
 
+# ---------------------------------------------------------------------------
+# Analytics API — computed KPIs from simulated data
+# ---------------------------------------------------------------------------
+
+@app.route("/api/analytics/cycle-times")
+def api_cycle_times():
+    import analytics
+    return jsonify(analytics.get_cycle_times())
+
+
+@app.route("/api/analytics/quality-grades")
+def api_quality_grades():
+    import analytics
+    return jsonify(analytics.get_quality_grades())
+
+
+@app.route("/api/analytics/temperature")
+def api_temperature():
+    import analytics
+    return jsonify(analytics.get_temperature_curves())
+
+
+@app.route("/api/analytics/oee")
+def api_oee():
+    import analytics
+    return jsonify(analytics.get_oee())
+
+
+@app.route("/api/analytics/throughput")
+def api_throughput():
+    import analytics
+    return jsonify(analytics.get_throughput())
+
+
+@app.route("/api/analytics/alerts")
+def api_alerts():
+    import analytics
+    return jsonify(analytics.get_alerts())
+
+
+@app.route("/api/analytics/timeline")
+def api_timeline():
+    import analytics
+    return jsonify(analytics.get_station_timeline())
+
+
+@app.route("/api/analytics/bottleneck")
+def api_bottleneck():
+    import analytics
+    return jsonify(analytics.get_bottleneck())
+
+
+@app.route("/api/analytics/spc")
+def api_spc():
+    import analytics
+    return jsonify(analytics.get_spc_metrics())
+
+
+@app.route("/api/analytics/drift")
+def api_drift():
+    import analytics
+    return jsonify(analytics.get_drift_analysis())
+
+
+@app.route("/api/analytics/summary")
+def api_summary():
+    import analytics
+    return jsonify(analytics.get_summary())
+
+
 def find_csv():
-    """Auto-discover the largest CSV in nearby data directories."""
+    """Auto-discover the best CSV — prefer simulated runs over raw sensor dumps."""
     base = os.path.dirname(os.path.abspath(__file__))
-    # base = dashboard/, ../../../ = cpp/ (up from dashboard → Day5 → tag5 → cpp)
     cpp_root = os.path.normpath(os.path.join(base, "..", "..", ".."))
+
+    # Priority 1: simulated runs (have actuator events, good for demo)
+    simulated = sorted(
+        glob.glob(os.path.join(cpp_root, "tag 6", "data", "simulated_run_*.csv")),
+        key=os.path.getsize, reverse=True
+    )
+    if simulated:
+        return simulated[0]
+
+    # Priority 2: any CSV in data dirs (by size)
     search_paths = [
-        os.path.join(cpp_root, "tag 6", "data", "factory_run_*.csv"),
         os.path.join(cpp_root, "tag 6", "data", "*.csv"),
         os.path.join(base, "data", "*.csv"),
         os.path.join(base, "*.csv"),

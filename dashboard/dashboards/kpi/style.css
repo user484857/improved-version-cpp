@@ -1,0 +1,438 @@
+/* ============================================
+   KPI & Process Analytics — Dashboard Styles
+   ============================================ */
+
+/* ---- OEE Card ---- */
+.oee-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.oee-body {
+    padding-top: 8px;
+}
+
+.oee-main-gauge {
+    display: flex;
+    justify-content: center;
+}
+
+.gauge-lg {
+    width: 160px;
+    height: 160px;
+}
+
+.gauge-lg svg {
+    width: 100%;
+    height: 100%;
+}
+
+.gauge-sm {
+    width: 72px;
+    height: 72px;
+}
+
+.gauge-sm svg {
+    width: 100%;
+    height: 100%;
+}
+
+.gauge-arc {
+    transition: stroke-dasharray 1s var(--ease-out), stroke 0.4s var(--ease-out);
+}
+
+.gauge-number {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.gauge-number-sm {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    line-height: 1;
+}
+
+.oee-sub-gauges {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.sub-gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.sub-gauge-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.oee-formula {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 8px 16px;
+    background: var(--item-bg);
+    border-radius: var(--radius-sm);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+}
+
+.oee-formula span {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ---- Bottleneck Card ---- */
+.bottleneck-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(255, 69, 58, 0.12);
+    color: var(--red);
+    border: 1px solid rgba(255, 69, 58, 0.2);
+}
+
+.bottleneck-station {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0 14px;
+}
+
+.bottleneck-name {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.bottleneck-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+}
+
+.bottleneck-compare {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.compare-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.compare-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    width: 72px;
+    flex-shrink: 0;
+}
+
+.compare-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--item-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.compare-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s var(--ease-out);
+}
+
+.compare-bar.actual {
+    background: var(--red);
+}
+
+.compare-bar.theoretical {
+    background: var(--green);
+}
+
+.compare-value {
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.bottleneck-all {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.bn-station-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--item-bg);
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--separator);
+}
+
+.bn-station-chip .chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.bn-station-chip .chip-val {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bn-station-chip.is-bottleneck {
+    background: rgba(255, 69, 58, 0.08);
+    border-color: rgba(255, 69, 58, 0.2);
+}
+
+.bottleneck-recommendation {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--item-bg);
+    border-left: 3px solid var(--blue);
+}
+
+.rec-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+}
+
+.rec-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+/* ---- Throughput Card ---- */
+.throughput-main {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.throughput-current {
+    display: flex;
+    flex-direction: column;
+}
+
+.throughput-number {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.throughput-unit {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.throughput-max {
+    text-align: right;
+}
+
+.throughput-max-label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    margin-bottom: 2px;
+}
+
+.throughput-max-val {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.throughput-max-unit {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+}
+
+.utilization-section {
+    margin-bottom: 18px;
+}
+
+.utilization-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.utilization-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.utilization-pct {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.utilization-bar-track {
+    width: 100%;
+    height: 8px;
+    background: var(--item-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.utilization-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    transition: width 1s var(--ease-out);
+    width: 0%;
+}
+
+.throughput-meta {
+    display: flex;
+    gap: 16px;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.meta-label {
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+}
+
+.meta-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ---- Chart containers ---- */
+.chart-container-short {
+    height: 120px;
+}
+
+/* ---- MS Legend ---- */
+.ms-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin-top: 12px;
+}
+
+.ms-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+.ms-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.ms-legend-val {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.66rem;
+}
+
+/* ---- Cycle Time Chart: Station Labels ---- */
+.ct-station-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ct-station-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 860px) {
+    .oee-sub-gauges {
+        gap: 12px;
+    }
+
+    .gauge-lg {
+        width: 130px;
+        height: 130px;
+    }
+
+    .gauge-number {
+        font-size: 1.6rem;
+    }
+
+    .throughput-number {
+        font-size: 2rem;
+    }
+
+    .bottleneck-name {
+        font-size: 1.8rem;
+    }
+}

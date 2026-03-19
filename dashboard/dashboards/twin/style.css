@@ -1,0 +1,458 @@
+/* ============================================
+   Digital Twin — Factory Floor Visualization
+   Production-grade SCADA-style dashboard
+   ============================================ */
+
+/* ---- Typography overrides ---- */
+.twin-canvas,
+.twin-kpi,
+.twin-header,
+.legend-item,
+.station-tooltip {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.mono,
+.kpi-value,
+.kpi-detail,
+.tooltip-value {
+    font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- SVG Canvas ---- */
+.twin-canvas {
+    border-radius: var(--radius-lg);
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.twin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px 0;
+}
+
+.twin-legend {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.70rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ---- SVG Container ---- */
+.svg-container {
+    position: relative;
+    width: 100%;
+    padding: 12px 16px 20px;
+}
+
+#factory-svg {
+    width: 100%;
+    height: auto;
+    max-height: 560px;
+    display: block;
+}
+
+/* ---- Station Groups ---- */
+.station-group {
+    cursor: pointer;
+    transition: opacity 0.25s var(--ease-out);
+}
+
+.station-group:hover .station-bg {
+    stroke-opacity: 0.55 !important;
+    fill-opacity: 0.1;
+}
+
+.station-group:hover {
+    filter: brightness(1.08);
+}
+
+/* ---- SVG Text Styles ---- */
+.station-label {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.station-sublabel {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    fill: var(--text-tertiary);
+    letter-spacing: 0.02em;
+}
+
+.component-label {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-size: 8px;
+    font-weight: 500;
+    fill: var(--text-tertiary);
+    letter-spacing: 0.01em;
+}
+
+.bin-label {
+    font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* ---- Traffic Lights ---- */
+.traffic-light {
+    transition: fill 0.3s var(--ease-out), filter 0.3s var(--ease-out);
+}
+
+.traffic-light.active {
+    fill: var(--green);
+    filter: drop-shadow(0 0 6px rgba(48, 209, 88, 0.6));
+}
+
+.traffic-light.idle {
+    fill: var(--text-tertiary);
+    filter: none;
+}
+
+@keyframes light-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.traffic-light.active {
+    animation: light-pulse 1.8s ease-in-out infinite;
+}
+
+/* ---- Workpiece (class-based for multi-workpiece support) ---- */
+@keyframes wp-breathe {
+    0%, 100% { r: 7; opacity: 1; }
+    50% { r: 8; opacity: 0.85; }
+}
+
+.wp-body {
+    animation: wp-breathe 2s ease-in-out infinite;
+}
+
+/* ---- Oven Burn Glow ---- */
+@keyframes burn-glow {
+    0%, 100% { fill-opacity: 0.15; filter: none; }
+    50% { fill-opacity: 0.4; filter: drop-shadow(0 0 8px rgba(255,159,10,0.6)); }
+}
+
+#oven-glow.burning {
+    animation: burn-glow 1s ease-in-out infinite;
+}
+
+/* ---- Saw Blade Rotation ---- */
+@keyframes saw-spin {
+    to { transform: rotate(360deg); }
+}
+
+#saw-blade-group.spinning {
+    animation: saw-spin 0.3s linear infinite;
+}
+
+/* ---- Connection Path Flow ---- */
+@keyframes dash-flow {
+    to { stroke-dashoffset: -20; }
+}
+
+.connection-path {
+    transition: opacity 0.3s var(--ease-out);
+}
+
+.connection-path.active {
+    opacity: 0.6 !important;
+    stroke-width: 2;
+    animation: dash-flow 1.2s linear infinite;
+}
+
+/* ---- Color Reveal Flash ---- */
+@keyframes color-reveal {
+    0% { r: 7; filter: brightness(1); }
+    30% { r: 12; filter: brightness(2); }
+    100% { r: 7; filter: brightness(1); }
+}
+
+.wp-body.color-flash {
+    animation: color-reveal 0.6s ease-out;
+}
+
+/* ---- Trail Effect ---- */
+.trail-dot {
+    transition: opacity 0.4s ease-out;
+}
+
+@keyframes trail-fade {
+    from { opacity: 0.25; r: 4; }
+    to { opacity: 0; r: 1; }
+}
+
+.trail-dot {
+    animation: trail-fade 1.5s ease-out forwards;
+}
+
+/* ---- Punch Drop ---- */
+@keyframes punch-drop {
+    0% { transform: translateY(0); }
+    40% { transform: translateY(6px); }
+    100% { transform: translateY(0); }
+}
+
+#punch-tip.punching {
+    animation: punch-drop 0.5s ease-in-out;
+}
+
+/* ---- Station Active Glow Classes ---- */
+.station-group.active .station-bg {
+    stroke-opacity: 0.6;
+}
+
+/* ---- Tooltip ---- */
+.station-tooltip {
+    position: absolute;
+    z-index: 100;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    min-width: 180px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.station-tooltip.visible {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--separator);
+}
+
+.tooltip-station-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.tooltip-status {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--item-bg);
+}
+
+.tooltip-status.active {
+    color: var(--green);
+    background: rgba(48, 209, 88, 0.1);
+}
+
+.tooltip-status.idle {
+    color: var(--text-tertiary);
+}
+
+.tooltip-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tooltip-label {
+    font-size: 0.70rem;
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.tooltip-value {
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ---- KPI Bar (twin-specific) ---- */
+.twin-kpi {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.twin-kpi .kpi-tile {
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+}
+
+.kpi-detail {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Progress bar */
+.progress-bar-container {
+    width: 100%;
+    height: 4px;
+    background: var(--separator);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    transition: width 0.4s var(--ease-out);
+    width: 0%;
+}
+
+/* Color swatch styling */
+#kpi-color-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-circle {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    transition: background 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+}
+
+.color-circle.white {
+    background: #e8e8e8;
+    border-color: rgba(240,240,240,0.5);
+}
+
+.color-circle.red {
+    background: #FF453A;
+    border-color: rgba(255,69,58,0.5);
+}
+
+.color-circle.blue {
+    background: #007AFF;
+    border-color: rgba(0,122,255,0.5);
+}
+
+/* ---- Rack slot subtle effects ---- */
+.rack-slot {
+    transition: fill-opacity 0.3s var(--ease-out);
+}
+
+/* ---- Bin active indicators ---- */
+.bin-active {
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 860px) {
+    .twin-kpi {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .twin-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .twin-legend {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    .twin-kpi {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- Light Theme Adjustments ---- */
+[data-theme="light"] .station-sublabel,
+[data-theme="light"] .component-label {
+    fill: var(--text-tertiary);
+}
+
+[data-theme="light"] .connection-path {
+    stroke: var(--text-tertiary);
+}
+
+[data-theme="light"] .connection-arrow {
+    fill: var(--text-tertiary);
+}
+
+[data-theme="light"] .color-circle {
+    border-color: rgba(0,0,0,0.15);
+}
+
+[data-theme="light"] .color-circle.white {
+    background: #d8d8d8;
+    border-color: rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .wp-body {
+    stroke: rgba(0,0,0,0.2);
+}
+
+[data-theme="light"] .wp-highlight {
+    fill: rgba(255,255,255,0.5);
+}
+
+[data-theme="light"] .wp-trail {
+    opacity: 0.04;
+}
+
+[data-theme="light"] .bin-label {
+    font-weight: 700;
+}
+
+[data-theme="light"] .rack-slot {
+    fill: rgba(175,82,222,0.12);
+}
+
+[data-theme="light"] .rack-slot.rack-empty {
+    fill: rgba(175,82,222,0.04);
+}
