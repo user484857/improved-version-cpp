@@ -27,7 +27,7 @@ DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashbo
 
 # Will be set based on mode
 data_source = None
-mode = "demo"
+mode = "live"
 
 
 @app.route("/")
@@ -181,13 +181,12 @@ def static_files(path):
 @app.route("/api/data")
 def api_data():
     """Return current state of all variables."""
-    if mode == "demo":
+    if hasattr(data_source, "current_state"):
         state = data_source.current_state()
-        progress = data_source.get_progress()
+        progress = data_source.get_progress() if hasattr(data_source, "get_progress") else 0
         return jsonify({
             "status": "connected",
-            "mode": "demo",
-            "progress": progress,
+            "mode": "live",
             "data": state,
         })
     else:
@@ -203,7 +202,7 @@ def api_data():
 @app.route("/api/config")
 def api_config():
     """Return variable configuration for dynamic frontend rendering."""
-    if mode == "demo":
+    if hasattr(data_source, "get_config"):
         return jsonify(data_source.get_config())
     else:
         from config import VARIABLES
@@ -220,16 +219,7 @@ def api_config():
 @app.route("/api/status")
 def api_status():
     """Return server status and mode info."""
-    info = {"mode": mode}
-    if mode == "demo" and data_source:
-        if hasattr(data_source, "csv_path"):
-            info["source"] = "csv"
-            info["file"] = str(data_source.csv_path.name)
-        elif hasattr(data_source, "db_path"):
-            info["source"] = "sqlite"
-            info["file"] = str(data_source.db_path.name)
-        info["progress"] = data_source.get_progress()
-        info["events"] = len(data_source._events)
+    info = {"mode": "live"}
     return jsonify(info)
 
 
@@ -252,7 +242,7 @@ def api_switch_mode():
             from demo_db_player import DemoDBPlayer
             data_source = DemoDBPlayer(db_path, speed=2.0, loop=True)
             data_source.start()
-            mode = "demo"
+            mode = "live"
             return jsonify({"mode": mode, "source": "sqlite"})
 
         csv_path = find_csv()
@@ -261,7 +251,7 @@ def api_switch_mode():
         from demo_player import DemoPlayer
         data_source = DemoPlayer(csv_path, speed=2.0, loop=True)
         data_source.start()
-        mode = "demo"
+        mode = "live"
         return jsonify({"mode": mode, "source": "csv", "file": os.path.basename(csv_path)})
 
     elif target == "live":
@@ -559,8 +549,7 @@ def main():
         print(f"  Mode: LIVE (OPC UA)")
         print(f"  http://localhost:{args.port}\n")
     else:
-        mode = "demo"
-
+        # Fallback demo mode when not connected to OPC UA
         # Priority: --csv flag > --demo-db flag > auto-detect (DB first, then CSV)
         if args.csv:
             from demo_player import DemoPlayer

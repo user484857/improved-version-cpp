@@ -58,7 +58,7 @@ var prevStep = -1;
 var activeStations = {};   // {hbw: bool, crane: bool, ms: bool, sl: bool}
 var prevActiveStations = {};  // previous tick — for detecting station-off edges
 var msSubStep = 'idle';    // 'conveyor'|'oven'|'saw'|'sort'|'idle'
-var currentMode = 'demo';
+var currentMode = 'live';
 
 // Track last known cycle time per pill (persists across runs)
 var lastKnownTimes = { hbw: null, crane: null, oven: null, color: null, sort: null, total: null };
@@ -820,24 +820,6 @@ function setConn(id, cls) {
 //  Mode Switching
 // ============================================
 
-async function switchMode(newMode) {
-    try {
-        var resp = await fetch('/api/switch-mode', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: newMode }),
-        });
-        var result = await resp.json();
-        currentMode = result.mode || newMode;
-
-        // Update toggle buttons
-        document.querySelectorAll('#mode-toggle .toggle-option').forEach(function(btn) {
-            btn.classList.toggle('active', btn.dataset.mode === currentMode);
-        });
-    } catch (e) {
-        console.error('Mode switch failed:', e);
-    }
-}
 
 function updateLiveIndicator(status, mode) {
     var dot = document.getElementById('live-dot');
@@ -847,7 +829,7 @@ function updateLiveIndicator(status, mode) {
     dot.className = 'live-dot';
     if (status === 'connected') {
         dot.classList.add('connected');
-        text.textContent = mode === 'demo' ? 'Demo' : 'Live';
+        text.textContent = 'Live';
     } else if (status === 'disconnected') {
         dot.classList.add('disconnected');
         text.textContent = 'Offline';

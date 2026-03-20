@@ -37,7 +37,7 @@ let liveData = null;
 let lastFetchTs = 0;
 let activeStep = -1;
 let prevStep = -1;
-let currentMode = 'demo';
+let currentMode = 'live';
 
 // -- Theme toggle -----------------------------------------------------
 
@@ -627,22 +627,6 @@ async function pollLiveData() {
     } catch (e) {}
 }
 
-async function switchMode(newMode) {
-    try {
-        const resp = await fetch('/api/switch-mode', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: newMode }),
-        });
-        const result = await resp.json();
-        currentMode = result.mode || newMode;
-        document.querySelectorAll('#mode-toggle .toggle-option').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === currentMode);
-        });
-    } catch (e) {
-        console.error('Mode switch failed:', e);
-    }
-}
 
 function updateLiveIndicator(status, serverMode) {
     const dot = document.getElementById('live-dot');
@@ -650,7 +634,7 @@ function updateLiveIndicator(status, serverMode) {
     if (!dot || !text) return;
     dot.className = 'live-dot';
     if (status === 'connected') {
-        text.textContent = serverMode === 'demo' ? 'Demo' : 'Live';
+        text.textContent = 'Live';
     } else if (status === 'disconnected') {
         dot.classList.add('disconnected');
         text.textContent = 'Offline';

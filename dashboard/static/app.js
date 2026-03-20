@@ -2,7 +2,7 @@
  * Fischertechnik Factory — Professional Glass Dashboard
  * Data-driven station cards, live polling, dark/light theme.
  * Views: Live (real-time) | History (SQLite queries)
- * Settings: Theme (dark/light) | Data source (demo/live)
+ * Settings: Theme (dark/light)
  */
 
 const POLL_INTERVAL = 400;
@@ -29,7 +29,7 @@ const STATION_ICONS = {
 
 // --- State ---
 let currentView = "live";    // "live" | "history"
-let serverMode = "demo";     // "demo" | "live" (data source on server)
+let serverMode = "live";
 const chartHistory = { timestamps: [] };
 const TRACKED_SIGNALS = {};
 let chart = null;
@@ -141,35 +141,6 @@ function closeSettings() {
     document.getElementById("settings-overlay").classList.remove("open");
 }
 
-async function switchSource(newMode) {
-    const desc = document.getElementById("source-desc");
-    desc.textContent = "Switching...";
-
-    try {
-        const res = await fetch("/api/switch-mode", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode: newMode }),
-        });
-        const json = await res.json();
-
-        if (res.ok) {
-            serverMode = json.mode;
-            desc.textContent = serverMode === "demo"
-                ? `CSV replay: ${json.csv || "auto"}`
-                : "OPC UA real-time";
-        } else {
-            desc.textContent = `Error: ${json.error}`;
-            // Revert segmented to current mode
-            const idx = serverMode === "demo" ? 0 : 1;
-            updateSegmented("source-segmented", idx);
-        }
-    } catch (e) {
-        desc.textContent = `Connection error`;
-        const idx = serverMode === "demo" ? 0 : 1;
-        updateSegmented("source-segmented", idx);
-    }
-}
 
 async function loadDbStats() {
     try {
@@ -203,17 +174,6 @@ async function init() {
 
     // Theme segmented
     initSegmented("theme-segmented", ["dark", "light"], getTheme(), setTheme);
-
-    // Source segmented — get current mode from server first
-    try {
-        const statusRes = await fetch("/api/status");
-        const status = await statusRes.json();
-        serverMode = status.mode || "demo";
-    } catch { /* keep default */ }
-
-    initSegmented("source-segmented", ["demo", "live"], serverMode, switchSource);
-    document.getElementById("source-desc").textContent =
-        serverMode === "demo" ? "CSV replay mode" : "OPC UA real-time";
 
     // Station pills
     document.querySelectorAll("#station-pills .pill").forEach(pill => {
@@ -520,17 +480,6 @@ function updateUI(json) {
         status === "connected" ? "connected" : "disconnected",
         status === "connected" ? "Connected" : "Disconnected"
     );
-
-    const modeBadge = document.getElementById("mode-badge");
-    if (srvMode === "demo") {
-        modeBadge.style.display = "flex";
-        document.getElementById("mode-text").textContent = "DEMO";
-        const circle = document.getElementById("progress-circle");
-        const circumference = 2 * Math.PI * 8;
-        circle.setAttribute("stroke-dashoffset", circumference * (1 - (progress || 0)));
-    } else {
-        modeBadge.style.display = "none";
-    }
 
     document.getElementById("timestamp").textContent = now;
     if (!data || Object.keys(data).length === 0) return;

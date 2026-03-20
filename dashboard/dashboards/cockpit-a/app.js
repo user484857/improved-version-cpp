@@ -107,7 +107,7 @@ async function pollLoop() {
         const json = await res.json();
         lastFetch = Date.now();
         processData(json.data || {});
-        updateFooterMode(json.mode || 'demo');
+        updateFooterMode(json.mode || 'live');
     } catch (e) {
         setLineState('idle');
     }
