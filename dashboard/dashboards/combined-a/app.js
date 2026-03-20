@@ -55,7 +55,15 @@ var liveData = null;
 var lastFetchTs = 0;
 var activeStep = -1;
 var prevStep = -1;
+var activeStations = {};   // {hbw: bool, crane: bool, ms: bool, sl: bool}
+var prevActiveStations = {};  // previous tick — for detecting station-off edges
+var msSubStep = 'idle';    // 'conveyor'|'oven'|'saw'|'sort'|'idle'
 var currentMode = 'demo';
+
+// Track last known cycle time per pill (persists across runs)
+var lastKnownTimes = { hbw: null, crane: null, oven: null, color: null, sort: null, total: null };
+var displayedTimes = { hbw: null, crane: null, oven: null, color: null, sort: null, total: null };
+var lastKnownRunCount = 0;
 
 // ============================================
 //  Init
@@ -66,6 +74,16 @@ function init() {
     setInterval(updateClock, 1000);
     loadData();
     setInterval(loadData, 8000);
+
+    // Sync mode from server on page load
+    fetch('/api/status').then(function(r) { return r.json(); }).then(function(s) {
+        if (s.mode) {
+            currentMode = s.mode;
+            document.querySelectorAll('#mode-toggle .toggle-option').forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.mode === currentMode);
+            });
+        }
+    }).catch(function() {});
 
     // Live polling for Digital Twin (400ms)
     setInterval(pollLiveData, 400);
@@ -227,29 +245,7 @@ function renderStackedBars() {
 function renderTwinTimings() {
     if (!cycleData.length) return;
 
-    // Last run data
-    var lastRun = cycleData[cycleData.length - 1];
-
-    // Averages per station for SVG action labels and timing pills
-    var stationAvgs = {};
-    var stationLasts = {};
-    STATIONS.forEach(function(st) {
-        stationAvgs[st.key] = avgActuals[st.key] || 0;
-        stationLasts[st.key] = lastRun.stations[st.key] || null;
-    });
-
-    // Update SVG action labels
-    TWIN_STATIONS.forEach(function(ts) {
-        var actionEl = document.getElementById(ts.actionId);
-        if (actionEl) {
-            var lastVal = stationLasts[ts.cycleKey];
-            if (lastVal != null) {
-                actionEl.textContent = lastVal.toFixed(1) + 's';
-            }
-        }
-    });
-
-    // Update timing pills
+    // Find last non-null value per station across ALL runs (not just last run)
     var twinPillMap = {
         hbw:   { cycle: 'HBW',   target: 10 },
         crane: { cycle: 'Crane', target: 12 },
@@ -258,17 +254,65 @@ function renderTwinTimings() {
         sort:  { cycle: 'SL',    target: 5 },
     };
 
+    var stationAvgs = {};
+    STATIONS.forEach(function(st) {
+        stationAvgs[st.key] = avgActuals[st.key] || 0;
+    });
+
+    // Scan runs in reverse to find the most recent non-null value per station
     Object.keys(twinPillMap).forEach(function(pillKey) {
         var map = twinPillMap[pillKey];
-        var lastVal = stationLasts[map.cycle];
+        for (var i = cycleData.length - 1; i >= 0; i--) {
+            var v = cycleData[i].stations[map.cycle];
+            if (v != null) {
+                lastKnownTimes[pillKey] = v;
+                break;
+            }
+        }
+    });
+
+    // Find last non-null total
+    for (var i = cycleData.length - 1; i >= 0; i--) {
+        if (cycleData[i].total != null) {
+            lastKnownTimes.total = cycleData[i].total;
+            break;
+        }
+    }
+
+    // Update SVG action labels with last known values
+    TWIN_STATIONS.forEach(function(ts) {
+        var actionEl = document.getElementById(ts.actionId);
+        if (actionEl) {
+            // Find last non-null for this specific twin station
+            var val = null;
+            for (var i = cycleData.length - 1; i >= 0; i--) {
+                var v = cycleData[i].stations[ts.cycleKey];
+                if (v != null) { val = v; break; }
+            }
+            if (val != null) {
+                actionEl.textContent = val.toFixed(1) + 's';
+            }
+        }
+    });
+
+    // Update timing pills — always show last known, flash on change
+    Object.keys(twinPillMap).forEach(function(pillKey) {
+        var map = twinPillMap[pillKey];
+        var val = lastKnownTimes[pillKey];
         var avgVal = stationAvgs[map.cycle];
 
         var timeEl = document.getElementById('time-' + pillKey);
         var avgEl = document.getElementById('avg-' + pillKey);
         var tlEl = document.getElementById('tl-' + pillKey);
 
-        if (timeEl && lastVal != null) {
-            timeEl.textContent = lastVal.toFixed(1) + 's';
+        if (timeEl && val != null) {
+            var newText = val.toFixed(1) + 's';
+            // Flash if value changed
+            if (displayedTimes[pillKey] !== null && displayedTimes[pillKey] !== val) {
+                flashElement(timeEl);
+            }
+            timeEl.textContent = newText;
+            displayedTimes[pillKey] = val;
         }
         if (avgEl && avgVal > 0) {
             avgEl.textContent = 'avg ' + avgVal.toFixed(1) + 's';
@@ -288,11 +332,24 @@ function renderTwinTimings() {
         }
     });
 
-    // Total
+    // Total — show last known, flash on change
     var totalEl = document.getElementById('time-total');
-    if (totalEl && lastRun.total != null) {
-        totalEl.textContent = lastRun.total.toFixed(1) + 's';
+    var totalVal = lastKnownTimes.total;
+    if (totalEl && totalVal != null) {
+        if (displayedTimes.total !== null && displayedTimes.total !== totalVal) {
+            flashElement(totalEl);
+        }
+        totalEl.textContent = totalVal.toFixed(1) + 's';
+        displayedTimes.total = totalVal;
     }
+}
+
+// Flash animation helper — briefly highlights an element
+function flashElement(el) {
+    el.classList.remove('value-flash');
+    // Force reflow to restart animation
+    void el.offsetWidth;
+    el.classList.add('value-flash');
 }
 
 // ============================================
@@ -590,46 +647,51 @@ function anyActuator(stn) {
     return false;
 }
 
-function detectStep(data) {
-    if (!data) return -1;
+function detectActiveStations(data) {
+    // Returns which stations are active RIGHT NOW based on actuator state.
+    // Each station is independent — multiple can be active simultaneously.
+    if (!data) return { hbw: false, crane: false, ms: false, sl: false };
     var hbw = data.HBW || {};
     var crane = data.Crane || {};
     var ms = data.MS || {};
     var sl = data.SL || {};
 
-    // SL Sorting valves
-    if (isOn(sl, 'actuators', 'Valve Blue') || isOn(sl, 'actuators', 'Valve Red') || isOn(sl, 'actuators', 'Valve White')) return 5;
-    // SL Conveyor/Color
-    if (isOn(sl, 'actuators', 'Conveyor Belt') || isOn(sl, 'actuators', 'Motor Conveyor Belt')) return 4;
-    if (isOn(sl, 'actuators', 'Compressor') && !anyActuator(crane)) return 4;
-    // MS Oven burn
-    if (isOn(ms, 'actuators', 'Lamp')) return 2;
-    // MS Oven loading
-    if (isOn(ms, 'actuators', 'Oven Slider In') || isOn(ms, 'actuators', 'Motor Oven Slider Move In') ||
-        isOn(ms, 'actuators', 'Ovendoor') || isOn(ms, 'actuators', 'Valve Ovendoor') ||
-        isOn(ms, 'actuators', 'Transfer To Oven') || isOn(ms, 'actuators', 'Motor Transfer Unit → Oven') ||
-        isOn(ms, 'actuators', 'Oven Slider Out') || isOn(ms, 'actuators', 'Motor Oven Slider Move Out')) return 2;
-    // MS Saw/Eject
-    if (isOn(ms, 'actuators', 'Saw') || isOn(ms, 'actuators', 'Motor Saw') ||
-        isOn(ms, 'actuators', 'Ejector Valve') || isOn(ms, 'actuators', 'Valve Ejector')) return 3;
-    // MS Conveyor/Turntable (pre-oven)
-    if (isOn(ms, 'actuators', 'Conveyor Fwd') || isOn(ms, 'actuators', 'Motor Conveyor Belt Forward') ||
-        isOn(ms, 'actuators', 'Turntable CW') || isOn(ms, 'actuators', 'Motor Turntable Clockwise') ||
-        isOn(ms, 'actuators', 'Turntable CCW') || isOn(ms, 'actuators', 'Motor Turntable Counterclockwise') ||
-        isOn(ms, 'actuators', 'Transfer To Turntable') || isOn(ms, 'actuators', 'Motor Transfer Unit → Turntable')) return 2;
-    if (isOn(ms, 'actuators', 'Compressor') && !anyActuator(crane)) return 2;
-    // Crane
-    if (anyActuator(crane)) {
-        if (activeStep >= 5) return 6; // after sort = return
-        if (activeStep <= 1 || activeStep === -1) return 1; // to oven
-        if (activeStep >= 3) return 6;
-        return 1;
-    }
-    // HBW
-    if (anyActuator(hbw)) {
-        if (activeStep >= 6) return 7; // storing
-        return 0; // retrieving
-    }
+    return {
+        hbw:   anyActuator(hbw),
+        crane: anyActuator(crane),
+        ms:    anyActuator(ms),
+        sl:    anyActuator(sl),
+    };
+}
+
+function detectMsSubStep(data) {
+    // Determine which MS sub-process is active for the oven glow etc.
+    var ms = (data && data.MS) || {};
+    if (isOn(ms, 'actuators', 'Lamp')) return 'burn';
+    if (isOn(ms, 'actuators', 'Oven Slider In') || isOn(ms, 'actuators', 'Oven Slider Out') ||
+        isOn(ms, 'actuators', 'Oven Door Valve') || isOn(ms, 'actuators', 'Transfer To Oven') ||
+        isOn(ms, 'actuators', 'Transfer To Turntable')) return 'oven';
+    if (isOn(ms, 'actuators', 'Saw') || isOn(ms, 'actuators', 'Ejector Valve')) return 'saw';
+    if (isOn(ms, 'actuators', 'Conveyor Fwd') || isOn(ms, 'actuators', 'Turntable CW') ||
+        isOn(ms, 'actuators', 'Turntable CCW')) return 'conveyor';
+    if (isOn(ms, 'actuators', 'Compressor') || isOn(ms, 'actuators', 'Vacuum Valve')) return 'oven';
+    return 'idle';
+}
+
+function detectSlSubStep(data) {
+    var sl = (data && data.SL) || {};
+    if (isOn(sl, 'actuators', 'Valve Blue') || isOn(sl, 'actuators', 'Valve Red') || isOn(sl, 'actuators', 'Valve White')) return 'sort';
+    if (isOn(sl, 'actuators', 'Conveyor Belt') || isOn(sl, 'actuators', 'Compressor')) return 'color';
+    return 'idle';
+}
+
+// Legacy wrapper — keeps old code working
+function detectStep(data) {
+    var s = detectActiveStations(data);
+    if (s.sl) { var sub = detectSlSubStep(data); return sub === 'sort' ? 5 : 4; }
+    if (s.ms) { var sub = detectMsSubStep(data); return sub === 'saw' ? 3 : 2; }
+    if (s.crane) return activeStep >= 4 ? 6 : 1;
+    if (s.hbw) return activeStep >= 6 ? 7 : 0;
     return -1;
 }
 
@@ -644,10 +706,13 @@ async function pollLiveData() {
         var d = json && json.data;
         if (!d || Object.keys(d).length === 0) return;
 
+        // Detect ALL active stations concurrently
+        activeStations = detectActiveStations(d);
+        msSubStep = detectMsSubStep(d);
+
+        // Legacy single-step for connection paths
         var step = detectStep(d);
-        if (step !== activeStep) {
-            prevStep = activeStep;
-        }
+        if (step !== activeStep) prevStep = activeStep;
         activeStep = step;
 
         updateTwinFromLive(step, d);
@@ -658,13 +723,18 @@ async function pollLiveData() {
 }
 
 function updateTwinFromLive(step, data) {
-    // Step-to-SVG-station mapping
-    var STEP_STNS = ['stn-hbw', 'stn-crane', 'stn-oven', 'stn-out', 'stn-color', 'stn-sort', 'stn-return', 'stn-rack'];
-    var STEP_COLORS = ['#AF52DE', '#30D158', '#007AFF', '#007AFF', '#5AC8FA', '#FF9F0A', '#30D158', '#AF52DE'];
+    // Station SVG IDs and their colors
+    var STN_MAP = {
+        hbw:   { ids: ['stn-hbw', 'stn-rack'],            color: '#AF52DE' },
+        crane: { ids: ['stn-crane', 'stn-return'],         color: '#30D158' },
+        ms:    { ids: ['stn-oven', 'stn-out'],             color: '#007AFF' },
+        sl:    { ids: ['stn-color', 'stn-sort'],           color: '#FF9F0A' },
+    };
 
-    // Reset all stations
-    for (var i = 0; i < STEP_STNS.length; i++) {
-        var el = document.getElementById(STEP_STNS[i]);
+    // Reset all station highlights
+    var ALL_IDS = ['stn-hbw', 'stn-crane', 'stn-oven', 'stn-out', 'stn-color', 'stn-sort', 'stn-return', 'stn-rack'];
+    for (var i = 0; i < ALL_IDS.length; i++) {
+        var el = document.getElementById(ALL_IDS[i]);
         if (!el) continue;
         var bg = el.querySelector('.stn-bg');
         if (bg) {
@@ -673,36 +743,77 @@ function updateTwinFromLive(step, data) {
         }
     }
 
-    // Highlight active station
-    if (step >= 0 && step < STEP_STNS.length) {
-        var activeEl = document.getElementById(STEP_STNS[step]);
-        if (activeEl) {
-            var bg = activeEl.querySelector('.stn-bg');
+    // Highlight ALL active stations simultaneously
+    for (var key in activeStations) {
+        if (!activeStations[key]) continue;
+        var info = STN_MAP[key];
+        if (!info) continue;
+        for (var j = 0; j < info.ids.length; j++) {
+            var el = document.getElementById(info.ids[j]);
+            if (!el) continue;
+            var bg = el.querySelector('.stn-bg');
             if (bg) {
                 bg.style.strokeWidth = '2.5';
-                bg.style.stroke = STEP_COLORS[step];
+                bg.style.stroke = info.color;
             }
         }
     }
 
-    // Update connection paths
+    // MS sub-step: highlight specific boxes
+    if (activeStations.ms) {
+        var ovenEl = document.getElementById('stn-oven');
+        var outEl = document.getElementById('stn-out');
+        if (msSubStep === 'burn' || msSubStep === 'oven') {
+            // Oven active
+            if (ovenEl) { var bg = ovenEl.querySelector('.stn-bg'); if (bg) { bg.style.strokeWidth = '2.5'; bg.style.stroke = '#007AFF'; } }
+        }
+        if (msSubStep === 'saw') {
+            // Saw/eject active
+            if (outEl) { var bg = outEl.querySelector('.stn-bg'); if (bg) { bg.style.strokeWidth = '2.5'; bg.style.stroke = '#007AFF'; } }
+        }
+    }
+
+    // SL sub-step: highlight specific boxes
+    if (activeStations.sl) {
+        var slSub = detectSlSubStep(data);
+        var colorEl = document.getElementById('stn-color');
+        var sortEl = document.getElementById('stn-sort');
+        if (slSub === 'color' && colorEl) {
+            var bg = colorEl.querySelector('.stn-bg'); if (bg) { bg.style.strokeWidth = '2.5'; bg.style.stroke = '#5AC8FA'; }
+        }
+        if (slSub === 'sort' && sortEl) {
+            var bg = sortEl.querySelector('.stn-bg'); if (bg) { bg.style.strokeWidth = '2.5'; bg.style.stroke = '#FF9F0A'; }
+        }
+    }
+
+    // Connection paths — show active based on which stations are running
     var CONN_IDS = ['conn-1', 'conn-2', 'conn-3', 'conn-4', 'conn-5', 'conn-6', 'conn-7'];
     for (var i = 0; i < CONN_IDS.length; i++) {
         var conn = document.getElementById(CONN_IDS[i]);
         if (!conn) continue;
         conn.classList.remove('active', 'visited');
-        if (step > 0 && i === step - 1) conn.classList.add('active');
-        else if (step > 0 && i < step - 1) conn.classList.add('visited');
     }
+    // Activate connections between active stations
+    if (activeStations.hbw)   { setConn('conn-1', 'active'); }
+    if (activeStations.crane) { setConn('conn-1', 'active'); setConn('conn-2', 'active'); setConn('conn-5', 'active'); setConn('conn-6', 'active'); }
+    if (activeStations.ms)    { setConn('conn-2', 'active'); setConn('conn-3', 'active'); }
+    if (activeStations.sl)    { setConn('conn-4', 'active'); setConn('conn-5', 'active'); }
 
-    // Update oven glow when burning
+    // Oven glow when burning
     var ovenBox = document.querySelector('#stn-oven .stn-bg');
     if (ovenBox) {
         var ms = data.MS || {};
         var burning = isOn(ms, 'actuators', 'Lamp');
-        ovenBox.style.stroke = burning ? '#FF453A' : '';
-        ovenBox.style.strokeWidth = burning ? '3' : '';
+        if (burning) {
+            ovenBox.style.stroke = '#FF453A';
+            ovenBox.style.strokeWidth = '3';
+        }
     }
+}
+
+function setConn(id, cls) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add(cls);
 }
 
 // ============================================
