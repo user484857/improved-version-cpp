@@ -314,12 +314,3 @@ Output: {DATA_DIR}/
             print("Disconnected.")
         except Exception:
             pass
-        # Checkpoint WAL so factory.db is a single portable file
-        try:
-            from database import FactoryDB
-            db = FactoryDB()
-            db._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
-            db.close()
-            print("DB checkpoint done — factory.db is ready for export.")
-        except Exception:
-            pass

@@ -43,7 +43,7 @@ class FactoryDB:
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=WAL")  # better concurrent reads
+        self._conn.execute("PRAGMA journal_mode=DELETE")  # single portable file
         self._create_tables()
 
     def _create_tables(self):
@@ -72,7 +72,6 @@ class FactoryDB:
             );
         """)
         self._conn.commit()
-        self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def _resolve_station(self, gvl):
         return GVL_TO_STATION.get(gvl, gvl)
