@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilization B — Machine Grid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/utilization-b/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <svg class="logo" width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="7" fill="var(--blue)" opacity="0.15"/>
+                    <rect x="5" y="16" width="4" height="7" rx="1.5" fill="var(--blue)" opacity="0.5"/>
+                    <rect x="12" y="10" width="4" height="13" rx="1.5" fill="var(--blue)" opacity="0.75"/>
+                    <rect x="19" y="5" width="4" height="18" rx="1.5" fill="var(--blue)"/>
+                </svg>
+                <div>
+                    <div class="dash-title">Machine Utilization</div>
+                    <div class="dash-subtitle">Fischertechnik Smart Factory</div>
+                </div>
+            </div>
+            <div class="dash-header-right">
+                <nav class="dash-nav">
+                    <a href="/utilization-b" class="active">Utilization</a>
+                    <a href="/production-b">Production</a>
+                    <a href="/quality-b">Quality</a>
+                    <a href="/kpi-b">KPI</a>
+                    <a href="/cockpit-b">Cockpit</a>
+                </nav>
+                <span id="lastUpdated" class="last-updated-indicator">--:--:--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1a.5.5 0 01.5.5v1a.5.5 0 01-1 0v-1A.5.5 0 018 1zm0 11a.5.5 0 01.5.5v1a.5.5 0 01-1 0v-1A.5.5 0 018 12zm7-4a.5.5 0 01-.5.5h-1a.5.5 0 010-1h1A.5.5 0 0115 8zM4 8a.5.5 0 01-.5.5h-1a.5.5 0 010-1h1A.5.5 0 014 8zm8.95-3.54a.5.5 0 010 .71l-.71.71a.5.5 0 11-.7-.71l.7-.7a.5.5 0 01.71 0zM5.17 10.46a.5.5 0 010 .71l-.71.71a.5.5 0 01-.7-.71l.7-.71a.5.5 0 01.71 0zM12.24 10.46a.5.5 0 01.7.71l-.7.71a.5.5 0 01-.71-.71l.7-.7zM4.46 4.46a.5.5 0 01.71 0l.7.71a.5.5 0 01-.7.7l-.71-.7a.5.5 0 010-.71zM8 4.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero: Factory Health Status Bar -->
+        <section class="hero-bar glass mb-14">
+            <div class="hero-bar-item">
+                <span class="status-dot green" id="liveStatusDot"></span>
+                <span class="hero-bar-label">Factory</span>
+                <span class="hero-bar-value mono" id="heroStatus">Online</span>
+            </div>
+            <div class="hero-bar-divider"></div>
+            <div class="hero-bar-item">
+                <span class="hero-bar-label">Avg Utilization</span>
+                <span class="hero-bar-value mono" id="heroUtilization">---%</span>
+            </div>
+            <div class="hero-bar-divider"></div>
+            <div class="hero-bar-item">
+                <span class="hero-bar-label">Total Parts</span>
+                <span class="hero-bar-value mono" id="heroParts">---</span>
+            </div>
+            <div class="hero-bar-divider"></div>
+            <div class="hero-bar-item">
+                <span class="hero-bar-label">Throughput</span>
+                <span class="hero-bar-value mono" id="heroThroughput">--- /hr</span>
+            </div>
+            <div class="hero-bar-divider"></div>
+            <div class="hero-bar-item">
+                <span class="hero-bar-label">Quality A-Rate</span>
+                <span class="hero-bar-value mono" id="heroQuality">---%</span>
+            </div>
+        </section>
+
+        <!-- Machine Grid: Vertical Thermometer Bars -->
+        <section class="card glass mb-18">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Machine Utilization Grid</div>
+                    <div class="card-subtitle">Run time vs. idle time per station</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="thermo-grid" id="thermoGrid">
+                    <!-- Value Adding group -->
+                    <div class="thermo-group">
+                        <div class="thermo-group-label">Value Adding</div>
+                        <div class="thermo-group-bars">
+                            <div class="thermo-col" data-machine="SAW">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-SAW" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-SAW">0%</span>
+                                <span class="thermo-name">SAW</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-SAW"></span>
+                            </div>
+                            <div class="thermo-col" data-machine="Oven">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-Oven" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-Oven">0%</span>
+                                <span class="thermo-name">Oven</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-Oven"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality group -->
+                    <div class="thermo-group">
+                        <div class="thermo-group-label">Quality</div>
+                        <div class="thermo-group-bars">
+                            <div class="thermo-col" data-machine="Sorting">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-Sorting" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-Sorting">0%</span>
+                                <span class="thermo-name">Sorting</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-Sorting"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transport group -->
+                    <div class="thermo-group">
+                        <div class="thermo-group-label">Transport</div>
+                        <div class="thermo-group-bars">
+                            <div class="thermo-col" data-machine="Crane">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-Crane" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-Crane">0%</span>
+                                <span class="thermo-name">Crane</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-Crane"></span>
+                            </div>
+                            <div class="thermo-col" data-machine="HBW">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-HBW" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-HBW">0%</span>
+                                <span class="thermo-name">HBW</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-HBW"></span>
+                            </div>
+                            <div class="thermo-col" data-machine="MS">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-MS" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-MS">0%</span>
+                                <span class="thermo-name">MS</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-MS"></span>
+                            </div>
+                            <div class="thermo-col" data-machine="PM">
+                                <div class="thermo-bar-wrapper glass">
+                                    <div class="thermo-bar-track">
+                                        <div class="thermo-bar-fill" id="bar-PM" style="height: 0%">
+                                            <div class="thermo-bar-shine"></div>
+                                        </div>
+                                        <div class="thermo-bar-markers">
+                                            <span class="thermo-marker" style="bottom: 25%"></span>
+                                            <span class="thermo-marker" style="bottom: 50%"></span>
+                                            <span class="thermo-marker" style="bottom: 75%"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="thermo-pct mono" id="pct-PM">0%</span>
+                                <span class="thermo-name">PM</span>
+                                <span class="thermo-status-dot status-dot grey" id="dot-PM"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Production Rate & Quality Side by Side -->
+        <div class="grid-2 mb-18">
+
+            <!-- Production Rate: Cumulative Line Chart -->
+            <section class="card glass">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Production Rate</div>
+                        <div class="card-subtitle">Cumulative parts over time</div>
+                    </div>
+                    <span class="mono card-subtitle" id="rateValue">-- /hr</span>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="cumulativeChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quality: Run Grid (Heatmap) -->
+            <section class="card glass">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Quality Map</div>
+                        <div class="card-subtitle">Grade per production run</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="run-grid" id="runGrid">
+                        <!-- JS fills run squares -->
+                    </div>
+                    <div class="run-grid-legend">
+                        <span class="run-legend-item"><span class="run-swatch grade-swatch-a"></span>Grade A</span>
+                        <span class="run-legend-item"><span class="run-swatch grade-swatch-b"></span>Grade B</span>
+                        <span class="run-legend-item"><span class="run-swatch grade-swatch-c"></span>Grade C</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Quality Summary: Mini Stats Row -->
+        <div class="quality-stats-row mb-18">
+            <div class="quality-stat glass">
+                <div class="quality-stat-accent accent-a"></div>
+                <div class="quality-stat-content">
+                    <span class="quality-stat-value mono" id="gradeACount">0</span>
+                    <span class="quality-stat-label">Grade A</span>
+                </div>
+            </div>
+            <div class="quality-stat glass">
+                <div class="quality-stat-accent accent-b"></div>
+                <div class="quality-stat-content">
+                    <span class="quality-stat-value mono" id="gradeBCount">0</span>
+                    <span class="quality-stat-label">Grade B</span>
+                </div>
+            </div>
+            <div class="quality-stat glass">
+                <div class="quality-stat-accent accent-c"></div>
+                <div class="quality-stat-content">
+                    <span class="quality-stat-value mono" id="gradeCCount">0</span>
+                    <span class="quality-stat-label">Grade C</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Collapsible: Detailed Table -->
+        <section class="card glass mb-18">
+            <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
+                <div>
+                    <div class="card-title">Detailed Breakdown</div>
+                    <div class="card-subtitle">Run time, idle time, utilization per machine</div>
+                </div>
+            </div>
+            <div class="collapsible-body">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Machine</th>
+                                <th>Category</th>
+                                <th>Run Time</th>
+                                <th>Idle Time</th>
+                                <th>Total</th>
+                                <th>Utilization</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailTableBody">
+                            <!-- JS fills rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Tooltip for run grid -->
+    <div class="run-tooltip" id="runTooltip"></div>
+
+    <script src="/dashboards/utilization-b/app.js"></script>
+</body>
+</html>

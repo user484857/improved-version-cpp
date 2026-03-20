@@ -134,6 +134,23 @@ def dashboard_quality_r2a():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-r2a"), "index.html")
 
 
+@app.route("/utilization-a")
+def dashboard_utilization_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-a"), "index.html")
+
+@app.route("/utilization-b")
+def dashboard_utilization_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-b"), "index.html")
+
+@app.route("/production-a")
+def dashboard_production_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-a"), "index.html")
+
+@app.route("/production-b")
+def dashboard_production_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-b"), "index.html")
+
+
 @app.route("/twin-v1")
 def dashboard_twin_v1():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-v1"), "index.html")
@@ -465,6 +482,18 @@ def api_drift():
 def api_summary():
     import analytics
     return jsonify(analytics.get_summary())
+
+
+@app.route("/api/analytics/utilization")
+def api_utilization():
+    import analytics
+    return jsonify(analytics.get_machine_utilization())
+
+
+@app.route("/api/analytics/wip")
+def api_wip():
+    import analytics
+    return jsonify(analytics.get_wip())
 
 
 def find_csv():

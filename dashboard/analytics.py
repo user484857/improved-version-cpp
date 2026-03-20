@@ -800,3 +800,162 @@ def get_summary():
         },
         "bottleneck": bottleneck,
     }
+
+
+def get_machine_utilization():
+    """Compute machine run-time percentages based on actuator on/off events.
+
+    Groups machines into:
+      - value_adding: SAW, Oven
+      - quality: Sorting (SL)
+      - transport: Crane, HBW, PM
+    """
+    events = _get_events()
+    if not events:
+        return {}
+
+    total_time = (events[-1]["ts"] - events[0]["ts"]).total_seconds()
+    if total_time <= 0:
+        return {}
+
+    # Single-actuator machines
+    single_actuators = {
+        "SAW": "bMotor_MS_Saw",
+        "Oven": "bLamp_MS",
+    }
+
+    # Multi-actuator machines: ANY motor active = station running
+    multi_actuators = {
+        "MS": [
+            "bMotor_MS_Turntable_clockwise", "bMotor_MS_Turntable_counterclockwise",
+            "bMotor_MS_ConveyorBelt_forward", "bMotor_MS_Saw",
+            "bMotor_MS_OvenSlider_movein", "bMotor_MS_OvenSlider_moveout",
+            "bMotor_MS_TransferUnit_tooven", "bMotor_MS_TransferUnit_toturntable",
+            "bLamp_MS", "bCompressor_MS",
+        ],
+        "Crane": [
+            "bMotor_C_upward", "bMotor_C_downward",
+            "bMotor_C_forward", "bMotor_C_backward",
+            "bMotor_C_clockwise", "bMotor_C_counterclockwise",
+        ],
+        "HBW": [
+            "bMotor_HBW_ConveyorBelt_forward", "bMotor_HBW_ConveyorBelt_backward",
+            "bMotor_HBW_StackerCrane_torack", "bMotor_HBW_StackerCrane_toconveyorbelt",
+            "bMotor_HBW_StackerCrane_upward", "bMotor_HBW_StackerCrane_downward",
+            "bMotor_HBW_Cantilever_forward", "bMotor_HBW_Cantilever_backward",
+        ],
+        "PM": [
+            "bMotor_PM_ConveyorBelt_forward", "bMotor_PM_ConveyorBelt_backward",
+            "bMotor_PM_Tool_upward", "bMotor_PM_Tool_downward",
+        ],
+    }
+
+    results = {}
+
+    # Single-actuator: simple on/off tracking
+    for machine, var_name in single_actuators.items():
+        on_time = 0.0
+        on_since = None
+        for e in events:
+            if e["variable"] == var_name:
+                if e["value"] is True and on_since is None:
+                    on_since = e["ts"]
+                elif e["value"] is False and on_since is not None:
+                    on_time += (e["ts"] - on_since).total_seconds()
+                    on_since = None
+        util = on_time / total_time
+        results[machine] = {
+            "utilization": round(util, 3),
+            "run_time_s": round(on_time, 1),
+            "idle_time_s": round(total_time - on_time, 1),
+            "total_time_s": round(total_time, 1),
+        }
+
+    # Multi-actuator: station active when ANY actuator is ON
+    for machine, var_names in multi_actuators.items():
+        var_set = set(var_names)
+        active_count = 0  # number of actuators currently ON
+        segment_start = None
+        on_time = 0.0
+
+        for e in events:
+            if e["variable"] in var_set:
+                if e["value"] is True:
+                    if active_count == 0:
+                        segment_start = e["ts"]
+                    active_count += 1
+                elif e["value"] is False and active_count > 0:
+                    active_count -= 1
+                    if active_count == 0 and segment_start is not None:
+                        on_time += (e["ts"] - segment_start).total_seconds()
+                        segment_start = None
+
+        util = on_time / total_time
+        results[machine] = {
+            "utilization": round(util, 3),
+            "run_time_s": round(on_time, 1),
+            "idle_time_s": round(total_time - on_time, 1),
+            "total_time_s": round(total_time, 1),
+        }
+
+    # Sorting Line: time between light barriers
+    sorting_on = 0.0
+    lb_before_ts = None
+    for e in events:
+        if e["variable"] == "bLightBarrier_SL_beforecolor" and e["value"] is True:
+            lb_before_ts = e["ts"]
+        elif e["variable"] == "bLightBarrier_SL_aftercolor" and e["value"] is True and lb_before_ts:
+            sorting_on += (e["ts"] - lb_before_ts).total_seconds()
+            lb_before_ts = None
+
+    results["Sorting"] = {
+        "utilization": round(sorting_on / total_time, 3) if total_time > 0 else 0,
+        "run_time_s": round(sorting_on, 1),
+        "idle_time_s": round(total_time - sorting_on, 1),
+        "total_time_s": round(total_time, 1),
+    }
+
+    results["_categories"] = {
+        "value_adding": ["SAW", "Oven"],
+        "quality": ["Sorting"],
+        "transport": ["Crane", "HBW", "MS", "PM"],
+    }
+
+    return results
+
+
+def get_wip():
+    """Compute Work In Progress using Little's Law: WIP = Throughput x Throughput Time.
+
+    Also returns per-run throughput times for charting.
+    """
+    throughput_data = get_throughput()
+    runs = _get_runs()
+
+    if not runs:
+        return {"wip": 0, "throughput_per_hour": 0, "avg_throughput_time_s": 0,
+                "throughput_times": [], "per_run": []}
+
+    # Throughput time = total time from first to last event per run
+    throughput_times = []
+    for run_events in runs:
+        if len(run_events) >= 2:
+            duration = (run_events[-1]["ts"] - run_events[0]["ts"]).total_seconds()
+            throughput_times.append(duration)
+
+    avg_tt = sum(throughput_times) / len(throughput_times) if throughput_times else 0
+    avg_tt_hr = avg_tt / 3600.0
+
+    thr = throughput_data.get("per_hour", 0)
+    wip = thr * avg_tt_hr
+
+    return {
+        "wip": round(wip, 2),
+        "throughput_per_hour": round(thr, 1),
+        "avg_throughput_time_s": round(avg_tt, 1),
+        "throughput_times": [round(t, 2) for t in throughput_times],
+        "per_run": [
+            {"run": i + 1, "throughput_time_s": round(t, 2)}
+            for i, t in enumerate(throughput_times)
+        ],
+    }

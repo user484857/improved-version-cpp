@@ -126,6 +126,8 @@ class ChangeHandler:
         self.node_map = node_map
 
     def datachange_notification(self, node, val, data):
+        if val is None:
+            return
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         node_key = node.nodeid.to_string()
         var_name, gvl = self.node_map.get(node_key, (str(node.nodeid), "unknown"))
@@ -229,6 +231,10 @@ def cmd_collect():
         conn.execute("UPDATE runs SET ended_at = ?, event_count = ? WHERE run_id = ?",
                      (now, writer.count, run_id))
         conn.commit()
+        try:
+            sub.delete()
+        except Exception:
+            pass
         try:
             client.disconnect()
         except Exception:

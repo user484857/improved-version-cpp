@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilization A -- Machine Run Times</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/utilization-a/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- ===== HEADER ===== -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="7" fill="var(--blue)" opacity="0.15"/>
+                        <path d="M8 14h3v6H8zM12.5 10h3v10h-3zM17 12h3v8h-3z" fill="var(--blue)"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="dash-title">Machine Utilization</div>
+                    <div class="dash-subtitle">Fischertechnik Smart Factory</div>
+                </div>
+            </div>
+            <div class="dash-header-right">
+                <span class="last-updated-indicator" id="lastUpdated">--:--:--</span>
+                <nav class="dash-nav">
+                    <a href="/utilization-a" class="active">Utilization</a>
+                    <a href="/production-a">Production</a>
+                    <a href="/quality-a">Quality</a>
+                    <a href="/kpi-a">KPI</a>
+                    <a href="/cockpit-a">Cockpit</a>
+                </nav>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 8 1zm3.354 2.354a.5.5 0 0 1 0 .707l-.708.708a.5.5 0 1 1-.707-.708l.708-.707a.5.5 0 0 1 .707 0zM14 7.5a.5.5 0 0 1 .5.5.5.5 0 0 1-.5.5h-1a.5.5 0 0 1 0-1h1zM11.354 11.354a.5.5 0 0 0-.708-.708l-.707.708a.5.5 0 0 0 .707.707l.708-.707zM8 13a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 8 13zM4.646 11.354l-.707.708a.5.5 0 0 0 .707.707l.708-.707a.5.5 0 0 0-.708-.708zM1.5 8a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm3.146-4.354a.5.5 0 0 1 0 .708l-.708.707a.5.5 0 1 1-.707-.707l.707-.708a.5.5 0 0 1 .708 0zM8 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== HERO BANNER ===== -->
+        <section class="hero-banner glass" id="heroBanner">
+            <div class="hero-content">
+                <div class="hero-label">Overall Factory Utilization</div>
+                <div class="hero-value-row">
+                    <span class="hero-number mono" id="heroNumber">--</span>
+                    <span class="hero-unit">%</span>
+                </div>
+                <div class="hero-meta" id="heroMeta">Loading machine data...</div>
+            </div>
+            <div class="hero-status" id="heroStatus">
+                <span class="status-dot grey"></span>
+                <span class="hero-status-label">Waiting</span>
+            </div>
+        </section>
+
+        <!-- ===== MACHINE RUN TIMES ===== -->
+        <section class="card glass mb-18">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Machine Run Times</div>
+                    <div class="card-subtitle">Run vs. idle breakdown by station category</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="utilizationBars" class="utilization-bars">
+                    <div class="bar-placeholder">Loading utilization data...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== KPI TILES ===== -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpiPartsHour">--</span>
+                <span class="kpi-label">Parts / Hour</span>
+                <span class="kpi-trend neutral" id="kpiPartsHourTrend"></span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpiTotalParts">--</span>
+                <span class="kpi-label">Total Parts</span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpiAvgCycle">--</span>
+                <span class="kpi-label">Avg Cycle Time</span>
+                <span class="kpi-trend neutral" id="kpiAvgCycleTrend"></span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpiUtilization">--</span>
+                <span class="kpi-label">Utilization</span>
+            </div>
+        </div>
+
+        <!-- ===== QUALITY CHARTS ===== -->
+        <div class="grid-2 mb-18">
+            <!-- Scatter Plot -->
+            <div class="card glass">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Quality Scatter</div>
+                        <div class="card-subtitle">Color sensor values by run</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="qualityScatter"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histogram -->
+            <div class="card glass">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Grade Distribution</div>
+                        <div class="card-subtitle">Quality grade breakdown</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="qualityHistogram"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COLLAPSIBLE: MACHINE DETAIL ===== -->
+        <section class="card glass mb-18">
+            <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
+                <div>
+                    <div class="card-title">Machine Detail</div>
+                    <div class="card-subtitle">Per-machine utilization breakdown</div>
+                </div>
+            </div>
+            <div class="collapsible-body">
+                <div class="card-body">
+                    <table class="data-table" id="machineDetailTable">
+                        <thead>
+                            <tr>
+                                <th>Station</th>
+                                <th>Category</th>
+                                <th>Utilization</th>
+                                <th>Run Time</th>
+                                <th>Idle Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="machineDetailBody">
+                            <tr><td colspan="6" style="text-align:center;color:var(--text-tertiary)">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="dash-footer">
+            <span>Fischertechnik Smart Factory</span>
+            <span class="dash-footer-sep">&middot;</span>
+            <span>TUM CPPS Seminar</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/utilization-a/app.js"></script>
+</body>
+</html>

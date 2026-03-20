@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production A — KPI Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/production-a/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- ═══════ HEADER ═══════ -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#lg-proda)"/>
+                        <path d="M6 24V18l3-2 4 6 4-12 4 8 5-6v12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <circle cx="22" cy="10" r="3" stroke="white" stroke-width="1.5" fill="none"/>
+                        <defs><linearGradient id="lg-proda" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#007AFF"/><stop offset="1" stop-color="#30D158"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Production KPIs</h1>
+                    <p class="dash-subtitle">OEE, throughput, WIP and cycle time analytics</p>
+                </div>
+            </div>
+            <nav class="dash-nav">
+                <a href="/utilization-a">Utilization</a>
+                <a href="/production-a" class="active">Production</a>
+                <a href="/quality-a">Quality</a>
+                <a href="/kpi-a">KPI</a>
+                <a href="/cockpit-a">Cockpit</a>
+            </nav>
+            <div class="dash-header-right">
+                <span class="last-updated-indicator mono" id="last-updated">--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══════ 1. HERO — OEE Score Banner ═══════ -->
+        <section class="oee-hero glass" id="oee-hero">
+            <div class="oee-hero-top">
+                <div class="oee-hero-left">
+                    <span class="oee-hero-label">Overall Equipment Effectiveness</span>
+                    <div class="oee-hero-formula">
+                        <span class="oee-factor" id="oee-factor-a">Availability</span>
+                        <span class="oee-factor-op">&times;</span>
+                        <span class="oee-factor" id="oee-factor-p">Performance</span>
+                        <span class="oee-factor-op">&times;</span>
+                        <span class="oee-factor" id="oee-factor-q">Quality</span>
+                        <span class="oee-factor-op">=</span>
+                        <span class="oee-factor oee-factor-result" id="oee-factor-oee">OEE</span>
+                    </div>
+                </div>
+                <div class="oee-hero-right">
+                    <span class="oee-hero-value mono" id="oee-value">--</span>
+                    <span class="oee-hero-unit">%</span>
+                </div>
+            </div>
+            <div class="oee-hero-bar-track">
+                <div class="oee-hero-bar-fill" id="oee-bar-fill"></div>
+            </div>
+        </section>
+
+        <!-- ═══════ 2. KPI TILES ROW ═══════ -->
+        <div class="kpi-grid">
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpi-throughput">--</span>
+                <span class="kpi-label">Throughput (parts/hr)</span>
+                <span class="kpi-trend neutral" id="kpi-throughput-trend"></span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpi-wip">--</span>
+                <span class="kpi-label">WIP (parts)</span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpi-cycle">--</span>
+                <span class="kpi-label">Avg Cycle Time (s)</span>
+            </div>
+            <div class="kpi-tile glass">
+                <span class="kpi-value mono" id="kpi-alerts">--</span>
+                <span class="kpi-label">Alerts</span>
+                <span class="kpi-trend" id="kpi-alerts-trend"></span>
+            </div>
+        </div>
+
+        <!-- ═══════ 3. CYCLE TIMES — Grouped Bar Chart ═══════ -->
+        <section class="card glass mb-18" id="cycle-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Station Cycle Times</h2>
+                    <span class="card-subtitle">Average actual vs. theoretical target per station</span>
+                </div>
+                <span class="card-subtitle mono" id="cycle-runs-label">-- runs</span>
+            </div>
+            <div class="card-body">
+                <div class="cycle-legend" id="cycle-legend"></div>
+                <div class="chart-container">
+                    <canvas id="cycle-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ 4. THROUGHPUT — Trend + Cumulative ═══════ -->
+        <section class="card glass mb-18" id="throughput-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Throughput Trend</h2>
+                    <span class="card-subtitle">Per-run throughput time and cumulative production count</span>
+                </div>
+                <div class="throughput-stats" id="throughput-stats">
+                    <span class="throughput-stat mono" id="throughput-rate">-- parts/hr</span>
+                    <span class="throughput-stat mono" id="throughput-util">-- % util</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="throughput-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ 5. WIP — Big Number + Little's Law ═══════ -->
+        <section class="card glass mb-18" id="wip-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Work In Progress</h2>
+                    <span class="card-subtitle">Little's Law analysis</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="wip-layout">
+                    <div class="wip-big-number-area">
+                        <div class="wip-big-value mono" id="wip-value">--</div>
+                        <div class="wip-big-label">parts in system</div>
+                        <div class="wip-formula-box glass">
+                            <span class="wip-formula-title">Little's Law</span>
+                            <span class="wip-formula mono">WIP = Throughput &times; Avg Throughput Time</span>
+                            <span class="wip-formula-actual mono" id="wip-formula-actual">WIP = -- &times; -- = --</span>
+                        </div>
+                    </div>
+                    <div class="wip-chart-area">
+                        <span class="wip-chart-label">Throughput Time per Run</span>
+                        <div class="chart-container wip-chart-size">
+                            <canvas id="wip-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ 6. OEE BREAKDOWN — Three Horizontal Bars ═══════ -->
+        <section class="card glass mb-18" id="oee-breakdown-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">OEE Breakdown</h2>
+                    <span class="card-subtitle">Availability, Performance, and Quality factors</span>
+                </div>
+                <span class="card-subtitle mono" id="oee-breakdown-total">OEE: --%</span>
+            </div>
+            <div class="card-body">
+                <div class="oee-bars">
+                    <div class="oee-bar-row">
+                        <div class="oee-bar-label">
+                            <span class="oee-bar-name">Availability</span>
+                            <span class="oee-bar-pct mono" id="oee-avail-pct">--%</span>
+                        </div>
+                        <div class="oee-bar-track">
+                            <div class="oee-bar-fill oee-bar-avail" id="oee-avail-fill"></div>
+                        </div>
+                        <span class="oee-bar-detail" id="oee-avail-detail"></span>
+                    </div>
+                    <div class="oee-bar-row">
+                        <div class="oee-bar-label">
+                            <span class="oee-bar-name">Performance</span>
+                            <span class="oee-bar-pct mono" id="oee-perf-pct">--%</span>
+                        </div>
+                        <div class="oee-bar-track">
+                            <div class="oee-bar-fill oee-bar-perf" id="oee-perf-fill"></div>
+                        </div>
+                        <span class="oee-bar-detail" id="oee-perf-detail"></span>
+                    </div>
+                    <div class="oee-bar-row">
+                        <div class="oee-bar-label">
+                            <span class="oee-bar-name">Quality</span>
+                            <span class="oee-bar-pct mono" id="oee-qual-pct">--%</span>
+                        </div>
+                        <div class="oee-bar-track">
+                            <div class="oee-bar-fill oee-bar-qual" id="oee-qual-fill"></div>
+                        </div>
+                        <span class="oee-bar-detail" id="oee-qual-detail"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ 7. ERRORS — Alert Feed (Collapsible) ═══════ -->
+        <section class="card glass mb-18" id="alerts-section">
+            <div class="card-header collapsible-header expanded" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title">Production Alerts</h2>
+                    <span class="card-subtitle" id="alerts-subtitle">Recent warnings and errors</span>
+                </div>
+            </div>
+            <div class="collapsible-body expanded">
+                <div class="card-body">
+                    <div id="alerts-list"></div>
+                    <button class="show-more-btn" id="alerts-show-more" style="display:none" onclick="showMoreAlerts()">Show more</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ Footer ═══════ -->
+        <footer class="footer-note glass">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="opacity:0.4;flex-shrink:0"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            <span>Production KPI analytics — data refreshes every 8 seconds</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-db mono" id="footer-db">DB: --</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/production-a/app.js"></script>
+</body>
+</html>
