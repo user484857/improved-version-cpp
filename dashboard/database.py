@@ -26,7 +26,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "factory.db")
 
-# Same mapping as demo_player.py
+# GVL → station mapping
 GVL_TO_STATION = {
     "gvl_MS": "MS",
     "gvl_C": "Crane",

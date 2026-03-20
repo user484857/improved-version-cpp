@@ -8,7 +8,7 @@
 
 ## 1. PROJEKTSTRUKTUR & DATEIPFADE
 
-```
+```als
 cpp/
 ├── tag 5/Day 5 Template-20260319/
 │   ├── dashboard/                        ← BESTEHENDER Dashboard-Code (Referenz für Design)

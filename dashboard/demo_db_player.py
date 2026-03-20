@@ -7,8 +7,7 @@ making it look like a live production run. Loops continuously.
 Idle gaps > MAX_GAP_SEC are compressed so the replay feels like continuous production
 instead of waiting through long pauses between runs.
 
-Same interface as DemoPlayer (current_state, get_config, get_progress, start, stop)
-so the server can use either interchangeably.
+Interface: current_state(), get_config(), get_progress(), start(), stop().
 """
 
 import copy
@@ -18,12 +17,93 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from demo_player import (
-    GVL_TO_STATION,
-    classify_variable,
-    make_label,
-    parse_value,
-)
+# GVL → station mapping
+GVL_TO_STATION = {
+    "gvl_MS": "MS",
+    "gvl_C": "Crane",
+    "gvl_SL": "SL",
+    "gvl_HBW": "HBW",
+    "gvl_PM": "PM",
+    "LocalVariables": "State",
+}
+
+# Classify variables as sensor or actuator by prefix
+SENSOR_PREFIXES = ("bReferenceSwitch_", "bLightBarrier_", "bEncoderImpulse_",
+                   "bPulseCounter_", "iColorSensor_", "bTrailSensor_")
+ACTUATOR_PREFIXES = ("bMotor_", "bValve_", "bLamp_", "bCompressor_")
+
+
+def classify_variable(name):
+    """Return 'sensors', 'actuators', or 'state' based on variable name."""
+    for prefix in SENSOR_PREFIXES:
+        if name.startswith(prefix):
+            return "sensors"
+    for prefix in ACTUATOR_PREFIXES:
+        if name.startswith(prefix):
+            return "actuators"
+    return "state"
+
+
+def parse_value(raw):
+    """Convert string value to Python type."""
+    if raw == "True":
+        return True
+    if raw == "False":
+        return False
+    try:
+        return int(raw)
+    except ValueError:
+        pass
+    try:
+        return float(raw)
+    except ValueError:
+        pass
+    return raw
+
+
+def make_label(variable_name):
+    """Create a human-readable label from the raw PLC variable name."""
+    station_codes = {"MS", "C", "SL", "HBW", "PM"}
+
+    name = variable_name
+    if name[0] in "bife" and name[1].isupper():
+        name = name[1:]
+
+    parts = name.split("_")
+    filtered = []
+    for i, part in enumerate(parts):
+        if part in station_codes and i <= 2:
+            continue
+        filtered.append(part)
+
+    if not filtered:
+        return variable_name
+
+    label = " ".join(p.capitalize() for p in filtered)
+    label = label.replace("Conveyorbelt", "Conveyor Belt")
+    label = label.replace("Stackercrane", "Stacker Crane")
+    label = label.replace("Transferunit", "Transfer Unit")
+    label = label.replace("Ovenslider", "Oven Slider")
+    label = label.replace("Colorsensor", "Color Sensor")
+    label = label.replace("Lightbarrier", "Light Barrier")
+    label = label.replace("Referenceswitch", "Ref Switch")
+    label = label.replace("Encoderimpulse", "Encoder")
+    label = label.replace("Pulsecounter", "Pulse Counter")
+    label = label.replace("Trailsensor", "Trail Sensor")
+    label = label.replace("Atturntable", "@ Turntable")
+    label = label.replace("Atoven", "@ Oven")
+    label = label.replace("Atsaw", "@ Saw")
+    label = label.replace("Attransferunit", "@ Transfer Unit")
+    label = label.replace("Atconveyorbelt", "@ Conveyor Belt")
+    label = label.replace("Tooven", "→ Oven")
+    label = label.replace("Toturntable", "→ Turntable")
+    label = label.replace("Torack", "→ Rack")
+    label = label.replace("Toconveyorbelt", "→ Conv Belt")
+    label = label.replace("Movein", "Move In")
+    label = label.replace("Moveout", "Move Out")
+    label = label.replace("Beforecolor", "Before Color")
+    label = label.replace("Aftercolor", "After Color")
+    return label
 
 # Gaps between events longer than this (in original seconds) get compressed
 # down to MAX_GAP_SEC. This eliminates dead time between runs.
