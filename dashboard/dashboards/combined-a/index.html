@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Overview — Combined A</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/combined-a/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- ======= HEADER ======= -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#lg-combined)"/>
+                        <path d="M8 22V14l4 2 4-6 4 6 4-2v8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <circle cx="16" cy="10" r="2.5" stroke="white" stroke-width="1.5" fill="none"/>
+                        <defs><linearGradient id="lg-combined" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#007AFF"/><stop offset="0.5" stop-color="#AF52DE"/><stop offset="1" stop-color="#30D158"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Factory Overview</h1>
+                    <p class="dash-subtitle">Combined Dashboard</p>
+                </div>
+            </div>
+            <div class="toggle-group mode-toggle" id="mode-toggle">
+                <button class="toggle-option active" data-mode="demo" onclick="switchMode('demo')">Demo</button>
+                <button class="toggle-option" data-mode="live" onclick="switchMode('live')">Live</button>
+            </div>
+            <div class="dash-header-right">
+                <span class="live-pill" id="live-pill">
+                    <span class="live-dot" id="live-dot"></span>
+                    <span class="live-text mono" id="live-text">Demo</span>
+                </span>
+                <span class="header-clock mono" id="header-clock">--:--:--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg class="icon-theme" width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ======= KPI ROW ======= -->
+        <div class="kpi-row">
+            <div class="kpi-pill glass">
+                <span class="kpi-pill-value mono" id="kpi-cycle-time">--</span>
+                <span class="kpi-pill-label">AVG CYCLE TIME</span>
+            </div>
+            <div class="kpi-pill glass">
+                <span class="kpi-pill-value mono" id="kpi-throughput">--</span>
+                <span class="kpi-pill-label">THROUGHPUT / HOUR</span>
+            </div>
+            <div class="kpi-pill glass">
+                <span class="kpi-pill-value mono" id="kpi-uptime">--</span>
+                <span class="kpi-pill-label">UPTIME</span>
+            </div>
+        </div>
+
+        <!-- ======= CYCLE TIME COMPARISON ======= -->
+        <section class="card glass mb-18" id="stacked-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Cycle Time Comparison</h2>
+                    <span class="card-subtitle">4 stations stacked &mdash; actual vs. theoretical target</span>
+                </div>
+                <span class="card-subtitle mono" id="stacked-runs-label">-- runs</span>
+            </div>
+            <div class="card-body">
+                <div class="stacked-container">
+                    <div class="stacked-row">
+                        <span class="stacked-label">Actual</span>
+                        <div class="stacked-bar-track" id="stacked-actual-track"></div>
+                        <span class="stacked-total mono" id="stacked-actual-total">--s</span>
+                    </div>
+                    <div class="stacked-legend" id="stacked-legend"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======= DIGITAL TWIN ======= -->
+        <div class="factory-card glass" id="factory-card">
+            <svg id="factory-svg" viewBox="0 0 960 440" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.05"/>
+                    </pattern>
+                    <filter id="glow-hbw" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#AF52DE" flood-opacity="0.4" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-crane" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#30D158" flood-opacity="0.4" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-oven" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#007AFF" flood-opacity="0.4" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-out" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#007AFF" flood-opacity="0.35" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-color" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#5AC8FA" flood-opacity="0.4" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="glow-sort" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="6" result="b"/><feFlood flood-color="#FF9F0A" flood-opacity="0.4" result="c"/>
+                        <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Grid background -->
+                <rect width="960" height="440" fill="url(#grid)" opacity="0.5"/>
+
+                <!-- Connection paths (no PM) -->
+                <g class="connections">
+                    <path id="conn-1" class="conn-path" d="M 155 210 C 210 210, 290 210, 350 210"/>
+                    <path id="conn-2" class="conn-path" d="M 448 175 C 460 130, 475 95, 500 80"/>
+                    <path id="conn-3" class="conn-path" d="M 588 80 C 610 80, 630 80, 648 80"/>
+                    <path id="conn-4" class="conn-path" d="M 736 95 C 755 140, 765 175, 770 200"/>
+                    <path id="conn-5" class="conn-path" d="M 770 270 C 768 305, 750 340, 730 355"/>
+                    <path id="conn-6" class="conn-path" d="M 648 365 C 570 365, 490 340, 448 275"/>
+                    <path id="conn-7" class="conn-path" d="M 350 250 C 290 260, 210 268, 155 272"/>
+                </g>
+
+                <!-- Step numbers -->
+                <g class="step-badges">
+                    <g class="step-badge"><circle cx="90"  cy="210" r="9"/><text x="90"  y="214">1</text></g>
+                    <g class="step-badge"><circle cx="400" cy="175" r="9"/><text x="400" y="179">2</text></g>
+                    <g class="step-badge"><circle cx="544" cy="55"  r="9"/><text x="544" y="59">3</text></g>
+                    <g class="step-badge"><circle cx="692" cy="55"  r="9"/><text x="692" y="59">4</text></g>
+                    <g class="step-badge"><circle cx="800" cy="235" r="9"/><text x="800" y="239">5</text></g>
+                    <g class="step-badge"><circle cx="730" cy="390" r="9"/><text x="730" y="394">6</text></g>
+                    <g class="step-badge"><circle cx="400" cy="275" r="9"/><text x="400" y="279">7</text></g>
+                </g>
+
+                <!-- Stations (no PM) -->
+                <g class="stn" id="stn-hbw">
+                    <rect x="65" y="175" width="90" height="72" rx="14" class="stn-bg" data-color="#AF52DE"/>
+                    <text x="110" y="200" text-anchor="middle" class="stn-label">HBW</text>
+                    <text x="110" y="214" text-anchor="middle" class="stn-sub">Retrieve</text>
+                    <text x="110" y="237" text-anchor="middle" class="stn-action" id="action-hbw">--</text>
+                </g>
+
+                <g class="stn" id="stn-crane">
+                    <rect x="355" y="170" width="90" height="72" rx="14" class="stn-bg" data-color="#30D158"/>
+                    <text x="400" y="195" text-anchor="middle" class="stn-label">Crane</text>
+                    <text x="400" y="209" text-anchor="middle" class="stn-sub">Transport</text>
+                    <text x="400" y="232" text-anchor="middle" class="stn-action" id="action-crane">--</text>
+                </g>
+
+                <g class="stn" id="stn-oven">
+                    <rect x="500" y="45" width="90" height="72" rx="14" class="stn-bg" data-color="#007AFF"/>
+                    <text x="545" y="72" text-anchor="middle" class="stn-label">Oven</text>
+                    <text x="545" y="86" text-anchor="middle" class="stn-sub">Burn</text>
+                    <text x="545" y="107" text-anchor="middle" class="stn-action" id="action-oven">--</text>
+                </g>
+
+                <g class="stn" id="stn-out">
+                    <rect x="648" y="45" width="90" height="72" rx="14" class="stn-bg" data-color="#007AFF"/>
+                    <text x="693" y="72" text-anchor="middle" class="stn-label">Out</text>
+                    <text x="693" y="86" text-anchor="middle" class="stn-sub">Eject</text>
+                    <text x="693" y="107" text-anchor="middle" class="stn-action" id="action-out">--</text>
+                </g>
+
+                <g class="stn" id="stn-color">
+                    <rect x="725" y="200" width="90" height="72" rx="14" class="stn-bg" data-color="#5AC8FA"/>
+                    <text x="770" y="225" text-anchor="middle" class="stn-label">Color</text>
+                    <text x="770" y="239" text-anchor="middle" class="stn-sub">Measure</text>
+                    <text x="770" y="262" text-anchor="middle" class="stn-action" id="action-color">--</text>
+                </g>
+
+                <g class="stn" id="stn-sort">
+                    <rect x="648" y="325" width="90" height="72" rx="14" class="stn-bg" data-color="#FF9F0A"/>
+                    <text x="693" y="350" text-anchor="middle" class="stn-label">Sort</text>
+                    <text x="693" y="364" text-anchor="middle" class="stn-sub">Classify</text>
+                    <text x="693" y="387" text-anchor="middle" class="stn-action" id="action-sort">--</text>
+                </g>
+
+                <!-- Crane Return (sub-station) -->
+                <g class="stn" id="stn-return">
+                    <rect x="355" y="245" width="90" height="52" rx="14" class="stn-bg stn-sm" data-color="#30D158"/>
+                    <text x="400" y="268" text-anchor="middle" class="stn-label">Crane</text>
+                    <text x="400" y="282" text-anchor="middle" class="stn-sub">Return</text>
+                </g>
+            </svg>
+        </div>
+
+        <!-- Timing pills below twin -->
+        <div class="timing-row" id="timing-row">
+            <div class="timing-pill glass" data-step="hbw">
+                <div class="pill-head">
+                    <span class="pill-dot" id="tl-hbw"></span>
+                    <span class="pill-name">HBW</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-hbw">--</span>
+                    <span class="pill-avg mono" id="avg-hbw"></span>
+                </div>
+            </div>
+            <div class="timing-pill glass" data-step="crane">
+                <div class="pill-head">
+                    <span class="pill-dot" id="tl-crane"></span>
+                    <span class="pill-name">Crane</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-crane">--</span>
+                    <span class="pill-avg mono" id="avg-crane"></span>
+                </div>
+            </div>
+            <div class="timing-pill glass" data-step="oven">
+                <div class="pill-head">
+                    <span class="pill-dot" id="tl-oven"></span>
+                    <span class="pill-name">Oven (MS)</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-oven">--</span>
+                    <span class="pill-avg mono" id="avg-oven"></span>
+                </div>
+            </div>
+            <div class="timing-pill glass" data-step="color">
+                <div class="pill-head">
+                    <span class="pill-dot" id="tl-color"></span>
+                    <span class="pill-name">Color (SL)</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-color">--</span>
+                    <span class="pill-avg mono" id="avg-color"></span>
+                </div>
+            </div>
+            <div class="timing-pill glass" data-step="sort">
+                <div class="pill-head">
+                    <span class="pill-dot" id="tl-sort"></span>
+                    <span class="pill-name">Sort (SL)</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-sort">--</span>
+                    <span class="pill-avg mono" id="avg-sort"></span>
+                </div>
+            </div>
+            <div class="timing-pill glass">
+                <div class="pill-head">
+                    <span class="pill-name">Total</span>
+                </div>
+                <div class="pill-times">
+                    <span class="pill-last mono" id="time-total">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======= COLOR SENSOR SCATTER ======= -->
+        <section class="card glass mb-18">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Color Sensor Analysis</h2>
+                    <p class="card-subtitle">Sensor value per run &mdash; grade bands: A (230-320), B (100-210), C (30-70)</p>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot legend-dot-a"></span> Grade A</span>
+                    <span class="legend-item"><span class="legend-dot legend-dot-b"></span> Grade B</span>
+                    <span class="legend-item"><span class="legend-dot legend-dot-c"></span> Grade C</span>
+                    <span class="legend-item"><span class="legend-dot legend-dot-trend"></span> Trend</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chart-scatter"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======= STATION TIMING CARDS ======= -->
+        <section class="station-cards-grid" id="station-cards-grid">
+            <!-- Populated by JS -->
+        </section>
+
+    </div>
+
+    <script src="/dashboards/combined-a/app.js"></script>
+</body>
+</html>

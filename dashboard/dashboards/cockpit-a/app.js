@@ -42,9 +42,9 @@ const RING_C = 2 * Math.PI * 63;
 
 // Color sensor value ranges
 function colorFromSensor(val) {
-    if (val >= 250 && val <= 300) return 'white';
-    if (val >= 130 && val <= 190) return 'red';
-    if (val >= 40 && val <= 60)   return 'blue';
+    if (val >= 230 && val <= 320) return 'white';
+    if (val >= 100 && val <= 210) return 'red';
+    if (val >= 30 && val <= 70)   return 'blue';
     return null;
 }
 

@@ -457,9 +457,9 @@ function renderScatter(grades) {
             const yScale = scales.y;
 
             const bands = [
-                { min: 250, max: 300, color: colors.A, label: 'A (250-300)' },
-                { min: 130, max: 190, color: colors.B, label: 'B (130-190)' },
-                { min: 40,  max: 60,  color: colors.C, label: 'C (40-60)' },
+                { min: 230, max: 320, color: colors.A, label: 'A (230-320)' },
+                { min: 100, max: 210, color: colors.B, label: 'B (100-210)' },
+                { min: 30,  max: 70,  color: colors.C, label: 'C (30-70)' },
             ];
 
             ctx.save();

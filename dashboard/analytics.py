@@ -15,11 +15,13 @@ import csv
 import math
 import os
 import glob
+import sqlite3
 from datetime import datetime, timedelta
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 TAG6_DATA = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "..", "..", "tag 6", "data"))
+LOCAL_DB = os.path.join(SCRIPT_DIR, "data", "factory.db")
 
 GVL_TO_STATION = {
     "gvl_MS": "MS",
@@ -31,7 +33,7 @@ GVL_TO_STATION = {
 }
 
 ACTUATOR_PREFIXES = ("bMotor_", "bValve_", "bLamp_", "bCompressor_")
-COLOR_RANGES = {"A": (250, 300), "B": (130, 190), "C": (40, 60)}
+COLOR_RANGES = {"A": (230, 320), "B": (100, 210), "C": (30, 70)}
 STATION_ORDER = ["HBW", "Crane", "MS", "PM", "SL"]
 
 # Theoretical cycle times (seconds) from simulator
@@ -53,6 +55,47 @@ def find_simulated_csv():
     if not files:
         return None
     return max(files, key=os.path.getsize)
+
+
+def load_events_from_db(db_path=None):
+    """Load events from SQLite database, return list of dicts (same format as load_events)."""
+    db_path = db_path or LOCAL_DB
+    if not os.path.exists(db_path):
+        return []
+
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT timestamp, gvl, variable, value, source, station "
+        "FROM events ORDER BY timestamp ASC"
+    ).fetchall()
+    conn.close()
+
+    events = []
+    for row in rows:
+        val_raw = row["value"]
+        if val_raw == "True":
+            value = True
+        elif val_raw == "False":
+            value = False
+        else:
+            try:
+                value = int(val_raw)
+            except ValueError:
+                try:
+                    value = float(val_raw)
+                except ValueError:
+                    value = val_raw
+
+        events.append({
+            "timestamp": row["timestamp"],
+            "ts": parse_ts(row["timestamp"]),
+            "gvl": row["gvl"],
+            "variable": row["variable"],
+            "value": value,
+            "station": row["station"],
+        })
+    return events
 
 
 def load_events(csv_path=None):
@@ -121,7 +164,12 @@ def split_into_runs(events):
 
 
 def compute_station_cycle_time(run_events, station):
-    """Compute cycle time for a station within a run."""
+    """Compute cycle time for a station within a run (sum of active periods).
+
+    Uses on/off tracking: time is counted only while at least one actuator is ON.
+    This avoids inflating the cycle time with idle gaps (e.g. HBW retrieval …
+    long idle … HBW storage).
+    """
     station_events = [e for e in run_events if e["station"] == station]
     if not station_events:
         return None
@@ -130,9 +178,22 @@ def compute_station_cycle_time(run_events, station):
     if not actuator_events:
         return None
 
-    first_ts = actuator_events[0]["ts"]
-    last_ts = actuator_events[-1]["ts"]
-    return (last_ts - first_ts).total_seconds()
+    active_count = 0
+    segment_start = None
+    active_time = 0.0
+
+    for e in actuator_events:
+        if e["value"] is True:
+            if active_count == 0:
+                segment_start = e["ts"]
+            active_count += 1
+        elif e["value"] is False and active_count > 0:
+            active_count -= 1
+            if active_count == 0 and segment_start is not None:
+                active_time += (e["ts"] - segment_start).total_seconds()
+                segment_start = None
+
+    return active_time if active_time > 0 else None
 
 
 def compute_ms_substeps(run_events):
@@ -169,60 +230,87 @@ def compute_ms_substeps(run_events):
     ejector_start = find_event("bValve_MS_Ejector", True)
     ejector_end = find_event("bValve_MS_Ejector", False)
 
+    def _dur(start, end):
+        """Return duration only if positive (correct temporal order)."""
+        if start and end:
+            d = (end - start).total_seconds()
+            return d if d > 0 else None
+        return None
+
     steps = {}
-    if conveyor_start and conveyor_end:
-        steps["conveyor"] = (conveyor_end - conveyor_start).total_seconds()
-    if turntable_start and transfer_at_oven:
-        steps["transfer_to_oven"] = (transfer_at_oven - turntable_start).total_seconds()
-    if burn_start and burn_end:
-        steps["burn"] = (burn_end - burn_start).total_seconds()
-    if saw_start and saw_end:
-        steps["saw"] = (saw_end - saw_start).total_seconds()
-    if ejector_start and ejector_end:
-        steps["eject"] = (ejector_end - ejector_start).total_seconds()
+    d = _dur(conveyor_start, conveyor_end)
+    if d is not None:
+        steps["conveyor"] = d
+
+    # Transfer to oven: use transfer motor start → arrival, not turntable
+    if transfer_start and transfer_at_oven:
+        d = _dur(transfer_start, transfer_at_oven)
+        if d is not None:
+            steps["transfer_to_oven"] = d
+
+    d = _dur(burn_start, burn_end)
+    if d is not None:
+        steps["burn"] = d
+    d = _dur(saw_start, saw_end)
+    if d is not None:
+        steps["saw"] = d
+    d = _dur(ejector_start, ejector_end)
+    if d is not None:
+        steps["eject"] = d
 
     # Oven loading (slider in/out)
     slider_in_start = find_event("bMotor_MS_OvenSlider_movein", True)
     slider_in_end = find_event("bReferenceSwitch_MS_OvenSlider_inside", True)
-    if slider_in_start and slider_in_end:
-        steps["oven_load"] = (slider_in_end - slider_in_start).total_seconds()
+    d = _dur(slider_in_start, slider_in_end)
+    if d is not None:
+        steps["oven_load"] = d
 
     slider_out_start = find_event("bMotor_MS_OvenSlider_moveout", True)
     slider_out_end = find_event("bReferenceSwitch_MS_OvenSlider_outside", True)
-    if slider_out_start and slider_out_end:
-        steps["oven_unload"] = (slider_out_end - slider_out_start).total_seconds()
+    d = _dur(slider_out_start, slider_out_end)
+    if d is not None:
+        steps["oven_unload"] = d
 
     # Transfer back
     transfer_back_start = find_event("bMotor_MS_TransferUnit_toturntable", True)
     transfer_back_end = find_event("bReferenceSwitch_MS_TransferUnit_atturntable", True)
-    if transfer_back_start and transfer_back_end:
-        steps["transfer_back"] = (transfer_back_end - transfer_back_start).total_seconds()
+    d = _dur(transfer_back_start, transfer_back_end)
+    if d is not None:
+        steps["transfer_back"] = d
 
     # Turntable to saw
     tt_saw_start = find_event("bMotor_MS_Turntable_counterclockwise", True)
-    tt_saw_end = find_event("bReferenceSwitch_MS_Turntable_atsaw", True)
-    if tt_saw_start and tt_saw_end:
-        steps["turntable_to_saw"] = (tt_saw_end - tt_saw_start).total_seconds()
+    tt_saw_end = find_event_after("bReferenceSwitch_MS_Turntable_atsaw", True, tt_saw_start) if tt_saw_start else None
+    d = _dur(tt_saw_start, tt_saw_end)
+    if d is not None:
+        steps["turntable_to_saw"] = d
 
     return steps
 
 
 def extract_color_reading(run_events):
-    """Extract color sensor reading from a run."""
-    for e in run_events:
-        if e["variable"] == "iColorSensor_SL" and isinstance(e["value"], int) and e["value"] > 10:
-            return e["value"]
-    return None
+    """Extract peak color sensor reading from a run.
+
+    The sensor outputs many readings as the workpiece passes; the peak
+    (maximum) value is the actual color measurement.
+    """
+    readings = [
+        e["value"] for e in run_events
+        if e["variable"] == "iColorSensor_SL"
+        and isinstance(e["value"], int)
+        and e["value"] > 10
+    ]
+    return max(readings) if readings else None
 
 
 def grade_from_color(color_value):
     if color_value is None:
         return None
-    if 250 <= color_value <= 300:
+    if 230 <= color_value <= 320:
         return "A"
-    elif 130 <= color_value <= 190:
+    elif 100 <= color_value <= 210:
         return "B"
-    elif 40 <= color_value <= 60:
+    elif 30 <= color_value <= 70:
         return "C"
     return "unknown"
 
@@ -254,20 +342,46 @@ def compute_temperature_curve(burn_time, t_ambient=25.0, t_target=180.0, tau=1.5
 # ---- Main analytics functions ----
 
 _cache = {}
+_cache_ts = 0.0
+_CACHE_TTL = 10.0  # seconds
+
+
+def _maybe_invalidate():
+    global _cache_ts
+    import time
+    now = time.time()
+    if now - _cache_ts > _CACHE_TTL:
+        _cache.clear()
+        _cache_ts = now
 
 
 def _get_events():
-    csv_path = find_simulated_csv()
-    cache_key = csv_path or "none"
-    if cache_key not in _cache:
-        _cache[cache_key] = load_events(csv_path)
-    return _cache[cache_key]
+    _maybe_invalidate()
+    # Prefer SQLite database (real PLC data) over simulated CSV
+    if "events" not in _cache:
+        events = load_events_from_db()
+        if events:
+            _cache["events"] = events
+        else:
+            csv_path = find_simulated_csv()
+            _cache["events"] = load_events(csv_path)
+    return _cache["events"]
 
 
 def _get_runs():
+    _maybe_invalidate()
     if "runs" not in _cache:
         events = _get_events()
-        _cache["runs"] = split_into_runs(events)
+        all_runs = split_into_runs(events)
+        # Filter out warmup data (>300s) and false detections (<20s)
+        filtered = []
+        for run in all_runs:
+            if len(run) < 2:
+                continue
+            dur = (run[-1]["ts"] - run[0]["ts"]).total_seconds()
+            if 20 <= dur <= 300:
+                filtered.append(run)
+        _cache["runs"] = filtered if filtered else all_runs
     return _cache["runs"]
 
 
@@ -407,14 +521,18 @@ def get_throughput():
     theoretical_max = 3600.0 / theoretical_run_time if theoretical_run_time > 0 else 0
     utilization = per_hour / theoretical_max if theoretical_max > 0 else 0
 
-    # Cumulative production
+    # Cumulative production with instantaneous rate
     cumulative = []
+    first_ts = events[0]["ts"] if events else None
     for i, run_events in enumerate(runs):
-        if run_events:
+        if run_events and first_ts:
+            elapsed = (run_events[-1]["ts"] - first_ts).total_seconds()
+            elapsed_hr = elapsed / 3600.0 if elapsed > 0 else 1
             cumulative.append({
                 "run": i + 1,
                 "timestamp": run_events[-1]["timestamp"],
                 "count": i + 1,
+                "rate_per_hour": round((i + 1) / elapsed_hr, 1),
             })
 
     return {
@@ -549,7 +667,7 @@ def get_alerts():
     for g in grades:
         cv = g.get("color_value")
         if cv is not None:
-            if not (40 <= cv <= 60 or 130 <= cv <= 190 or 250 <= cv <= 300):
+            if not (30 <= cv <= 70 or 100 <= cv <= 210 or 230 <= cv <= 320):
                 alerts.append({
                     "type": "color_sensor_drift",
                     "severity": "warning",

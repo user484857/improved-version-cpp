@@ -1,0 +1,486 @@
+/* ============================================
+   Combined Dashboard A — Custom Styles
+   Uses shared.css design system variables
+   ============================================ */
+
+/* ── KPI Row ──────────────────────────────── */
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.kpi-pill {
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+}
+
+.kpi-pill-value {
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.kpi-pill-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 8px;
+}
+
+/* ── Stacked Comparison Bars ──────────────── */
+
+.stacked-container { margin: 8px 0; }
+
+.stacked-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.stacked-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    width: 55px;
+    text-align: right;
+}
+
+.stacked-bar-track {
+    flex: 1;
+    display: flex;
+    height: 36px;
+    border-radius: 8px;
+    overflow: hidden;
+    gap: 2px;
+}
+
+.stacked-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: white;
+    border-radius: 6px;
+    transition: width 0.6s var(--ease-out);
+}
+
+.stacked-total {
+    font-size: 0.78rem;
+    font-weight: 600;
+    width: 55px;
+}
+
+.stacked-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    justify-content: center;
+}
+
+.stacked-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.stacked-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+/* ── Station Timing Cards ─────────────────── */
+
+.station-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.station-timing-card {
+    border-radius: var(--radius-md);
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.station-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+}
+
+.station-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-top: 4px;
+}
+
+.station-card-name {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.station-card-fullname {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+}
+
+.station-card-actual {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.station-card-unit {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+.station-card-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.station-card-target {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+}
+
+.gap-over {
+    color: var(--red);
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+
+.gap-ok {
+    color: var(--green);
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+
+.station-traffic-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.traffic-green {
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(48, 209, 88, 0.5);
+}
+
+.traffic-orange {
+    background: var(--orange);
+    box-shadow: 0 0 8px rgba(255, 159, 10, 0.5);
+}
+
+.traffic-red {
+    background: var(--red);
+    box-shadow: 0 0 8px rgba(255, 69, 58, 0.5);
+}
+
+.station-mini-bar-track {
+    position: relative;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--item-bg);
+    margin-top: 10px;
+}
+
+.station-mini-bar-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s var(--ease-out);
+}
+
+.station-mini-bar-target {
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 10px;
+    background: var(--text-tertiary);
+    border-radius: 1px;
+}
+
+/* ── Factory SVG Area ─────────────────────── */
+
+.factory-card {
+    border-radius: var(--radius-lg);
+    padding: 0;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+
+.factory-card svg {
+    width: 100%;
+    display: block;
+}
+
+/* ── Chart Container ──────────────────────── */
+
+.chart-container {
+    position: relative;
+    height: 340px;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ── Timing Row below Twin ────────────────── */
+
+.timing-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.timing-pill {
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.pill-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+}
+
+.pill-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.pill-last {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.pill-avg {
+    font-size: 0.62rem;
+    color: var(--text-tertiary);
+    display: block;
+}
+
+.tl-green {
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(48, 209, 88, 0.4);
+}
+
+.tl-orange {
+    background: var(--orange);
+    box-shadow: 0 0 6px rgba(255, 159, 10, 0.4);
+}
+
+.tl-red {
+    background: var(--red);
+    box-shadow: 0 0 6px rgba(255, 69, 58, 0.4);
+}
+
+.tl-active {
+    background: var(--blue);
+    box-shadow: 0 0 6px rgba(0, 122, 255, 0.4);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ── Section Spacing ──────────────────────── */
+
+.section-gap { margin-bottom: 18px; }
+
+/* ── SVG Station Styles ───────────────────── */
+
+.stn-bg {
+    fill: var(--glass-bg);
+    stroke: var(--glass-border);
+    stroke-width: 1.2;
+    transition: all 0.4s var(--ease-out);
+}
+
+.stn.active .stn-bg { stroke-width: 2; }
+
+.stn-label {
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--text-primary);
+    font-family: Inter, sans-serif;
+}
+
+.stn-sub {
+    font-size: 10px;
+    fill: var(--text-tertiary);
+    font-family: Inter, sans-serif;
+}
+
+.stn-action {
+    font-size: 9px;
+    fill: var(--text-secondary);
+    font-family: 'SF Mono', monospace;
+}
+
+.conn-path {
+    fill: none;
+    stroke: var(--text-tertiary);
+    stroke-width: 1.5;
+    stroke-dasharray: 6, 8;
+    opacity: 0.25;
+    transition: all 0.4s var(--ease-out);
+}
+
+.conn-path.active { opacity: 0.7; stroke-width: 2; }
+.conn-path.visited { opacity: 0.4; }
+
+.step-badge circle {
+    fill: var(--glass-bg);
+    stroke: var(--glass-border);
+    stroke-width: 1;
+}
+
+.step-badge text {
+    font-size: 10px;
+    fill: var(--text-tertiary);
+    font-family: 'SF Mono', monospace;
+    text-anchor: middle;
+}
+
+/* ── Clock in Header ──────────────────────── */
+
+.header-clock {
+    font-family: 'SF Mono', 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--item-bg);
+    border: 1px solid var(--glass-border);
+}
+
+/* ── Scatter Chart Legend ─────────────────── */
+
+.chart-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot-a {
+    background: #f0f0f0;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.legend-dot-b { background: #FF453A; }
+.legend-dot-c { background: #007AFF; }
+.legend-dot-trend { background: #AF52DE; }
+
+[data-theme="light"] .legend-dot-a {
+    background: #999;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* ── Section Title ────────────────────────── */
+
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.section-subtitle {
+    font-size: 0.70rem;
+    color: var(--text-tertiary);
+}
+
+/* ── Mode Toggle + Live Pill ─────────────── */
+
+.mode-toggle { margin-left: 12px; }
+
+.live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--item-bg);
+    border: 1px solid var(--glass-border);
+    font-size: 0.68rem;
+}
+
+.live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(48, 209, 88, 0.5);
+}
+
+.live-dot.stale {
+    background: var(--orange);
+    box-shadow: 0 0 6px rgba(255, 159, 10, 0.5);
+}
+
+.live-dot.disconnected {
+    background: var(--red);
+    box-shadow: 0 0 6px rgba(255, 69, 58, 0.5);
+}
+
+/* ── Responsive ───────────────────────────── */
+
+@media (max-width: 860px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    .station-cards-grid { grid-template-columns: repeat(2, 1fr); }
+}

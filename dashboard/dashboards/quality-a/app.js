@@ -6,9 +6,9 @@
  * Refreshes every 5 seconds.
  *
  * Grade colors = actual workpiece colors:
- *   A = white (#f0f0f0)  sensor 250-300
- *   B = red   (#FF453A)  sensor 130-190
- *   C = blue  (#007AFF)  sensor 40-60
+ *   A = white (#f0f0f0)  sensor 230-320
+ *   B = red   (#FF453A)  sensor 100-210
+ *   C = blue  (#007AFF)  sensor 30-70
  *
  * NO yellow anywhere.
  */
@@ -316,9 +316,9 @@ function renderScatterChart(grades) {
             if (!chartArea || !yScale) return;
 
             var bands = [
-                { min: 250, max: 300, color: gc.A, label: 'A (250-300)' },
-                { min: 130, max: 190, color: gc.B, label: 'B (130-190)' },
-                { min: 40,  max: 60,  color: gc.C, label: 'C (40-60)' },
+                { min: 230, max: 320, color: gc.A, label: 'A (230-320)' },
+                { min: 100, max: 210, color: gc.B, label: 'B (100-210)' },
+                { min: 30,  max: 70,  color: gc.C, label: 'C (30-70)' },
             ];
 
             ctx.save();

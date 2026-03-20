@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Overview B</title>
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/combined-b/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <svg class="logo" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="6" fill="url(#hdr-g)"/>
+                    <rect x="5" y="7" width="4" height="10" rx="1.5" fill="white" opacity="0.9"/>
+                    <rect x="10.5" y="5" width="4" height="14" rx="1.5" fill="white" opacity="0.7"/>
+                    <rect x="16" y="9" width="3" height="8" rx="1.5" fill="white" opacity="0.5"/>
+                    <defs><linearGradient id="hdr-g" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#5856D6"/><stop offset="1" stop-color="#007AFF"/></linearGradient></defs>
+                </svg>
+                <div>
+                    <div class="dash-title">Factory Overview B</div>
+                    <div class="dash-subtitle">Fischertechnik Smart Factory &mdash; Sidebar Layout</div>
+                </div>
+                <div class="toggle-group mode-toggle" id="mode-toggle">
+                    <button class="toggle-option active" data-mode="demo" onclick="switchMode('demo')">Demo</button>
+                    <button class="toggle-option" data-mode="live" onclick="switchMode('live')">Live</button>
+                </div>
+            </div>
+            <div class="dash-header-right">
+                <span class="live-pill" id="live-pill">
+                    <span class="live-dot" id="live-dot"></span>
+                    <span class="live-text mono" id="live-text">Demo</span>
+                </span>
+                <span class="clock-display mono" id="clock">--:--:--</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg class="icon-moon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                    <svg class="icon-sun" width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style="display:none"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- 2-Column Layout -->
+        <div class="dashboard-grid">
+
+            <!-- ===== LEFT SIDEBAR ===== -->
+            <div class="sidebar">
+
+                <div class="sidebar-section-title">Key Metrics</div>
+
+                <!-- KPI: Avg Cycle Time -->
+                <div class="kpi-card glass" id="kpi-cycle">
+                    <span class="kpi-card-value mono" id="kpi-cycle-val">--</span>
+                    <span class="kpi-card-label">Avg Cycle Time</span>
+                    <span class="kpi-card-trend neutral" id="kpi-cycle-trend"></span>
+                </div>
+
+                <!-- KPI: Throughput -->
+                <div class="kpi-card glass kpi-green" id="kpi-throughput">
+                    <span class="kpi-card-value mono" id="kpi-tp-val">--</span>
+                    <span class="kpi-card-label">Throughput / Hour</span>
+                    <span class="kpi-card-trend neutral" id="kpi-tp-trend"></span>
+                </div>
+
+                <!-- KPI: Uptime -->
+                <div class="kpi-card glass kpi-purple" id="kpi-uptime">
+                    <span class="kpi-card-value mono" id="kpi-uptime-val">--</span>
+                    <span class="kpi-card-label">Total Uptime</span>
+                    <span class="kpi-card-trend neutral" id="kpi-uptime-trend"></span>
+                </div>
+
+                <div class="sidebar-section-title">Station Status</div>
+
+                <!-- Station cards rendered by JS -->
+                <div id="station-cards"></div>
+            </div>
+
+            <!-- ===== RIGHT MAIN CONTENT ===== -->
+            <div class="main-content">
+
+                <!-- Digital Twin SVG -->
+                <div class="card glass factory-card">
+                    <div class="card-header">
+                        <span class="card-title">Digital Twin</span>
+                        <span class="card-subtitle">Factory floor — last run timings</span>
+                    </div>
+                    <div class="card-body" style="padding:8px 12px 4px;">
+                        <svg id="factory-svg" viewBox="0 0 800 320" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <pattern id="grid-b" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="0.3" stroke-opacity="0.05"/>
+                                </pattern>
+                                <filter id="glow-hbw-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#AF52DE" flood-opacity="0.35" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <filter id="glow-crane-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#30D158" flood-opacity="0.35" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <filter id="glow-oven-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#007AFF" flood-opacity="0.35" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <filter id="glow-out-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#007AFF" flood-opacity="0.3" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <filter id="glow-color-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#5AC8FA" flood-opacity="0.35" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                                <filter id="glow-sort-b" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="b"/><feFlood flood-color="#FF9F0A" flood-opacity="0.35" result="c"/>
+                                    <feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                </filter>
+                            </defs>
+
+                            <!-- Background grid -->
+                            <rect width="800" height="320" fill="url(#grid-b)" opacity="0.5"/>
+
+                            <!-- Connection paths -->
+                            <g class="connections">
+                                <path id="conn-1" class="conn-path" d="M 130 150 C 175 150, 225 150, 270 150"/>
+                                <path id="conn-2" class="conn-path" d="M 355 125 C 370 90, 385 65, 410 55"/>
+                                <path id="conn-3" class="conn-path" d="M 500 55 C 520 55, 540 55, 555 55"/>
+                                <path id="conn-4" class="conn-path" d="M 640 70 C 660 110, 670 140, 670 165"/>
+                                <path id="conn-5" class="conn-path" d="M 670 230 C 665 255, 650 275, 630 285"/>
+                                <path id="conn-6" class="conn-path" d="M 550 290 C 470 285, 380 260, 355 195"/>
+                            </g>
+
+                            <!-- Step badges -->
+                            <g class="step-badges">
+                                <g class="step-badge"><circle cx="70"  cy="150" r="8"/><text x="70"  y="153">1</text></g>
+                                <g class="step-badge"><circle cx="315" cy="120" r="8"/><text x="315" y="123">2</text></g>
+                                <g class="step-badge"><circle cx="455" cy="35"  r="8"/><text x="455" y="38">3</text></g>
+                                <g class="step-badge"><circle cx="600" cy="35"  r="8"/><text x="600" y="38">4</text></g>
+                                <g class="step-badge"><circle cx="700" cy="195" r="8"/><text x="700" y="198">5</text></g>
+                                <g class="step-badge"><circle cx="635" cy="310" r="8"/><text x="635" y="313">6</text></g>
+                            </g>
+
+                            <!-- Stations -->
+                            <g class="stn" id="stn-hbw">
+                                <rect x="55" y="120" width="80" height="60" rx="12" class="stn-bg" filter="url(#glow-hbw-b)"/>
+                                <text x="95" y="145" text-anchor="middle" class="stn-label">HBW</text>
+                                <text x="95" y="158" text-anchor="middle" class="stn-sub">Warehouse</text>
+                            </g>
+
+                            <g class="stn" id="stn-crane">
+                                <rect x="270" y="120" width="85" height="60" rx="12" class="stn-bg" filter="url(#glow-crane-b)"/>
+                                <text x="312" y="145" text-anchor="middle" class="stn-label">Crane</text>
+                                <text x="312" y="158" text-anchor="middle" class="stn-sub">Transport</text>
+                            </g>
+
+                            <g class="stn" id="stn-oven">
+                                <rect x="410" y="28" width="90" height="60" rx="12" class="stn-bg" filter="url(#glow-oven-b)"/>
+                                <text x="455" y="53" text-anchor="middle" class="stn-label">Oven</text>
+                                <text x="455" y="66" text-anchor="middle" class="stn-sub">Burn / Heat</text>
+                            </g>
+
+                            <g class="stn" id="stn-out">
+                                <rect x="555" y="28" width="85" height="60" rx="12" class="stn-bg" filter="url(#glow-out-b)"/>
+                                <text x="597" y="53" text-anchor="middle" class="stn-label">Out</text>
+                                <text x="597" y="66" text-anchor="middle" class="stn-sub">Saw / Eject</text>
+                            </g>
+
+                            <g class="stn" id="stn-color">
+                                <rect x="625" y="165" width="90" height="65" rx="12" class="stn-bg" filter="url(#glow-color-b)"/>
+                                <text x="670" y="192" text-anchor="middle" class="stn-label">Color</text>
+                                <text x="670" y="206" text-anchor="middle" class="stn-sub">Measure</text>
+                            </g>
+
+                            <g class="stn" id="stn-sort">
+                                <rect x="550" y="260" width="85" height="55" rx="12" class="stn-bg" filter="url(#glow-sort-b)"/>
+                                <text x="592" y="283" text-anchor="middle" class="stn-label">Sort</text>
+                                <text x="592" y="296" text-anchor="middle" class="stn-sub">Classify</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Timing Pills -->
+                <div class="timing-row" id="timing-row"></div>
+
+                <!-- Quality Scatter Chart -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <span class="card-title">Quality Scatter</span>
+                        <span class="card-subtitle">Color sensor readings with grade bands</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="scatter-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cycle Time Comparison Bars -->
+                <div class="card glass">
+                    <div class="card-header">
+                        <span class="card-title">Cycle Time Comparison</span>
+                        <span class="card-subtitle">Station breakdown per run (stacked horizontal)</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="stacked-bars"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="/dashboards/combined-b/app.js"></script>
+</body>
+</html>

@@ -2,12 +2,14 @@
 Glassmorphism Dashboard Server for Fischertechnik Factory.
 
 Modes:
-  - Demo mode (default): Replays recorded CSV data — no PLC needed
+  - Demo mode (default): Replays recorded data — no PLC needed
+    Prefers SQLite database (factory.db), falls back to CSV
   - Live mode: Reads from PLC via OPC UA
 
 Usage:
-  python server.py                           # Demo mode (auto-finds CSV)
-  python server.py --csv path/to/data.csv    # Demo mode with specific CSV
+  python server.py                           # Demo mode (auto: DB → CSV)
+  python server.py --demo-db                 # Force SQLite demo mode
+  python server.py --csv path/to/data.csv    # Force CSV demo mode
   python server.py --live                    # Live OPC UA mode
   python server.py --speed 3                 # Replay at 3x speed
 """
@@ -81,6 +83,22 @@ def dashboard_cockpit_a():
 def dashboard_cockpit_b():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-b"), "index.html")
 
+@app.route("/production-a")
+def dashboard_production_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-a"), "index.html")
+
+@app.route("/production-b")
+def dashboard_production_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-b"), "index.html")
+
+@app.route("/utilization-a")
+def dashboard_utilization_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-a"), "index.html")
+
+@app.route("/utilization-b")
+def dashboard_utilization_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-b"), "index.html")
+
 
 
 @app.route("/cockpit-v1")
@@ -132,23 +150,6 @@ def dashboard_quality_v3():
 @app.route("/quality-r2a")
 def dashboard_quality_r2a():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-r2a"), "index.html")
-
-
-@app.route("/utilization-a")
-def dashboard_utilization_a():
-    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-a"), "index.html")
-
-@app.route("/utilization-b")
-def dashboard_utilization_b():
-    return send_from_directory(os.path.join(DASHBOARD_DIR, "utilization-b"), "index.html")
-
-@app.route("/production-a")
-def dashboard_production_a():
-    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-a"), "index.html")
-
-@app.route("/production-b")
-def dashboard_production_b():
-    return send_from_directory(os.path.join(DASHBOARD_DIR, "production-b"), "index.html")
 
 
 @app.route("/twin-v1")
@@ -221,7 +222,12 @@ def api_status():
     """Return server status and mode info."""
     info = {"mode": mode}
     if mode == "demo" and data_source:
-        info["csv"] = str(data_source.csv_path.name)
+        if hasattr(data_source, "csv_path"):
+            info["source"] = "csv"
+            info["file"] = str(data_source.csv_path.name)
+        elif hasattr(data_source, "db_path"):
+            info["source"] = "sqlite"
+            info["file"] = str(data_source.db_path.name)
         info["progress"] = data_source.get_progress()
         info["events"] = len(data_source._events)
     return jsonify(info)
@@ -236,17 +242,27 @@ def api_switch_mode():
     target = request.json.get("mode")
 
     if target == "demo":
-        csv_path = find_csv()
-        if not csv_path:
-            return jsonify({"error": "No CSV file found for demo mode"}), 400
         # Stop current source
         if data_source and hasattr(data_source, "stop"):
             data_source.stop()
+
+        # Prefer SQLite, fall back to CSV
+        db_path = find_db()
+        if db_path:
+            from demo_db_player import DemoDBPlayer
+            data_source = DemoDBPlayer(db_path, speed=2.0, loop=True)
+            data_source.start()
+            mode = "demo"
+            return jsonify({"mode": mode, "source": "sqlite"})
+
+        csv_path = find_csv()
+        if not csv_path:
+            return jsonify({"error": "No data source found for demo mode"}), 400
         from demo_player import DemoPlayer
         data_source = DemoPlayer(csv_path, speed=2.0, loop=True)
         data_source.start()
         mode = "demo"
-        return jsonify({"mode": mode, "csv": os.path.basename(csv_path)})
+        return jsonify({"mode": mode, "source": "csv", "file": os.path.basename(csv_path)})
 
     elif target == "live":
         try:
@@ -484,18 +500,6 @@ def api_summary():
     return jsonify(analytics.get_summary())
 
 
-@app.route("/api/analytics/utilization")
-def api_utilization():
-    import analytics
-    return jsonify(analytics.get_machine_utilization())
-
-
-@app.route("/api/analytics/wip")
-def api_wip():
-    import analytics
-    return jsonify(analytics.get_wip())
-
-
 def find_csv():
     """Auto-discover the best CSV — prefer simulated runs over raw sensor dumps."""
     base = os.path.dirname(os.path.abspath(__file__))
@@ -526,11 +530,21 @@ def find_csv():
     return best
 
 
+def find_db():
+    """Find the factory SQLite database."""
+    base = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base, "data", "factory.db")
+    if os.path.exists(db_path):
+        return db_path
+    return None
+
+
 def main():
     global data_source, mode
 
     parser = argparse.ArgumentParser(description="Fischertechnik Glass Dashboard")
     parser.add_argument("--live", action="store_true", help="Live OPC UA mode")
+    parser.add_argument("--demo-db", action="store_true", help="Force SQLite demo mode")
     parser.add_argument("--csv", type=str, help="Path to CSV file for demo replay")
     parser.add_argument("--speed", type=float, default=2.0, help="Replay speed multiplier (default: 2x)")
     parser.add_argument("--host", type=str, default="0.0.0.0")
@@ -546,20 +560,46 @@ def main():
         print(f"  http://localhost:{args.port}\n")
     else:
         mode = "demo"
-        csv_path = args.csv or find_csv()
-        if not csv_path:
-            print("No CSV file found for demo mode.")
-            print("Use --csv path/to/data.csv or --live for OPC UA mode.")
-            sys.exit(1)
 
-        from demo_player import DemoPlayer
-        data_source = DemoPlayer(csv_path, speed=args.speed, loop=True)
-        data_source.start()
+        # Priority: --csv flag > --demo-db flag > auto-detect (DB first, then CSV)
+        if args.csv:
+            from demo_player import DemoPlayer
+            data_source = DemoPlayer(args.csv, speed=args.speed, loop=True)
+            data_source.start()
+            print(f"\n  Fischertechnik Factory — Glass Dashboard")
+            print(f"  Mode: DEMO (CSV replay at {args.speed}x)")
+            print(f"  File: {os.path.basename(args.csv)} ({len(data_source._events)} events)")
+            print(f"  http://localhost:{args.port}\n")
 
-        print(f"\n  Fischertechnik Factory — Glass Dashboard")
-        print(f"  Mode: DEMO (CSV replay at {args.speed}x)")
-        print(f"  File: {os.path.basename(csv_path)} ({len(data_source._events)} events)")
-        print(f"  http://localhost:{args.port}\n")
+        else:
+            # Try SQLite database first
+            db_path = find_db()
+
+            if args.demo_db and not db_path:
+                print("No factory.db found in dashboard/data/")
+                sys.exit(1)
+
+            if db_path:
+                from demo_db_player import DemoDBPlayer
+                data_source = DemoDBPlayer(db_path, speed=args.speed, loop=True)
+                data_source.start()
+                print(f"\n  Fischertechnik Factory — Glass Dashboard")
+                print(f"  Mode: DEMO (SQLite replay at {args.speed}x)")
+                print(f"  Source: factory.db ({len(data_source._events)} events)")
+                print(f"  http://localhost:{args.port}\n")
+            else:
+                csv_path = find_csv()
+                if not csv_path:
+                    print("No data source found for demo mode.")
+                    print("Use --csv, --demo-db, or --live for OPC UA mode.")
+                    sys.exit(1)
+                from demo_player import DemoPlayer
+                data_source = DemoPlayer(csv_path, speed=args.speed, loop=True)
+                data_source.start()
+                print(f"\n  Fischertechnik Factory — Glass Dashboard")
+                print(f"  Mode: DEMO (CSV replay at {args.speed}x)")
+                print(f"  File: {os.path.basename(csv_path)} ({len(data_source._events)} events)")
+                print(f"  http://localhost:{args.port}\n")
 
     app.run(host=args.host, port=args.port, debug=False)
 
