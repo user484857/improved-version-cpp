@@ -113,7 +113,7 @@ MAX_GAP_SEC = 2.0
 class DemoDBPlayer:
     """Replays SQLite events as fake real-time data."""
 
-    def __init__(self, db_path, speed=2.0, loop=True):
+    def __init__(self, db_path, speed=1.0, loop=True):
         self.db_path = Path(db_path)
         self.speed = speed
         self.loop = loop

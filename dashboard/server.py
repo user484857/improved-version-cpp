@@ -318,7 +318,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Fischertechnik Factory Dashboard")
     parser.add_argument("--live", action="store_true", help="Live OPC UA mode (connect to PLC)")
-    parser.add_argument("--speed", type=float, default=2.0, help="Replay speed multiplier (default: 2x)")
+    parser.add_argument("--speed", type=float, default=1.0, help="Replay speed multiplier (default: 1x)")
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8050)
     args = parser.parse_args()
