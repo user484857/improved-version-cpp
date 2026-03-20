@@ -1,7 +1,6 @@
 from opcua import ua, Client
 import time
 import sys
-import csv
 import os
 from datetime import datetime
 from threading import Thread
@@ -9,7 +8,7 @@ from queue import Queue
 
 # =============================================================================
 # OPC UA Client for Fischertechnik Factory
-# Collects ALL variable changes with timestamps and saves to CSV
+# Collects ALL variable changes and stores them in SQLite (event-based).
 # Server runs on Beckhoff CX2030 PLC
 #
 # Modes:
@@ -25,21 +24,18 @@ from queue import Queue
 
 SERVER_URL = "opc.tcp://169.254.100.11:4840"
 
-# CSV output directory (same folder as this script)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 
 
-class CsvWriterThread:
+class EventWriter:
     """
-    Non-blocking CSV + SQLite writer: events go into a queue,
-    a background thread writes them to both CSV and SQLite.
-    No Lock contention in the OPC UA callback.
+    Non-blocking SQLite writer: events go into a queue,
+    a background thread writes them to the database.
     """
 
-    def __init__(self, csv_path, run_id=None):
+    def __init__(self, run_id=None):
         self.queue = Queue()
-        self.csv_path = csv_path
         self.row_count = 0
         self.run_id = run_id
         self._running = True
@@ -47,51 +43,31 @@ class CsvWriterThread:
         self._thread.start()
 
     def _write_loop(self):
-        # Initialize SQLite alongside CSV
-        db = None
-        try:
-            from database import FactoryDB
-            db = FactoryDB()
-            if self.run_id:
-                db.register_run(self.run_id, source_file=os.path.basename(self.csv_path))
-            print(f"  [DB] SQLite storage active: {db.db_path}")
-        except Exception as e:
-            print(f"  [DB] SQLite not available ({e}), CSV-only mode")
+        from database import FactoryDB
+        db = FactoryDB()
+        if self.run_id:
+            db.register_run(self.run_id)
+        print(f"  [DB] SQLite storage active: {db.db_path}")
 
-        db_batch = []
+        batch = []
 
-        with open(self.csv_path, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["timestamp", "gvl", "variable", "value", "source"])
-            while self._running or not self.queue.empty():
-                try:
-                    row = self.queue.get(timeout=0.5)
-                    # Write to CSV
-                    writer.writerow(row)
-                    self.row_count += 1
+        while self._running or not self.queue.empty():
+            try:
+                row = self.queue.get(timeout=0.5)
+                batch.append(tuple(row))
+                self.row_count += 1
 
-                    # Batch for SQLite
-                    if db:
-                        db_batch.append(tuple(row))
+                if len(batch) >= 50:
+                    db.insert_batch(batch, run_id=self.run_id)
+                    batch = []
+            except Exception:
+                pass
 
-                    # Flush every 50 rows
-                    if self.row_count % 50 == 0:
-                        f.flush()
-                        # Also flush SQLite batch
-                        if db and db_batch:
-                            db.insert_batch(db_batch, run_id=self.run_id)
-                            db_batch = []
-                except Exception:
-                    pass
-            f.flush()
-
-        # Final SQLite flush
-        if db:
-            if db_batch:
-                db.insert_batch(db_batch, run_id=self.run_id)
-            if self.run_id:
-                db.finish_run(self.run_id)
-            db.close()
+        if batch:
+            db.insert_batch(batch, run_id=self.run_id)
+        if self.run_id:
+            db.finish_run(self.run_id)
+        db.close()
 
     def write(self, timestamp, gvl, variable, value, source="event"):
         self.queue.put([timestamp, gvl, variable, value, source])
@@ -107,15 +83,15 @@ class QueueSubHandler(object):
     instead of writing directly — no blocking in the callback.
     """
 
-    def __init__(self, csv_writer, node_map):
-        self.csv_writer = csv_writer
+    def __init__(self, writer, node_map):
+        self.writer = writer
         self.node_map = node_map
 
     def datachange_notification(self, node, val, data):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         node_key = node.nodeid.to_string()
         var_name, gvl_name = self.node_map.get(node_key, (str(node.nodeid), "unknown"))
-        self.csv_writer.write(timestamp, gvl_name, var_name, val, "event")
+        self.writer.write(timestamp, gvl_name, var_name, val, "event")
         print(f"  [EVT] {timestamp} | {gvl_name}.{var_name} = {val}")
 
 
@@ -178,20 +154,20 @@ def find_gvl_nodes(client):
     return node_map, var_nodes
 
 
-def poll_all(var_nodes, csv_writer):
-    """Read all variables once and write to CSV as 'poll' entries."""
+def poll_all(var_nodes, writer):
+    """Read all variables once and write as 'poll' entries."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     for var_node, var_name, gvl_name in var_nodes:
         try:
             val = var_node.get_value()
-            csv_writer.write(timestamp, gvl_name, var_name, val, "poll")
+            writer.write(timestamp, gvl_name, var_name, val, "poll")
         except Exception:
             pass
 
 
 def collect_data(client, mode="both", poll_interval_ms=500):
     """
-    Collect factory data and save to CSV.
+    Collect factory data and store in SQLite.
 
     mode:
         "events" — subscription-based, only records changes
@@ -202,19 +178,16 @@ def collect_data(client, mode="both", poll_interval_ms=500):
 
     run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_id = f"factory_run_{run_time}"
-    csv_path = os.path.join(DATA_DIR, f"{run_id}.csv")
 
     print(f"Finding all GVL variables...")
     node_map, var_nodes = find_gvl_nodes(client)
     print(f"Found {len(var_nodes)} variables.\n")
 
-    # Start non-blocking CSV + SQLite writer
-    csv_writer = CsvWriterThread(csv_path, run_id=run_id)
+    writer = EventWriter(run_id=run_id)
 
-    # Subscribe to events
     if mode in ("events", "both"):
-        handler = QueueSubHandler(csv_writer, node_map)
-        sub = client.create_subscription(100, handler)  # 100ms interval
+        handler = QueueSubHandler(writer, node_map)
+        sub = client.create_subscription(100, handler)
 
         subscribed = 0
         for var_node, var_name, gvl_name in var_nodes:
@@ -229,7 +202,6 @@ def collect_data(client, mode="both", poll_interval_ms=500):
     if mode in ("poll", "both"):
         print(f"Polling all variables every {poll_interval_ms}ms.")
 
-    print(f"Saving to: {csv_path}")
     print(f"\nCollecting data... (Ctrl+C to stop)\n")
     print("-" * 60)
 
@@ -239,48 +211,48 @@ def collect_data(client, mode="both", poll_interval_ms=500):
     try:
         while True:
             if mode in ("poll", "both"):
-                poll_all(var_nodes, csv_writer)
+                poll_all(var_nodes, writer)
                 poll_count += 1
                 if poll_count % 10 == 0:
                     print(f"  [POLL] {datetime.now().strftime('%H:%M:%S')} | "
-                          f"poll #{poll_count}, {csv_writer.row_count} total rows")
+                          f"poll #{poll_count}, {writer.row_count} total rows")
             time.sleep(poll_interval_s)
     except KeyboardInterrupt:
         pass
 
-    csv_writer.stop()
+    writer.stop()
 
     print(f"\n{'=' * 60}")
     print(f"Data collection finished.")
-    print(f"Total rows recorded: {csv_writer.row_count}")
-    print(f"CSV saved to: {csv_path}")
+    print(f"Total rows recorded: {writer.row_count}")
     print(f"{'=' * 60}")
 
 
 def snapshot(client):
-    """Take a single snapshot of all variable values and save to CSV."""
-    os.makedirs(DATA_DIR, exist_ok=True)
-
-    run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_path = os.path.join(DATA_DIR, f"snapshot_{run_time}.csv")
+    """Take a single snapshot of all variable values and store in SQLite."""
+    from database import FactoryDB
 
     print(f"Taking snapshot of all variables...")
     node_map, var_nodes = find_gvl_nodes(client)
+    db = FactoryDB()
 
-    with open(csv_path, "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["timestamp", "gvl", "variable", "value", "source"])
+    run_id = f"snapshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    db.register_run(run_id)
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        for var_node, var_name, gvl_name in var_nodes:
-            try:
-                val = var_node.get_value()
-                writer.writerow([now, gvl_name, var_name, val, "snapshot"])
-                print(f"  {gvl_name}.{var_name} = {val}")
-            except Exception as e:
-                print(f"  {gvl_name}.{var_name} (error: {e})")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    batch = []
+    for var_node, var_name, gvl_name in var_nodes:
+        try:
+            val = var_node.get_value()
+            batch.append((now, gvl_name, var_name, val, "snapshot"))
+            print(f"  {gvl_name}.{var_name} = {val}")
+        except Exception as e:
+            print(f"  {gvl_name}.{var_name} (error: {e})")
 
-    print(f"\nSnapshot saved to: {csv_path}")
+    db.insert_batch(batch, run_id=run_id)
+    db.finish_run(run_id)
+    db.close()
+    print(f"\nSnapshot saved to SQLite ({len(batch)} variables).")
 
 
 if __name__ == "__main__":
@@ -340,5 +312,14 @@ Output: {DATA_DIR}/
         try:
             client.disconnect()
             print("Disconnected.")
+        except Exception:
+            pass
+        # Checkpoint WAL so factory.db is a single portable file
+        try:
+            from database import FactoryDB
+            db = FactoryDB()
+            db._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+            db.close()
+            print("DB checkpoint done — factory.db is ready for export.")
         except Exception:
             pass

@@ -1,8 +1,8 @@
 """
 SQLite storage for factory event data.
 
-Stores the same data as the CSV files but in a queryable database.
-Designed to run alongside CSV — not a replacement.
+All data collection is event-based — OPC UA subscriptions and polling
+write directly to this database.
 
 Usage:
     from database import FactoryDB
@@ -17,7 +17,6 @@ Usage:
     runs = db.list_runs()
 """
 
-import csv
 import os
 import sqlite3
 from datetime import datetime
@@ -69,11 +68,11 @@ class FactoryDB:
                 run_id TEXT PRIMARY KEY,
                 started_at TEXT,
                 ended_at TEXT,
-                source_file TEXT,
                 event_count INTEGER DEFAULT 0
             );
         """)
         self._conn.commit()
+        self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
     def _resolve_station(self, gvl):
         return GVL_TO_STATION.get(gvl, gvl)
@@ -103,12 +102,12 @@ class FactoryDB:
     def commit(self):
         self._conn.commit()
 
-    def register_run(self, run_id, source_file=None):
+    def register_run(self, run_id):
         """Register a new data collection run."""
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self._conn.execute(
-            "INSERT OR IGNORE INTO runs (run_id, started_at, source_file) VALUES (?, ?, ?)",
-            (run_id, now, source_file),
+            "INSERT OR IGNORE INTO runs (run_id, started_at) VALUES (?, ?)",
+            (run_id, now),
         )
         self._conn.commit()
 
@@ -272,88 +271,10 @@ class FactoryDB:
         self._conn.close()
 
 
-def import_csv(csv_path, db=None):
-    """
-    Import a CSV file into the database.
-    Returns the run_id used.
-    """
-    db = db or FactoryDB()
-    filename = os.path.basename(csv_path)
-
-    # Check if already imported
-    existing = db._conn.execute(
-        "SELECT run_id FROM runs WHERE source_file = ?", (filename,)
-    ).fetchone()
-    if existing:
-        print(f"  Skipping {filename} — already imported as {existing['run_id']}")
-        return existing["run_id"]
-
-    # Derive run_id from filename (e.g., factory_run_20260319_173535)
-    run_id = filename.replace(".csv", "")
-
-    db.register_run(run_id, source_file=filename)
-
-    batch = []
-    count = 0
-    with open(csv_path, newline="") as f:
-        reader = csv.DictReader(f)
-        has_source = "source" in (reader.fieldnames or [])
-        for row in reader:
-            source = row.get("source", "csv_import") if has_source else "csv_import"
-            batch.append((
-                row["timestamp"],
-                row["gvl"],
-                row["variable"],
-                row["value"],
-                source,
-            ))
-            count += 1
-
-            # Commit in batches of 5000
-            if len(batch) >= 5000:
-                db.insert_batch(batch, run_id=run_id, commit=False)
-                batch = []
-
-    if batch:
-        db.insert_batch(batch, run_id=run_id, commit=False)
-
-    db.commit()
-    db.finish_run(run_id)
-    print(f"  Imported {filename}: {count} events → run_id={run_id}")
-    return run_id
-
-
-def import_all_csvs(data_dir=None, db=None):
-    """Import all CSV files from the data directory."""
-    data_dir = data_dir or DATA_DIR
-    db = db or FactoryDB()
-
-    import glob
-    csv_files = sorted(glob.glob(os.path.join(data_dir, "*.csv")))
-
-    if not csv_files:
-        print(f"No CSV files found in {data_dir}")
-        return
-
-    print(f"Importing {len(csv_files)} CSV files into {db.db_path}\n")
-
-    for csv_path in csv_files:
-        try:
-            import_csv(csv_path, db=db)
-        except Exception as e:
-            print(f"  Error importing {os.path.basename(csv_path)}: {e}")
-
-    stats = db.stats()
-    print(f"\nDone. {stats['total_events']} total events across {stats['total_runs']} runs.")
-    print(f"By station: {stats['by_station']}")
-
-
 if __name__ == "__main__":
     import sys
 
-    if "--import" in sys.argv:
-        import_all_csvs()
-    elif "--stats" in sys.argv:
+    if "--stats" in sys.argv:
         db = FactoryDB()
         s = db.stats()
         print(f"Total events: {s['total_events']}")
@@ -361,8 +282,7 @@ if __name__ == "__main__":
         print(f"By station:   {s['by_station']}")
         for run in db.list_runs():
             print(f"  {run['run_id']}: {run['event_count']} events "
-                  f"({run['started_at']} → {run['ended_at'] or 'ongoing'}) "
-                  f"[{run['source_file'] or 'live'}]")
+                  f"({run['started_at']} → {run['ended_at'] or 'ongoing'})")
     elif "--query" in sys.argv:
         db = FactoryDB()
         # Example: python database.py --query --station Crane --limit 20
@@ -389,8 +309,7 @@ if __name__ == "__main__":
         print()
         for run in db.list_runs():
             print(f"  {run['run_id']}: {run['event_count']} events "
-                  f"({run['started_at']} → {run['ended_at'] or 'ongoing'}) "
-                  f"[{run['source_file'] or 'live'}]")
+                  f"({run['started_at']} → {run['ended_at'] or 'ongoing'})")
         print()
         # All variables grouped by station
         rows = db._conn.execute(
