@@ -125,6 +125,22 @@
 6. **Runde Diagramme (Gauges/Donuts) vermeiden** — nicht aussagekräftig genug
 7. **Professionelles Finish** nötig — aktuell noch "billig"
 
+---
+
+## Zusatz-Feedback (20.03.2026, KPI /kpi)
+
+### Station Breakdown + Cycle Time Trend verknüpfen:
+- **Testing Station Breakdown (Yamazumi) ist cool** — aber braucht Toggle durch ALLE Stationen, nicht nur MS
+- **Cycle Time Trend daneben** — Wenn man eine Station auswählt, sieht man links den Breakdown UND rechts den Trend über Runs
+- Station-Farben in der aktuellen Darstellung nicht sinnvoll
+- **Toggle/Filter per Station** → Links: Zeitlicher Breakdown der Sub-Steps, Rechts: Trend über alle Runs
+
+### Run-Detail Filter:
+- Zusätzlich zu Station-Auswahl: **Spezifischen Run auswählen**
+- Bei ausgewähltem Run: Alle Station-Timings dieses einen Runs sehen
+- Eher für Lower Level / Shop Floor gedacht
+- Filter-Kombination: Station × Run → Deep-Dive View
+
 ### Nächste Schritte:
 - 2 neue Versionen pro Dashboard-Kategorie mit eingearbeitetem Feedback
 - Alte Versionen als "v1-archive" markieren

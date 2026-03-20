@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI B — Bottleneck Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/shared.css">
+    <link rel="stylesheet" href="/dashboards/kpi-b/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>(function(){var t=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",t)})();</script>
+</head>
+<body>
+    <div class="app">
+
+        <!-- Header -->
+        <header class="dash-header glass">
+            <div class="dash-header-left">
+                <div class="logo">
+                    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#lg-kpib)"/>
+                        <path d="M6 22L10 10l6 8 6-12 4 16" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <circle cx="16" cy="11" r="3" stroke="white" stroke-width="1.5" fill="none"/>
+                        <defs><linearGradient id="lg-kpib" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#FF453A"/><stop offset="1" stop-color="#AF52DE"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="dash-title">Bottleneck Analysis</h1>
+                    <p class="dash-subtitle">Identify constraints, optimize total cycle time</p>
+                </div>
+            </div>
+            <nav class="dash-nav">
+                <a href="/twin-a">Twin</a>
+                <a href="/quality-a">Quality</a>
+                <a href="/kpi-b" class="active">KPI</a>
+                <a href="/cockpit-a">Cockpit</a>
+            </nav>
+            <div class="dash-header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- HERO: Bottleneck Station -->
+        <section class="bottleneck-hero glass" id="bottleneck-hero">
+            <div class="hero-badge" id="hero-badge">
+                <span class="hero-badge-label">BOTTLENECK</span>
+            </div>
+            <div class="hero-content">
+                <div class="hero-station-info">
+                    <span class="hero-station-name mono" id="hero-station-name">--</span>
+                    <span class="hero-station-fullname" id="hero-station-fullname">Loading...</span>
+                </div>
+                <div class="hero-timing">
+                    <div class="hero-timing-actual">
+                        <span class="hero-timing-value mono" id="hero-actual">--</span>
+                        <span class="hero-timing-unit">s actual</span>
+                    </div>
+                    <span class="hero-timing-sep">/</span>
+                    <div class="hero-timing-target">
+                        <span class="hero-timing-target-value mono" id="hero-target">--</span>
+                        <span class="hero-timing-unit">s target</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-bar-container">
+                <div class="hero-bar-track" id="hero-bar-track">
+                    <div class="hero-bar-fill" id="hero-bar-fill"></div>
+                    <div class="hero-bar-target-marker" id="hero-bar-marker"></div>
+                </div>
+                <div class="hero-bar-excess" id="hero-bar-excess">
+                    <span class="hero-excess-label">Excess</span>
+                    <span class="hero-excess-value mono" id="hero-excess-val">--</span>
+                </div>
+            </div>
+            <div class="hero-insight" id="hero-insight">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="opacity:0.6;flex-shrink:0"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                <span id="hero-insight-text">Analyzing...</span>
+            </div>
+        </section>
+
+        <!-- ROW 1: Stacked Horizontal Bars -->
+        <section class="card glass mb-18" id="stacked-section">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Total Cycle Breakdown</h2>
+                    <span class="card-subtitle">Stacked by station -- actual vs. target</span>
+                </div>
+                <span class="card-subtitle mono" id="stacked-runs-label">-- runs</span>
+            </div>
+            <div class="card-body">
+                <div class="stacked-container">
+                    <div class="stacked-row">
+                        <span class="stacked-label">Actual</span>
+                        <div class="stacked-bar-track" id="stacked-actual-track"></div>
+                        <span class="stacked-total mono" id="stacked-actual-total">--s</span>
+                    </div>
+                    <div class="stacked-row">
+                        <span class="stacked-label">Target</span>
+                        <div class="stacked-bar-track" id="stacked-target-track"></div>
+                        <span class="stacked-total mono" id="stacked-target-total">--s</span>
+                    </div>
+                    <div class="stacked-legend" id="stacked-legend"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROW 2: Station Pills -->
+        <section class="station-pills" id="station-pills">
+            <!-- 5 pills generated by JS -->
+        </section>
+
+        <!-- Collapsible: Per-station trend over runs -->
+        <section class="card glass mb-18" id="trend-section" style="display:none">
+            <div class="card-header collapsible-header expanded" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title" id="trend-title">Station Trend</h2>
+                    <span class="card-subtitle" id="trend-subtitle">Cycle time per run</span>
+                </div>
+            </div>
+            <div class="collapsible-body expanded">
+                <div class="card-body">
+                    <div class="chart-container trend-chart-size">
+                        <canvas id="trend-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Collapsible: Waterfall of cumulative excess -->
+        <section class="card glass mb-18">
+            <div class="card-header collapsible-header" onclick="toggleCollapsible(this)">
+                <div>
+                    <h2 class="card-title">Cumulative Excess Time</h2>
+                    <span class="card-subtitle">Where time is lost, station by station</span>
+                </div>
+                <span class="card-subtitle mono" id="waterfall-total">Total excess: --s</span>
+            </div>
+            <div class="collapsible-body">
+                <div class="card-body">
+                    <div class="chart-container waterfall-chart-size">
+                        <canvas id="waterfall-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-note glass">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="opacity:0.4;flex-shrink:0"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+            <span>Target times are configured estimates, not measured baselines. Bottleneck identification based on median cycle times across all recorded runs.</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/kpi-b/app.js"></script>
+</body>
+</html>

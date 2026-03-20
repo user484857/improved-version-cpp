@@ -32,34 +32,66 @@ DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 
 class CsvWriterThread:
     """
-    Non-blocking CSV writer: events go into a queue,
-    a background thread writes them to disk.
+    Non-blocking CSV + SQLite writer: events go into a queue,
+    a background thread writes them to both CSV and SQLite.
     No Lock contention in the OPC UA callback.
     """
 
-    def __init__(self, csv_path):
+    def __init__(self, csv_path, run_id=None):
         self.queue = Queue()
         self.csv_path = csv_path
         self.row_count = 0
+        self.run_id = run_id
         self._running = True
         self._thread = Thread(target=self._write_loop, daemon=True)
         self._thread.start()
 
     def _write_loop(self):
+        # Initialize SQLite alongside CSV
+        db = None
+        try:
+            from database import FactoryDB
+            db = FactoryDB()
+            if self.run_id:
+                db.register_run(self.run_id, source_file=os.path.basename(self.csv_path))
+            print(f"  [DB] SQLite storage active: {db.db_path}")
+        except Exception as e:
+            print(f"  [DB] SQLite not available ({e}), CSV-only mode")
+
+        db_batch = []
+
         with open(self.csv_path, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["timestamp", "gvl", "variable", "value", "source"])
             while self._running or not self.queue.empty():
                 try:
                     row = self.queue.get(timeout=0.5)
+                    # Write to CSV
                     writer.writerow(row)
                     self.row_count += 1
-                    # Flush every 50 rows for near-realtime file access
+
+                    # Batch for SQLite
+                    if db:
+                        db_batch.append(tuple(row))
+
+                    # Flush every 50 rows
                     if self.row_count % 50 == 0:
                         f.flush()
+                        # Also flush SQLite batch
+                        if db and db_batch:
+                            db.insert_batch(db_batch, run_id=self.run_id)
+                            db_batch = []
                 except Exception:
                     pass
             f.flush()
+
+        # Final SQLite flush
+        if db:
+            if db_batch:
+                db.insert_batch(db_batch, run_id=self.run_id)
+            if self.run_id:
+                db.finish_run(self.run_id)
+            db.close()
 
     def write(self, timestamp, gvl, variable, value, source="event"):
         self.queue.put([timestamp, gvl, variable, value, source])
@@ -169,14 +201,15 @@ def collect_data(client, mode="both", poll_interval_ms=500):
     os.makedirs(DATA_DIR, exist_ok=True)
 
     run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_path = os.path.join(DATA_DIR, f"factory_run_{run_time}.csv")
+    run_id = f"factory_run_{run_time}"
+    csv_path = os.path.join(DATA_DIR, f"{run_id}.csv")
 
     print(f"Finding all GVL variables...")
     node_map, var_nodes = find_gvl_nodes(client)
     print(f"Found {len(var_nodes)} variables.\n")
 
-    # Start non-blocking CSV writer
-    csv_writer = CsvWriterThread(csv_path)
+    # Start non-blocking CSV + SQLite writer
+    csv_writer = CsvWriterThread(csv_path, run_id=run_id)
 
     # Subscribe to events
     if mode in ("events", "both"):

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cockpit B — Compact Status Wall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboards/cockpit-b/style.css">
+</head>
+<body>
+    <div class="wall">
+
+        <!-- TOP BAR: Status + Nav + Production counter -->
+        <header class="top-bar">
+            <div class="top-left">
+                <div class="status-beacon" id="status-beacon"></div>
+                <span class="status-label" id="status-label">CONNECTING</span>
+            </div>
+            <nav class="dash-nav">
+                <a href="/twin-r2a">Twin</a>
+                <a href="/quality-r2a">Quality</a>
+                <a href="/kpi-r2a">KPI</a>
+                <a href="/cockpit-b" class="active">Cockpit</a>
+            </nav>
+            <div class="top-right">
+                <div class="produced-bar">
+                    <span class="produced-label">Produced</span>
+                    <div class="produced-pips" id="produced-pips">
+                        <div class="pip"></div><div class="pip"></div><div class="pip"></div>
+                        <div class="pip"></div><div class="pip"></div><div class="pip"></div>
+                        <div class="pip"></div><div class="pip"></div><div class="pip"></div>
+                    </div>
+                    <span class="produced-count" id="produced-count">0/9</span>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- PIPELINE: Horizontal process flow with connecting lines -->
+        <section class="pipeline-section">
+            <div class="pipeline" id="pipeline">
+
+                <!-- Step 1: HBW -->
+                <div class="pipe-node" id="node-HBW" data-step="HBW">
+                    <div class="node-ring">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-HBW" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-HBW">
+                            <div class="wp-dot" id="wp-HBW"></div>
+                        </div>
+                    </div>
+                    <span class="node-name">HBW</span>
+                    <span class="node-desc" id="desc-HBW">Storage</span>
+                </div>
+
+                <div class="pipe-line" id="line-0"><div class="pipe-dash"></div></div>
+
+                <!-- Step 2: Crane to oven -->
+                <div class="pipe-node" id="node-Crane1" data-step="Crane1">
+                    <div class="node-ring">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-Crane1" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-Crane1">
+                            <div class="wp-dot" id="wp-Crane1"></div>
+                        </div>
+                    </div>
+                    <span class="node-name">Crane</span>
+                    <span class="node-desc" id="desc-Crane1">To Oven</span>
+                </div>
+
+                <div class="pipe-line" id="line-1"><div class="pipe-dash"></div></div>
+
+                <!-- Step 3: Oven -->
+                <div class="pipe-node" id="node-Oven" data-step="Oven">
+                    <div class="node-ring oven-wrap" id="oven-wrap">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-Oven" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-Oven">
+                            <div class="wp-dot" id="wp-Oven"></div>
+                            <div class="oven-flames" id="oven-flames">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2c0 3-2 5-2 8s2 5 2 8"/>
+                                    <path d="M8 6c0 2-1.5 3.5-1.5 5.5S8 15 8 17"/>
+                                    <path d="M16 6c0 2-1.5 3.5-1.5 5.5S16 15 16 17"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="node-name">Oven</span>
+                    <span class="node-desc" id="desc-Oven">Burn</span>
+                </div>
+
+                <div class="pipe-line" id="line-2"><div class="pipe-dash"></div></div>
+
+                <!-- Step 4: Color Sensor -->
+                <div class="pipe-node" id="node-Color" data-step="Color">
+                    <div class="node-ring">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-Color" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-Color">
+                            <div class="wp-dot color-reveal" id="wp-Color"></div>
+                        </div>
+                    </div>
+                    <span class="node-name">Color</span>
+                    <span class="node-desc" id="desc-Color">Measure</span>
+                </div>
+
+                <div class="pipe-line" id="line-3"><div class="pipe-dash"></div></div>
+
+                <!-- Step 5: Sorting -->
+                <div class="pipe-node" id="node-Sort" data-step="Sort">
+                    <div class="node-ring">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-Sort" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-Sort">
+                            <div class="wp-dot" id="wp-Sort"></div>
+                        </div>
+                    </div>
+                    <span class="node-name">Sort</span>
+                    <span class="node-desc" id="desc-Sort">Classify</span>
+                </div>
+
+                <div class="pipe-line" id="line-4"><div class="pipe-dash"></div></div>
+
+                <!-- Step 6: Crane back -->
+                <div class="pipe-node" id="node-Crane2" data-step="Crane2">
+                    <div class="node-ring">
+                        <svg class="tl-ring" viewBox="0 0 100 100">
+                            <circle class="tl-track" cx="50" cy="50" r="46"/>
+                            <circle class="tl-fill" id="tl-Crane2" cx="50" cy="50" r="46"/>
+                        </svg>
+                        <div class="node-circle idle" id="circle-Crane2">
+                            <div class="wp-dot" id="wp-Crane2"></div>
+                        </div>
+                    </div>
+                    <span class="node-name">Return</span>
+                    <span class="node-desc" id="desc-Crane2">To Rack</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- LOWER PANELS: two side-by-side -->
+        <section class="lower-panels">
+
+            <!-- LEFT: Inventory — Rack + Sorting Bins -->
+            <div class="panel glass" id="panel-inventory">
+                <div class="panel-header">
+                    <span class="panel-title">Inventory</span>
+                </div>
+                <div class="inventory-row">
+
+                    <!-- HBW Rack Grid -->
+                    <div class="inv-group">
+                        <span class="inv-label">HBW Rack</span>
+                        <div class="rack-grid" id="rack-grid">
+                            <div class="rack-dot" data-slot="0"></div>
+                            <div class="rack-dot" data-slot="1"></div>
+                            <div class="rack-dot" data-slot="2"></div>
+                            <div class="rack-dot" data-slot="3"></div>
+                            <div class="rack-dot" data-slot="4"></div>
+                            <div class="rack-dot" data-slot="5"></div>
+                            <div class="rack-dot" data-slot="6"></div>
+                            <div class="rack-dot" data-slot="7"></div>
+                            <div class="rack-dot" data-slot="8"></div>
+                        </div>
+                    </div>
+
+                    <div class="inv-divider"></div>
+
+                    <!-- Sorting Bins -->
+                    <div class="inv-group">
+                        <span class="inv-label">Sort Bins</span>
+                        <div class="sort-bins" id="sort-bins">
+                            <div class="bin-col" id="bin-white">
+                                <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                                <span class="bin-tag">W</span>
+                            </div>
+                            <div class="bin-col" id="bin-red">
+                                <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                                <span class="bin-tag">R</span>
+                            </div>
+                            <div class="bin-col" id="bin-blue">
+                                <div class="bin-slot"></div><div class="bin-slot"></div><div class="bin-slot"></div>
+                                <span class="bin-tag">B</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT: Timing + Alerts -->
+            <div class="panel glass" id="panel-info">
+                <div class="panel-header">
+                    <span class="panel-title">Status</span>
+                    <button class="alert-toggle" id="alert-toggle" onclick="toggleAlerts()">
+                        <span class="alert-indicator" id="alert-indicator"></span>
+                        <span class="alert-count" id="alert-count">--</span>
+                        <span class="alert-chevron" id="alert-chevron">&#9662;</span>
+                    </button>
+                </div>
+
+                <!-- Cycle times -->
+                <div class="timing-row">
+                    <div class="timing-block">
+                        <span class="timing-label">Last Cycle</span>
+                        <span class="timing-value" id="cycle-last">--</span>
+                    </div>
+                    <div class="timing-sep"></div>
+                    <div class="timing-block">
+                        <span class="timing-label">Average</span>
+                        <span class="timing-value" id="cycle-avg">--</span>
+                    </div>
+                    <div class="timing-sep"></div>
+                    <div class="timing-block">
+                        <span class="timing-label">Active Step</span>
+                        <span class="timing-value accent" id="active-step-name">Idle</span>
+                    </div>
+                </div>
+
+                <!-- Alert feed (collapsible) -->
+                <div class="alert-feed" id="alert-feed">
+                    <div class="alert-list" id="alert-list"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="wall-footer">
+            <span class="ft" id="ft-clock">--:--:--</span>
+            <span class="ft-dot"></span>
+            <span class="ft" id="ft-mode">Demo</span>
+            <span class="ft-dot"></span>
+            <span class="ft" id="ft-updated">--</span>
+        </footer>
+
+    </div>
+
+    <script src="/dashboards/cockpit-b/app.js"></script>
+</body>
+</html>

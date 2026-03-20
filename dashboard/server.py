@@ -37,20 +37,49 @@ def index():
 def dashboard_twin():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "twin"), "index.html")
 
+@app.route("/twin-a")
+def dashboard_twin_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-a"), "index.html")
+
+@app.route("/twin-b")
+def dashboard_twin_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "twin-b"), "index.html")
 
 @app.route("/quality")
 def dashboard_quality():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "quality"), "index.html")
 
+@app.route("/quality-a")
+def dashboard_quality_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-a"), "index.html")
+
+@app.route("/quality-b")
+def dashboard_quality_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "quality-b"), "index.html")
 
 @app.route("/kpi")
 def dashboard_kpi():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi"), "index.html")
 
+@app.route("/kpi-a")
+def dashboard_kpi_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-a"), "index.html")
+
+@app.route("/kpi-b")
+def dashboard_kpi_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "kpi-b"), "index.html")
 
 @app.route("/cockpit")
 def dashboard_cockpit():
     return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit"), "index.html")
+
+@app.route("/cockpit-a")
+def dashboard_cockpit_a():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-a"), "index.html")
+
+@app.route("/cockpit-b")
+def dashboard_cockpit_b():
+    return send_from_directory(os.path.join(DASHBOARD_DIR, "cockpit-b"), "index.html")
 
 
 
@@ -223,17 +252,26 @@ _factory_db = None
 
 
 def _get_db():
-    """Lazy-load the factory database."""
+    """Lazy-load the factory database.
+
+    Prefers local database.py (in dashboard dir) over tag 6 fallback.
+    """
     global _factory_db
     if _factory_db is None:
         try:
             import sys
-            db_module = os.path.normpath(os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tag 6"
-            ))
-            if db_module not in sys.path:
-                sys.path.insert(0, db_module)
-            from database import FactoryDB
+            # Prefer local database.py (same dir as server.py)
+            local_dir = os.path.dirname(os.path.abspath(__file__))
+            if local_dir not in sys.path:
+                sys.path.insert(0, local_dir)
+            try:
+                from database import FactoryDB
+            except ImportError:
+                # Fallback: tag 6 database.py
+                db_module = os.path.normpath(os.path.join(local_dir, "..", "..", "..", "tag 6"))
+                if db_module not in sys.path:
+                    sys.path.insert(0, db_module)
+                from database import FactoryDB
             _factory_db = FactoryDB()
         except Exception:
             return None
@@ -278,6 +316,85 @@ def api_db_stats():
     if db is None:
         return jsonify({"error": "SQLite database not available"}), 503
     return jsonify(db.stats())
+
+
+@app.route("/api/history/timeseries")
+def api_history_timeseries():
+    """Return time-series data for a variable (for trend charts).
+
+    Query params: variable (required, supports LIKE %), station, since, until,
+                  run_id, limit (default 500)
+    Example: /api/history/timeseries?variable=iColorSensor_SL&limit=100
+    """
+    from flask import request
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+
+    variable = request.args.get("variable")
+    if not variable:
+        return jsonify({"error": "variable parameter required"}), 400
+
+    rows = db.timeseries(
+        variable=variable,
+        station=request.args.get("station"),
+        since=request.args.get("since"),
+        until=request.args.get("until"),
+        run_id=request.args.get("run_id"),
+        limit=int(request.args.get("limit", 500)),
+    )
+    return jsonify(rows)
+
+
+@app.route("/api/history/activity")
+def api_history_activity():
+    """Return recent actuator activity (state changes) for event log display.
+
+    Query params: station, limit (default 50)
+    Only returns actuator/motor/valve/lamp changes — filters out sensor noise.
+    """
+    from flask import request
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+
+    rows = db.activity(
+        station=request.args.get("station"),
+        limit=int(request.args.get("limit", 50)),
+    )
+    return jsonify(rows)
+
+
+@app.route("/api/history/changes")
+def api_history_changes():
+    """Return last N state changes for a specific variable.
+
+    Query params: variable (required), limit (default 20)
+    Example: /api/history/changes?variable=bMotor_MS_Saw&limit=10
+    """
+    from flask import request
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+
+    variable = request.args.get("variable")
+    if not variable:
+        return jsonify({"error": "variable parameter required"}), 400
+
+    rows = db.changes(
+        variable=variable,
+        limit=int(request.args.get("limit", 20)),
+    )
+    return jsonify(rows)
+
+
+@app.route("/api/history/variables")
+def api_history_variables():
+    """Return all known variables grouped by station (for building queries)."""
+    db = _get_db()
+    if db is None:
+        return jsonify({"error": "SQLite database not available"}), 503
+    return jsonify(db.variables_list())
 
 
 # ---------------------------------------------------------------------------
