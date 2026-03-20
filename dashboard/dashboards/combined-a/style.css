@@ -325,6 +325,18 @@
     50% { opacity: 0.5; }
 }
 
+/* ── Value Flash Animation ───────────────── */
+
+.value-flash {
+    animation: valueFlash 0.6s ease-out;
+}
+
+@keyframes valueFlash {
+    0%   { color: var(--blue); transform: scale(1.15); }
+    40%  { color: var(--blue); transform: scale(1.08); }
+    100% { color: inherit; transform: scale(1); }
+}
+
 /* ── Section Spacing ──────────────────────── */
 
 .section-gap { margin-bottom: 18px; }
